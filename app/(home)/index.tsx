@@ -8,6 +8,7 @@ import { useFocusEffect } from '@react-navigation/native'; // To handle screen f
 type Movement = {
   name: string;
   pr: number;
+  date: string;
 };
 
 export default function MovementsList() {
@@ -19,7 +20,6 @@ export default function MovementsList() {
     React.useCallback(() => {
       async function fetchMovements() {
         const storedMovements = await getAllMovements();
-        console.debug('Stored Movements:', storedMovements);
         setMovements(storedMovements);
       }
 
@@ -36,12 +36,12 @@ export default function MovementsList() {
   }
 
   function goToQuickCalc() {
-    router.push({ pathname: '/pr-details', params: { quickCalc: true } });
+    router.push({ pathname: '/pr-details', params: { quickCalc: "true" } });
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Weightlifting Movements</Text>
+      <Text style={styles.header}>Calculame Este</Text>
       <FlatList
         data={movements}
         keyExtractor={(item) => item.name}

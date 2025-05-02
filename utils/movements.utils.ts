@@ -1,3 +1,4 @@
+import { Movement } from '@/types/movements.type';
 import storageClient from './async-storage.client';
 
 const MOVEMENTS_STORAGE_KEY = 'movements';
@@ -6,9 +7,9 @@ const MOVEMENTS_STORAGE_KEY = 'movements';
  * Fetch all movements from AsyncStorage.
  * @returns A list of all movements.
  */
-export async function getAllMovements(): Promise<{ name: string; pr: number }[]> {
+export async function getAllMovements(): Promise<Movement[]> {
   try {
-    const movements = await storageClient.getItem<{ name: string; pr: number }[]>(MOVEMENTS_STORAGE_KEY);
+    const movements = await storageClient.getItem<Movement[]>(MOVEMENTS_STORAGE_KEY);
     return movements || [];
   } catch (error) {
     console.error('Error fetching movements:', error);
@@ -20,7 +21,7 @@ export async function getAllMovements(): Promise<{ name: string; pr: number }[]>
  * Create or update a movement in AsyncStorage.
  * @param movement The movement object to save (includes name and pr).
  */
-export async function saveMovement(movement: { name: string; pr: number }): Promise<void> {
+export async function saveMovement(movement: Movement): Promise<void> {
   try {
     const movements = await getAllMovements();
     const index = movements.findIndex((m) => m.name === movement.name);

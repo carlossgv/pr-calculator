@@ -31,7 +31,7 @@ export default function MovementForm() {
       return;
     }
 
-    await saveMovement({ name, pr: Number(pr) });
+    await saveMovement({ name, pr: Number(pr), date: new Date().toISOString() });
     router.back();
   }
 
