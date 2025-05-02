@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons'; // For the floating button
+import { MaterialIcons } from '@expo/vector-icons'; // For icons
 import { getAllMovements } from '@/utils/movements.utils';
 import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
 
@@ -35,6 +35,10 @@ export default function MovementsList() {
     router.push('/create-edit-movement'); // Navigate to the add/edit movement screen
   }
 
+  function goToQuickCalc() {
+    router.push({ pathname: '/pr-details', params: { quickCalc: true } });
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Weightlifting Movements</Text>
@@ -51,7 +55,11 @@ export default function MovementsList() {
           <Text style={styles.emptyText}>No movements found. Add a new one!</Text>
         }
       />
-      {/* Floating Button */}
+      {/* Quick Calc Button */}
+      <TouchableOpacity style={styles.quickCalcButton} onPress={goToQuickCalc}>
+        <MaterialIcons name="calculate" size={28} color="white" />
+      </TouchableOpacity>
+      {/* Add Movement Button */}
       <TouchableOpacity style={styles.floatingButton} onPress={goToAddMovement}>
         <MaterialIcons name="add" size={32} color="white" />
       </TouchableOpacity>
@@ -98,6 +106,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#B0BEC5',
     marginTop: 20,
+  },
+  quickCalcButton: {
+    position: 'absolute',
+    bottom: 90, // Positioned above the "+" button
+    right: 20,
+    backgroundColor: '#FF9800', // Orange background for distinction
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
   floatingButton: {
     position: 'absolute',

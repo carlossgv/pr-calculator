@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, Switch } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { KG_TO_LBS, LBS_TO_KG } from '@/constants/Units';
 
@@ -13,15 +13,13 @@ function calculatePercentages(weight: number) {
 
 export default function PRPage() {
   const router = useRouter();
-  const { name: movementName, pr: initialWeight } = useLocalSearchParams();
+  const { name: movementName, pr: initialWeight, quickCalc = false } = useLocalSearchParams();
   const [weight, setWeight] = useState<number>(Number(initialWeight) || 0);
   const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs');
   const [percentages, setPercentages] = useState(calculatePercentages(weight));
 
   useEffect(() => {
     setPercentages(calculatePercentages(weight));
-    console.debug('important weight:', weight);
-    console.debug('name:', movementName);
   }, [weight]);
 
   function handleWeightChange(input: string) {
@@ -61,28 +59,33 @@ export default function PRPage() {
   return (
     <View style={styles.container}>
       {/* Title */}
-      {movementName && (
-        <Text style={styles.title}>{movementName}</Text>
-      )}
+      <Text style={styles.title}>{quickCalc ? 'Quick Percentage Calculator' : movementName}</Text>
 
       {/* Toggle Row */}
       <View style={styles.row}>
-        <Button
-          title="Kg"
-          onPress={toggleUnit}
-          color={unit === 'kg' ? '#6200EE' : '#B0BEC5'}
+        <Text style={styles.toggleLabel}>Unit:</Text>
+        <Switch
+          value={unit === 'kg'}
+          onValueChange={toggleUnit}
+          thumbColor="#FFFFFF"
+          trackColor={{ false: '#B0BEC5', true: '#6200EE' }}
         />
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={String(weight)}
-          onChangeText={handleWeightChange}
-        />
-        <Button
-          title="Lbs"
-          onPress={toggleUnit}
-          color={unit === 'lbs' ? '#6200EE' : '#B0BEC5'}
-        />
+        <Text style={styles.unitLabel}>{unit.toUpperCase()}</Text>
+      </View>
+
+      {/* Weight Display or Input */}
+      <View style={styles.row}>
+        <Text style={styles.weightLabel}>Weight:</Text>
+        {quickCalc ? (
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={String(weight)}
+            onChangeText={handleWeightChange}
+          />
+        ) : (
+          <Text style={styles.weightDisplay}>{weight} {unit}</Text>
+        )}
       </View>
 
       {/* Percentages Table */}
@@ -93,7 +96,7 @@ export default function PRPage() {
       />
 
       {/* Edit Button */}
-      {movementName && (
+      {!quickCalc && movementName && (
         <TouchableOpacity style={styles.editButton} onPress={handleEditMovement}>
           <Text style={styles.editButtonText}>Edit Movement</Text>
         </TouchableOpacity>
@@ -121,6 +124,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,
+  },
+  toggleLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  unitLabel: {
+    fontSize: 16,
+    color: '#6200EE',
+  },
+  weightLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  weightDisplay: {
+    fontSize: 16,
+    color: '#000000',
   },
   input: {
     borderWidth: 1,
