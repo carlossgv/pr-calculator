@@ -1,19 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons'; // For icons
+import AsyncStorage from '@react-native-async-storage/async-storage'; // For clearing storage
 import { getAllMovements } from '@/utils/movements.utils';
 import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
-
-type Movement = {
-  name: string;
-  pr: number;
-  date: string;
-};
+import { Movement } from '@/types/movements.type';
+import storageClient from '@/utils/async-storage.client';
 
 export default function MovementsList() {
   const router = useRouter();
   const [movements, setMovements] = useState<Movement[]>([]);
+  const [titleTapCount, setTitleTapCount] = useState<number>(0);
 
   // Re-fetch movements when the screen comes into focus
   useFocusEffect(
@@ -39,30 +44,70 @@ export default function MovementsList() {
     router.push({ pathname: '/pr-details', params: { quickCalc: "true" } });
   }
 
+  async function clearStorage() {
+    try {
+      await storageClient.clear();
+      Alert.alert('Success', 'Storage has been cleared.');
+      
+      // Re-fetch and update the movements
+      const updatedMovements = await getAllMovements();
+      setMovements(updatedMovements); // Update the state to reflect the cleared storage
+    } catch (error) {
+      console.error('Error clearing AsyncStorage:', error);
+      Alert.alert('Error', 'Failed to clear storage.');
+    }
+  }
+
+  function handleTitlePress() {
+    setTitleTapCount((prevCount) => prevCount + 1);
+
+    if (titleTapCount + 1 === 7) {
+      setTitleTapCount(0); // Reset the counter
+      Alert.alert(
+        'Confirm Action',
+        'Are you sure you want to clear all data? This action cannot be undone.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Clear', style: 'destructive', onPress: clearStorage },
+        ]
+      );
+    }
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Calculame Este</Text>
+      {/* Title with hidden functionality */}
+      <Pressable
+        onPress={handleTitlePress}
+        android_ripple={{ color: 'transparent' }}
+      >
+        <Text style={styles.header}>Calculame Este</Text>
+      </Pressable>
       <FlatList
         data={movements}
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.movementRow} onPress={() => goToPRPage(item)}>
+          <Pressable
+            style={styles.movementRow}
+            onPress={() => goToPRPage(item)}
+            android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
+          >
             <Text style={styles.movementName}>{item.name}</Text>
             <Text style={styles.prValue}>{item.pr} lbs</Text>
-          </TouchableOpacity>
+          </Pressable>
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No movements found. Add a new one!</Text>
         }
       />
       {/* Quick Calc Button */}
-      <TouchableOpacity style={styles.quickCalcButton} onPress={goToQuickCalc}>
+      <Pressable style={styles.quickCalcButton} onPress={goToQuickCalc}>
         <MaterialIcons name="calculate" size={28} color="white" />
-      </TouchableOpacity>
+      </Pressable>
       {/* Add Movement Button */}
-      <TouchableOpacity style={styles.floatingButton} onPress={goToAddMovement}>
+      <Pressable style={styles.floatingButton} onPress={goToAddMovement}>
         <MaterialIcons name="add" size={32} color="white" />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 }
