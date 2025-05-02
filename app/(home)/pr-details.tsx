@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, FlatList } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 
 function calculatePercentages(weight: number) {
   const percentages = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45];
@@ -10,14 +11,18 @@ function calculatePercentages(weight: number) {
 }
 
 export default function PRPage() {
-  const [weight, setWeight] = useState(0);
-  const [unit, setUnit] = useState('kg');
-  const [percentages, setPercentages] = useState(calculatePercentages(0));
+  const { weight: initialWeight } = useLocalSearchParams();
+  const [weight, setWeight] = useState<number>(Number(initialWeight) || 0);
+  const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs');
+  const [percentages, setPercentages] = useState(calculatePercentages(weight));
+
+  useEffect(() => {
+    setPercentages(calculatePercentages(weight));
+  }, [weight]);
 
   function handleWeightChange(input: string) {
     const parsedWeight = parseFloat(input) || 0;
     setWeight(parsedWeight);
-    setPercentages(calculatePercentages(parsedWeight));
   }
 
   function toggleUnit() {
@@ -25,19 +30,14 @@ export default function PRPage() {
       const convertedWeight = weight * 2.20462; // Convert kg to lbs
       setUnit('lbs');
       setWeight(parseFloat(convertedWeight.toFixed(2)));
-      setPercentages(calculatePercentages(convertedWeight));
     } else {
       const convertedWeight = weight / 2.20462; // Convert lbs to kg
       setUnit('kg');
       setWeight(parseFloat(convertedWeight.toFixed(2)));
-      setPercentages(calculatePercentages(convertedWeight));
     }
   }
 
-  function renderPercentage({ item, index }: {
-    item: { label: string; value: string };
-    index: number;
-  }) {
+  function renderPercentage({ item, index }: { item: { label: string; value: string }; index: number }) {
     const backgroundColor = index % 2 === 0 ? '#FFFFFF' : '#F5F5DC'; // White for even rows, beige for odd rows
     return (
       <View style={[styles.row, { backgroundColor }]}>
