@@ -1,24 +1,38 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons'; // For the floating button
+import { getAllMovements } from '@/utils/movements.utils';
+import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
 
 type Movement = {
   name: string;
   pr: number;
 };
 
-const DEFAULT_MOVEMENTS: Movement[] = [
-  { name: 'Squat', pr: 315 },
-  { name: 'Bench Press', pr: 225 },
-  { name: 'Deadlift', pr: 405 },
-];
-
 export default function MovementsList() {
   const router = useRouter();
-  const [movements] = useState<Movement[]>(DEFAULT_MOVEMENTS);
+  const [movements, setMovements] = useState<Movement[]>([]);
+
+  // Re-fetch movements when the screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      async function fetchMovements() {
+        const storedMovements = await getAllMovements();
+        console.debug('Stored Movements:', storedMovements);
+        setMovements(storedMovements);
+      }
+
+      fetchMovements();
+    }, [])
+  );
 
   function goToPRPage(movement: Movement) {
-    router.push({ pathname: '/pr-details', params: { weight: movement.pr } });
+    router.push({ pathname: '/pr-details', params: movement });
+  }
+
+  function goToAddMovement() {
+    router.push('/create-edit-movement'); // Navigate to the add/edit movement screen
   }
 
   return (
@@ -33,7 +47,14 @@ export default function MovementsList() {
             <Text style={styles.prValue}>{item.pr} lbs</Text>
           </TouchableOpacity>
         )}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No movements found. Add a new one!</Text>
+        }
       />
+      {/* Floating Button */}
+      <TouchableOpacity style={styles.floatingButton} onPress={goToAddMovement}>
+        <MaterialIcons name="add" size={32} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -71,5 +92,27 @@ const styles = StyleSheet.create({
   prValue: {
     fontSize: 16,
     color: '#6200EE',
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#B0BEC5',
+    marginTop: 20,
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#6200EE',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
 });

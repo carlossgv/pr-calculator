@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, FlatList } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { View, Text, TextInput, Button, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { KG_TO_LBS, LBS_TO_KG } from '@/constants/Units';
 
 function calculatePercentages(weight: number) {
@@ -12,13 +12,16 @@ function calculatePercentages(weight: number) {
 }
 
 export default function PRPage() {
-  const { weight: initialWeight } = useLocalSearchParams();
+  const router = useRouter();
+  const { name: movementName, pr: initialWeight } = useLocalSearchParams();
   const [weight, setWeight] = useState<number>(Number(initialWeight) || 0);
   const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs');
   const [percentages, setPercentages] = useState(calculatePercentages(weight));
 
   useEffect(() => {
     setPercentages(calculatePercentages(weight));
+    console.debug('important weight:', weight);
+    console.debug('name:', movementName);
   }, [weight]);
 
   function handleWeightChange(input: string) {
@@ -28,14 +31,21 @@ export default function PRPage() {
 
   function toggleUnit() {
     if (unit === 'kg') {
-      const convertedWeight = weight * KG_TO_LBS
+      const convertedWeight = weight * KG_TO_LBS;
       setUnit('lbs');
       setWeight(parseFloat(convertedWeight.toFixed(2)));
     } else {
-      const convertedWeight = weight * LBS_TO_KG
+      const convertedWeight = weight * LBS_TO_KG;
       setUnit('kg');
       setWeight(parseFloat(convertedWeight.toFixed(2)));
     }
+  }
+
+  function handleEditMovement() {
+    router.push({
+      pathname: '/create-edit-movement',
+      params: { name: movementName as string, pr: String(weight) },
+    });
   }
 
   function renderPercentage({ item, index }: { item: { label: string; value: string }; index: number }) {
@@ -50,6 +60,11 @@ export default function PRPage() {
 
   return (
     <View style={styles.container}>
+      {/* Title */}
+      {movementName && (
+        <Text style={styles.title}>{movementName}</Text>
+      )}
+
       {/* Toggle Row */}
       <View style={styles.row}>
         <Button
@@ -76,6 +91,13 @@ export default function PRPage() {
         keyExtractor={(item) => item.label}
         renderItem={renderPercentage}
       />
+
+      {/* Edit Button */}
+      {movementName && (
+        <TouchableOpacity style={styles.editButton} onPress={handleEditMovement}>
+          <Text style={styles.editButtonText}>Edit Movement</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -86,11 +108,18 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#F5F5F5',
   },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#6200EE',
+  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10, // Adjusted to remove margin and make rows compact
+    paddingVertical: 10,
     paddingHorizontal: 15,
   },
   input: {
@@ -108,5 +137,17 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 16,
+  },
+  editButton: {
+    marginTop: 20,
+    paddingVertical: 15,
+    backgroundColor: '#6200EE',
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  editButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
