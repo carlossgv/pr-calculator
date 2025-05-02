@@ -78,12 +78,14 @@ export default function MovementForm() {
       <TextInput
         style={styles.input}
         placeholder="Movement Name"
+        placeholderTextColor="#B0BEC5" // TODO: Check why it doesn't use the theme color in development build
         value={name}
         onChangeText={setName}
       />
       <TextInput
         style={styles.input}
         placeholder="PR (lbs)"
+        placeholderTextColor="#B0BEC5" // TODO: Check why it doesn't use the theme color in development build
         keyboardType="numeric"
         value={pr}
         onChangeText={setPR}

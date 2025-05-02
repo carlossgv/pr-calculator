@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons'; // For the pencil icon
 import { KG_TO_LBS, LBS_TO_KG } from '@/constants/Units';
 
 function calculatePercentages(weight: number) {
-  const percentages = [1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, ];
+  const percentages = [1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4];
   return percentages.map((percentage) => ({
     label: `${(percentage * 100).toFixed(0)}%`,
     value: Math.round(weight * percentage).toString(),
@@ -28,6 +28,11 @@ export default function PRPage() {
   useEffect(() => {
     setPercentages(calculatePercentages(weight));
   }, [weight]);
+
+  function handleWeightChange(input: string) {
+    const parsedWeight = parseFloat(input) || 0;
+    setWeight(parsedWeight);
+  }
 
   function toggleUnit() {
     if (unit === 'kg') {
@@ -72,7 +77,18 @@ export default function PRPage() {
 
       {/* Personal Record */}
       <View style={styles.personalRecordContainer}>
-        <Text style={styles.personalRecord}>Personal Record: {weight}</Text>
+        {quickCalc ? (
+          // Editable TextInput for quickCalc mode
+          <TextInput
+            style={styles.personalRecordInput}
+            keyboardType="numeric"
+            value={String(weight)}
+            onChangeText={handleWeightChange}
+          />
+        ) : (
+          // Static display for normal mode
+          <Text style={styles.personalRecord}>Personal Record: {weight}</Text>
+        )}
         <TouchableOpacity style={styles.unitButton} onPress={toggleUnit}>
           <Text style={styles.unitButtonText}>{unit.toUpperCase()}</Text>
         </TouchableOpacity>
@@ -129,6 +145,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#000000',
+  },
+  personalRecordInput: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#000000',
+    borderWidth: 1,
+    borderColor: '#B0BEC5',
+    borderRadius: 5,
+    padding: 5,
+    width: 120,
+    textAlign: 'center',
   },
   unitButton: {
     marginLeft: 10,
