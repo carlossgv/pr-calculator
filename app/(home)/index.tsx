@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons'; // For icons
-import AsyncStorage from '@react-native-async-storage/async-storage'; // For clearing storage
 import { getAllMovements } from '@/utils/movements.utils';
 import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
 import { Movement } from '@/types/movements.type';
@@ -48,7 +47,7 @@ export default function MovementsList() {
     try {
       await storageClient.clear();
       Alert.alert('Success', 'Storage has been cleared.');
-      
+
       // Re-fetch and update the movements
       const updatedMovements = await getAllMovements();
       setMovements(updatedMovements); // Update the state to reflect the cleared storage
