@@ -5,7 +5,7 @@ function calculatePercentages(weight: number) {
   const percentages = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45];
   return percentages.map((percentage) => ({
     label: `${(percentage * 100).toFixed(0)}%`,
-    value: Math.round(weight * percentage),
+    value: Math.round(weight * percentage).toString(),
   }));
 }
 
@@ -34,11 +34,13 @@ export default function PRPage() {
     }
   }
 
-  function renderPercentage({ item }: {
+  function renderPercentage({ item, index }: {
     item: { label: string; value: string };
+    index: number;
   }) {
+    const backgroundColor = index % 2 === 0 ? '#FFFFFF' : '#F5F5DC'; // White for even rows, beige for odd rows
     return (
-      <View style={styles.row}>
+      <View style={[styles.row, { backgroundColor }]}>
         <Text style={styles.label}>{item.label}</Text>
         <Text style={styles.value}>{item.value} {unit}</Text>
       </View>
@@ -87,7 +89,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 10,
+    paddingVertical: 10, // Adjusted to remove margin and make rows compact
+    paddingHorizontal: 15,
   },
   input: {
     borderWidth: 1,
