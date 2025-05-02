@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, FlatList } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { KG_TO_LBS, LBS_TO_KG } from '@/constants/Units';
 
 function calculatePercentages(weight: number) {
   const percentages = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45];
@@ -27,11 +28,11 @@ export default function PRPage() {
 
   function toggleUnit() {
     if (unit === 'kg') {
-      const convertedWeight = weight * 2.20462; // Convert kg to lbs
+      const convertedWeight = weight * KG_TO_LBS
       setUnit('lbs');
       setWeight(parseFloat(convertedWeight.toFixed(2)));
     } else {
-      const convertedWeight = weight / 2.20462; // Convert lbs to kg
+      const convertedWeight = weight * LBS_TO_KG
       setUnit('kg');
       setWeight(parseFloat(convertedWeight.toFixed(2)));
     }
