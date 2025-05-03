@@ -1,7 +1,6 @@
 import { Movement } from '@/types/movements.type';
 import storageClient from './async-storage.client';
-
-const MOVEMENTS_STORAGE_KEY = 'movements';
+import { MOVEMENTS_STORAGE_KEY } from '@/constants/Files';
 
 /**
  * Fetch all movements from AsyncStorage.

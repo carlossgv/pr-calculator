@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal, Pressable } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons'; // For the pencil icon
+import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons'; // Added FontAwesome5 for male/female icons
 import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
 import { KG_TO_LBS, LBS_TO_KG } from '@/constants/Units';
 import { getAllMovements } from '@/utils/movements.utils';
@@ -26,6 +26,11 @@ export default function PRPage() {
   const [weight, setWeight] = useState<number>(Number(initialWeight) || 0);
   const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs');
   const [percentages, setPercentages] = useState(calculatePercentages(weight));
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedWeight, setSelectedWeight] = useState<number | null>(null);
+  const [isWomenBar, setIsWomenBar] = useState(false); // Toggle for men's vs women's bar
+
+  const barWeight = isWomenBar ? (unit === 'kg' ? 15 : 35) : (unit === 'kg' ? 20 : 45); // Dynamic bar weight
 
   // Re-fetch the movement details when the page gains focus
   useFocusEffect(
@@ -67,6 +72,10 @@ export default function PRPage() {
     }
   }
 
+  function toggleBarGender() {
+    setIsWomenBar((prev) => !prev);
+  }
+
   function handleEditMovement() {
     router.push({
       pathname: '/create-edit-movement',
@@ -74,13 +83,21 @@ export default function PRPage() {
     });
   }
 
+  function handleLongPress(weight: string) {
+    setSelectedWeight(Number(weight));
+    setModalVisible(true);
+  }
+
   function renderPercentage({ item, index }: { item: { label: string; value: string }; index: number }) {
-    const backgroundColor = index % 2 === 0 ? '#FFFFFF' : '#F5F5DC'; // White for even rows, beige for odd rows
+    const backgroundColor = index % 2 === 0 ? '#FFFFFF' : '#E0E0E0'; // White for even rows, beige for odd rows
     return (
-      <View style={[styles.row, { backgroundColor }]}>
+      <TouchableOpacity
+        onLongPress={() => handleLongPress(item.value)}
+        style={[styles.row, { backgroundColor }]}
+      >
         <Text style={styles.label}>{item.label}</Text>
         <Text style={styles.value}>{item.value} {unit}</Text>
-      </View>
+      </TouchableOpacity>
     );
   }
 
@@ -91,7 +108,7 @@ export default function PRPage() {
 
       {/* Date Display */}
       {!quickCalc && date && (
-        <Text style={styles.date}>Updated on {formatDate(date as string)}</Text> // TODO: check this cast to string
+        <Text style={styles.date}>Updated on {formatDate(date as string)}</Text>
       )}
 
       {/* Personal Record */}
@@ -108,9 +125,24 @@ export default function PRPage() {
           // Static display for normal mode
           <Text style={styles.personalRecord}>Personal Record: {weight}</Text>
         )}
-        <TouchableOpacity style={styles.unitButton} onPress={toggleUnit}>
-          <Text style={styles.unitButtonText}>{unit.toUpperCase()}</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonsContainer}>
+          {/* Unit Toggle */}
+          <TouchableOpacity style={styles.unitButton} onPress={toggleUnit}>
+            <Text style={styles.unitButtonText}>{unit.toUpperCase()}</Text>
+          </TouchableOpacity>
+
+          {/* Bar Gender Toggle */}
+          <TouchableOpacity
+            style={[styles.genderButton]}
+            onPress={toggleBarGender}
+          >
+            <FontAwesome5
+              name={isWomenBar ? 'female' : 'male'}
+              size={16}
+              color={'#FFFFFF'}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Percentages Table */}
@@ -132,6 +164,28 @@ export default function PRPage() {
           <MaterialIcons name="edit" size={28} color="white" />
         </TouchableOpacity>
       )}
+
+      {/* Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
+          <Pressable style={styles.modalContent} onPress={() => { }}>
+            <Text style={styles.modalTitle}>Load Information</Text>
+            {selectedWeight !== null && (
+              <>
+                <Text style={styles.modalText}>Bar Weight: {barWeight} {unit}</Text>
+                <Text style={styles.modalText}>
+                  Weight per Side: {((selectedWeight - barWeight) / 2).toFixed(2)} {unit}
+                </Text>
+              </>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -176,8 +230,12 @@ const styles = StyleSheet.create({
     width: 120,
     textAlign: 'center',
   },
-  unitButton: {
+  buttonsContainer: {
+    flexDirection: 'row',
     marginLeft: 10,
+  },
+  unitButton: {
+    marginHorizontal: 5,
     paddingHorizontal: 15,
     paddingVertical: 5,
     backgroundColor: '#6200EE',
@@ -187,6 +245,16 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  genderButton: {
+    marginHorizontal: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    backgroundColor: '#6200EE',
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 40, // Fixed width to prevent size changing
   },
   row: {
     flexDirection: 'row',
@@ -217,5 +285,27 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 10,
   },
 });
