@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons'; // For the pencil icon
+import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
 import { KG_TO_LBS, LBS_TO_KG } from '@/constants/Units';
+import { getAllMovements } from '@/utils/movements.utils';
 
 function calculatePercentages(weight: number) {
   const percentages = [1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4];
@@ -24,6 +26,23 @@ export default function PRPage() {
   const [weight, setWeight] = useState<number>(Number(initialWeight) || 0);
   const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs');
   const [percentages, setPercentages] = useState(calculatePercentages(weight));
+
+  // Re-fetch the movement details when the page gains focus
+  useFocusEffect(
+    React.useCallback(() => {
+      async function fetchMovement() {
+        const movements = await getAllMovements();
+        const movement = movements.find((item) => item.name === movementName);
+        if (movement) {
+          setWeight(movement.pr);
+        }
+      }
+
+      if (!quickCalc && movementName) {
+        fetchMovement();
+      }
+    }, [movementName, quickCalc])
+  );
 
   useEffect(() => {
     setPercentages(calculatePercentages(weight));
