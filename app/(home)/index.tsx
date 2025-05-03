@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,18 +6,29 @@ import {
   Pressable,
   StyleSheet,
   Alert,
+  TouchableOpacity,
+  Animated,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons'; // For icons
 import { getAllMovements } from '@/utils/movements.utils';
 import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
 import { Movement } from '@/types/movements.type';
-import storageClient from '@/utils/async-storage.client';
+import filesystemClient from '@/utils/filesystem.client'; // Import the updated filesystem client
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FILE_NAME } from '@/constants/Files';
+import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
 
 export default function MovementsList() {
   const router = useRouter();
   const [movements, setMovements] = useState<Movement[]>([]);
-  const [titleTapCount, setTitleTapCount] = useState<number>(0);
+  const [isExpanded, setIsExpanded] = useState(false); // State to toggle button visibility
+  const animation = useRef(new Animated.Value(0)).current; // Animation state for smooth transitions
+  const [titleTapCount, setTitleTapCount] = useState(0); // Counter for title taps
+  const tapTimeout = useRef<NodeJS.Timeout | null>(null); // Reference to the timeout for resets
 
   // Re-fetch movements when the screen comes into focus
   useFocusEffect(
@@ -27,25 +38,36 @@ export default function MovementsList() {
         setMovements(storedMovements);
       }
 
+      // Collapse the buttons when returning to the screen
+      setIsExpanded(false);
+      Animated.timing(animation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+
       fetchMovements();
     }, [])
   );
 
   function goToPRPage(movement: Movement) {
+    collapseButtons(); // Collapse buttons before navigation
     router.push({ pathname: '/pr-details', params: movement });
   }
 
   function goToAddMovement() {
+    collapseButtons(); // Collapse buttons before navigation
     router.push('/create-edit-movement'); // Navigate to the add/edit movement screen
   }
 
   function goToQuickCalc() {
+    collapseButtons(); // Collapse buttons before navigation
     router.push({ pathname: '/pr-details', params: { quickCalc: "true" } });
   }
 
   async function clearStorage() {
     try {
-      await storageClient.clear();
+      await AsyncStorage.clear();
       Alert.alert('Success', 'Storage has been cleared.');
 
       // Re-fetch and update the movements
@@ -57,65 +79,204 @@ export default function MovementsList() {
     }
   }
 
+  async function exportDataAsJSON() {
+    if (movements.length === 0) {
+      Alert.alert('No Data', 'There are no movements to export.');
+      return;
+    }
+
+    try {
+      // Use the filesystem client to write and share the JSON file
+      const fileUri = await filesystemClient.writeJSON(FILE_NAME, movements);
+      await filesystemClient.shareFile(fileUri);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      Alert.alert('Error', (error as any).message ?? 'Failed to export data.');
+    }
+  }
+
+  async function loadJSONData() {
+    try {
+      // Open the file picker to select a JSON file
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'application/json', // Only allow JSON files
+      });
+
+      // Check if the user canceled the document picker
+      if (result.canceled) {
+        console.log('User canceled the file picker.');
+        return;
+      }
+
+      // If the result is a success, get the file URI from the first asset
+      const fileUri = result.assets[0].uri;
+
+      // Read the JSON file content
+      const fileContent = await FileSystem.readAsStringAsync(fileUri);
+      const parsedData: unknown = JSON.parse(fileContent);
+
+      // Validate that the parsed data matches the `Movement[]` type
+      if (!Array.isArray(parsedData) || !parsedData.every(validateMovement)) {
+        Alert.alert('Invalid Data', 'The selected JSON file does not match the expected format.');
+        return;
+      }
+
+      Alert.alert(
+        'Warning',
+        'Loading this JSON will overwrite the current movement list. Are you sure?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Load',
+            style: 'destructive',
+            onPress: async () => {
+              // Save the valid data to Async Storage
+              await filesystemClient.loadJSONToAsyncStorage(fileUri);
+              const updatedMovements = await getAllMovements();
+              setMovements(updatedMovements);
+              Alert.alert('Success', 'Movements have been successfully loaded.');
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Error loading JSON data:', error);
+      Alert.alert('Error', 'Failed to load JSON data.');
+    }
+  }
+
+  // Validate that an object matches the Movement type
+  function validateMovement(data: any): data is Movement {
+    return (
+      typeof data.name === 'string' &&
+      typeof data.pr === 'number' &&
+      typeof data.date === 'string'
+    );
+  }
+
+  function toggleButtons() {
+    const targetValue = isExpanded ? 0 : 1;
+    setIsExpanded(!isExpanded);
+    Animated.timing(animation, {
+      toValue: targetValue,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }
+
+  function collapseButtons() {
+    if (isExpanded) {
+      setIsExpanded(false);
+      Animated.timing(animation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  }
+
   function handleTitlePress() {
+    // Increment the title tap count
     setTitleTapCount((prevCount) => prevCount + 1);
 
+    // If the titleTapCount reaches 7, show confirmation alert
     if (titleTapCount + 1 === 7) {
       setTitleTapCount(0); // Reset the counter
       Alert.alert(
-        'Confirm Action',
+        'Confirm Cache Clear',
         'Are you sure you want to clear all data? This action cannot be undone.',
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Clear', style: 'destructive', onPress: clearStorage },
         ]
       );
+      return;
     }
+
+    // Reset the counter if no further taps within 1.5 seconds
+    if (tapTimeout.current) {
+      clearTimeout(tapTimeout.current);
+    }
+    tapTimeout.current = setTimeout(() => {
+      setTitleTapCount(0); // Reset the counter after timeout
+    }, 1500);
   }
 
   return (
-    <View style={styles.container}>
-      {/* Title with hidden functionality */}
-      <Pressable
-        onPress={handleTitlePress}
-        android_ripple={{ color: 'transparent' }}
-      >
-        <Text style={styles.header}>Calculame Este</Text>
-      </Pressable>
-      <FlatList
-        data={movements}
-        keyExtractor={(item) => item.name}
-        renderItem={({ item }) => (
-          <Pressable
-            style={styles.movementRow}
-            onPress={() => goToPRPage(item)}
-            android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
-          >
-            <Text style={styles.movementName}>{item.name}</Text>
-            <Text style={styles.prValue}>{item.pr} lbs</Text>
+    <KeyboardAvoidingView style={styles.container} behavior="padding">
+      <TouchableWithoutFeedback onPress={collapseButtons}>
+        <View style={[styles.container, styles.contentWrapper]}>
+          {/* Title with hidden functionality */}
+          <Pressable onPress={handleTitlePress} android_ripple={{ color: 'transparent' }}>
+            <Text style={styles.header}>Calculame Este</Text>
           </Pressable>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No movements found. Add a new one!</Text>
-        }
-      />
-      {/* Quick Calc Button */}
-      <Pressable style={styles.quickCalcButton} onPress={goToQuickCalc}>
-        <MaterialIcons name="calculate" size={28} color="white" />
-      </Pressable>
-      {/* Add Movement Button */}
-      <Pressable style={styles.floatingButton} onPress={goToAddMovement}>
-        <MaterialIcons name="add" size={32} color="white" />
-      </Pressable>
-    </View>
+          <FlatList
+            data={movements}
+            keyExtractor={(item) => item.name}
+            renderItem={({ item }) => (
+              <Pressable
+                style={styles.movementRow}
+                onPress={() => goToPRPage(item)}
+                android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
+              >
+                <Text style={styles.movementName}>{item.name}</Text>
+                <Text style={styles.prValue}>{item.pr} lbs</Text>
+              </Pressable>
+            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No movements found. Add a new one!</Text>
+            }
+          />
+          {/* Collapsible Buttons */}
+          <View style={styles.collapsibleContainer}>
+            {isExpanded && (
+              <Animated.View style={styles.collapsibleButtons}>
+                <TouchableOpacity
+                  style={[styles.collapsibleButton, styles.loadButton]}
+                  onPress={loadJSONData}
+                >
+                  <MaterialIcons name="file-upload" size={28} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.collapsibleButton, styles.exportButton]}
+                  onPress={exportDataAsJSON}
+                >
+                  <MaterialIcons name="file-download" size={28} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.collapsibleButton, styles.quickCalcButton]}
+                  onPress={goToQuickCalc}
+                >
+                  <MaterialIcons name="calculate" size={28} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.collapsibleButton, styles.addMovementButton]}
+                  onPress={goToAddMovement}
+                >
+                  <MaterialIcons name="add" size={28} color="white" />
+                </TouchableOpacity>
+              </Animated.View>
+            )}
+
+            {/* Main Button */}
+            <TouchableOpacity style={styles.mainButton} onPress={toggleButtons}>
+              <MaterialIcons name={isExpanded ? 'close' : 'menu'} size={32} color="white" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#f5f5f5',
+  },
+  contentWrapper: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
   header: {
     fontSize: 24,
@@ -151,26 +312,13 @@ const styles = StyleSheet.create({
     color: '#B0BEC5',
     marginTop: 20,
   },
-  quickCalcButton: {
-    position: 'absolute',
-    bottom: 90, // Positioned above the "+" button
-    right: 20,
-    backgroundColor: '#FF9800', // Orange background for distinction
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-  },
-  floatingButton: {
+  collapsibleContainer: {
     position: 'absolute',
     bottom: 20,
     right: 20,
+    alignItems: 'center',
+  },
+  mainButton: {
     backgroundColor: '#6200EE',
     width: 56,
     height: 56,
@@ -182,5 +330,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 5,
+  },
+  collapsibleButtons: {
+    position: 'absolute',
+    bottom: 80, // Ensure buttons expand upwards
+    alignItems: 'center',
+  },
+  collapsibleButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  loadButton: {
+    backgroundColor: '#FF5722', // Orange-red
+  },
+  exportButton: {
+    backgroundColor: '#4CAF50', // Green
+  },
+  quickCalcButton: {
+    backgroundColor: '#FF9800', // Orange
+  },
+  addMovementButton: {
+    backgroundColor: '#2196F3', // Blue
   },
 });
