@@ -10,6 +10,7 @@ import {
   Animated,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
+  TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons'; // For icons
@@ -26,6 +27,8 @@ import * as DocumentPicker from 'expo-document-picker';
 export default function MovementsList() {
   const router = useRouter();
   const [movements, setMovements] = useState<Movement[]>([]);
+  const [filteredMovements, setFilteredMovements] = useState<Movement[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
   const [userPreferences, setUserPreferences] = useState<{ weightUnit: 'kg' | 'lb' }>({ weightUnit: 'kg' });
   const [isExpanded, setIsExpanded] = useState(false); // State to toggle button visibility
   const animation = useRef(new Animated.Value(0)).current; // Animation state for smooth transitions
@@ -56,6 +59,15 @@ export default function MovementsList() {
       fetchData();
     }, [])
   );
+
+  function handleSearch(query: string) {
+    setSearchQuery(query);
+    const lowercasedQuery = query.toLowerCase();
+    const filtered = movements.filter((movement) =>
+      movement.name.toLowerCase().includes(lowercasedQuery)
+    );
+    setFilteredMovements(filtered);
+  }
 
   function adjustMovementsToUnit(movements: Movement[], weightUnit: 'kg' | 'lb') {
     if (weightUnit === 'kg') {
@@ -238,8 +250,21 @@ export default function MovementsList() {
           <Pressable onPress={handleTitlePress} android_ripple={{ color: 'transparent' }}>
             <Text style={styles.header}>Calculame Este</Text>
           </Pressable>
+
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <MaterialIcons name="search" size={24} color="#B0BEC5" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search movements..."
+              value={searchQuery}
+              onChangeText={handleSearch}
+            />
+          </View>
+
+          {/* Movement List */}
           <FlatList
-            data={movements}
+            data={filteredMovements}
             keyExtractor={(item) => item.name}
             renderItem={({ item }) => (
               <Pressable
@@ -399,5 +424,23 @@ const styles = StyleSheet.create({
   },
   preferencesButton: {
     backgroundColor: '#9C27B0', // Purple
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#B0BEC5',
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#fff',
+    marginBottom: 20,
+  },
+  searchIcon: {
+    marginRight: 5,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 10,
   },
 });
