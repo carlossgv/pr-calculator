@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons'; // For icons
 import { getAllMovements } from '@/utils/movements.utils';
+import { getUser } from '@/utils/user.utils';
 import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
 import { Movement } from '@/types/movements.type';
 import filesystemClient from '@/utils/filesystem.client'; // Import the updated filesystem client
@@ -25,17 +26,23 @@ import * as DocumentPicker from 'expo-document-picker';
 export default function MovementsList() {
   const router = useRouter();
   const [movements, setMovements] = useState<Movement[]>([]);
+  const [userPreferences, setUserPreferences] = useState<{ weightUnit: 'kg' | 'lb' }>({ weightUnit: 'kg' });
   const [isExpanded, setIsExpanded] = useState(false); // State to toggle button visibility
   const animation = useRef(new Animated.Value(0)).current; // Animation state for smooth transitions
   const [titleTapCount, setTitleTapCount] = useState(0); // Counter for title taps
   const tapTimeout = useRef<NodeJS.Timeout | null>(null); // Reference to the timeout for resets
 
-  // Re-fetch movements when the screen comes into focus
+  // Re-fetch movements and user preferences when the screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      async function fetchMovements() {
-        const storedMovements = await getAllMovements();
-        setMovements(storedMovements);
+      async function fetchData() {
+        try {
+          const [storedMovements, user] = await Promise.all([getAllMovements(), getUser()]);
+          setMovements(adjustMovementsToUnit(storedMovements, user?.preferences.weightUnit || 'kg'));
+          setUserPreferences(user?.preferences || { weightUnit: 'kg' });
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
       }
 
       // Collapse the buttons when returning to the screen
@@ -46,9 +53,25 @@ export default function MovementsList() {
         useNativeDriver: false,
       }).start();
 
-      fetchMovements();
+      fetchData();
     }, [])
   );
+
+  function adjustMovementsToUnit(movements: Movement[], weightUnit: 'kg' | 'lb') {
+    if (weightUnit === 'kg') {
+      // Convert lbs to kg (1 lb = 0.453592 kg)
+      return movements.map((movement) => ({
+        ...movement,
+        pr: Math.round(movement.pr * 0.453592 * 10) / 10, // Rounded to one decimal place
+      }));
+    } else {
+      // Convert kg to lbs (1 kg = 2.20462 lbs)
+      return movements.map((movement) => ({
+        ...movement,
+        pr: Math.round(movement.pr * 2.20462 * 10) / 10, // Rounded to one decimal place
+      }));
+    }
+  }
 
   function goToPRPage(movement: Movement) {
     collapseButtons(); // Collapse buttons before navigation
@@ -65,6 +88,11 @@ export default function MovementsList() {
     router.push({ pathname: '/pr-details', params: { quickCalc: "true" } });
   }
 
+  function goToUserPreferences() {
+    collapseButtons(); // Collapse buttons before navigation
+    router.push('/user-preferences'); // Navigate to the user preferences screen
+  }
+
   async function clearStorage() {
     try {
       await AsyncStorage.clear();
@@ -72,7 +100,7 @@ export default function MovementsList() {
 
       // Re-fetch and update the movements
       const updatedMovements = await getAllMovements();
-      setMovements(updatedMovements); // Update the state to reflect the cleared storage
+      setMovements(adjustMovementsToUnit(updatedMovements, userPreferences.weightUnit));
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
       Alert.alert('Error', 'Failed to clear storage.');
@@ -133,7 +161,7 @@ export default function MovementsList() {
               // Save the valid data to Async Storage
               await filesystemClient.loadJSONToAsyncStorage(fileUri);
               const updatedMovements = await getAllMovements();
-              setMovements(updatedMovements);
+              setMovements(adjustMovementsToUnit(updatedMovements, userPreferences.weightUnit));
               Alert.alert('Success', 'Movements have been successfully loaded.');
             },
           },
@@ -220,7 +248,9 @@ export default function MovementsList() {
                 android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
               >
                 <Text style={styles.movementName}>{item.name}</Text>
-                <Text style={styles.prValue}>{item.pr} lbs</Text>
+                <Text style={styles.prValue}>
+                  {item.pr} {userPreferences.weightUnit}
+                </Text>
               </Pressable>
             )}
             ListEmptyComponent={
@@ -254,6 +284,12 @@ export default function MovementsList() {
                   onPress={goToAddMovement}
                 >
                   <MaterialIcons name="add" size={28} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.collapsibleButton, styles.preferencesButton]}
+                  onPress={goToUserPreferences}
+                >
+                  <MaterialIcons name="settings" size={28} color="white" />
                 </TouchableOpacity>
               </Animated.View>
             )}
@@ -360,5 +396,8 @@ const styles = StyleSheet.create({
   },
   addMovementButton: {
     backgroundColor: '#2196F3', // Blue
+  },
+  preferencesButton: {
+    backgroundColor: '#9C27B0', // Purple
   },
 });
