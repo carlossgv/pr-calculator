@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { saveMovement, deleteMovement } from '@/utils/movements.utils';
+import { getUser } from '@/utils/user.utils'; // Import to fetch user preferences
 import { MaterialIcons } from '@expo/vector-icons'; // For the trash icon
+import { KG_TO_LBS } from '@/constants/Units';
 
 export default function MovementForm() {
   const router = useRouter();
@@ -10,8 +12,18 @@ export default function MovementForm() {
 
   const [name, setName] = useState<string>(initialName as string || '');
   const [pr, setPR] = useState<string>(initialPR as string || '');
+  const [unit, setUnit] = useState<'lbs' | 'kg'>('lbs'); // Default unit is lbs
 
   useEffect(() => {
+    async function fetchUserPreferences() {
+      const user = await getUser();
+      if (user?.preferences?.weightUnit) {
+        setUnit(user.preferences.weightUnit); // Set default unit based on user preferences
+      }
+    }
+
+    fetchUserPreferences();
+
     if (initialName) {
       setName(initialName as string);
     }
@@ -27,11 +39,14 @@ export default function MovementForm() {
     }
 
     if (!pr || isNaN(Number(pr))) {
-      Alert.alert('Error', 'Please provide a valid PR value in lbs.');
+      Alert.alert('Error', `Please provide a valid PR value in ${unit}.`);
       return;
     }
 
-    await saveMovement({ name, pr: Number(pr), date: new Date().toISOString() });
+    // Convert to lbs if the current unit is kg
+    const prInLbs = unit === 'kg' ? Number(pr) * KG_TO_LBS : Number(pr);
+
+    await saveMovement({ name, pr: prInLbs, date: new Date().toISOString() });
     router.back();
   }
 
@@ -58,6 +73,20 @@ export default function MovementForm() {
     );
   }
 
+  function toggleUnit() {
+    if (unit === 'lbs') {
+      // Convert lbs to kg
+      const convertedPR = pr ? (Number(pr) / KG_TO_LBS).toFixed(2) : '';
+      setPR(convertedPR);
+      setUnit('kg');
+    } else {
+      // Convert kg to lbs
+      const convertedPR = pr ? (Number(pr) * KG_TO_LBS).toFixed(2) : '';
+      setPR(convertedPR);
+      setUnit('lbs');
+    }
+  }
+
   return (
     <View style={styles.container}>
       {/* Trash Icon Button */}
@@ -74,22 +103,29 @@ export default function MovementForm() {
         <Text style={styles.header}>Create Movement</Text>
       )}
 
-      {/* Input Fields */}
+      {/* Movement Name Input */}
       <TextInput
-        style={styles.input}
+        style={styles.nameInput}
         placeholder="Movement Name"
-        placeholderTextColor="#B0BEC5" // TODO: Check why it doesn't use the theme color in development build
+        placeholderTextColor="#B0BEC5"
         value={name}
         onChangeText={setName}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="PR (lbs)"
-        placeholderTextColor="#B0BEC5" // TODO: Check why it doesn't use the theme color in development build
-        keyboardType="numeric"
-        value={pr}
-        onChangeText={setPR}
-      />
+
+      {/* PR Input and Unit Button */}
+      <View style={styles.prInputContainer}>
+        <TextInput
+          style={styles.prInput}
+          placeholder={`PR (${unit})`}
+          placeholderTextColor="#B0BEC5"
+          keyboardType="numeric"
+          value={pr}
+          onChangeText={setPR}
+        />
+        <TouchableOpacity style={styles.unitButton} onPress={toggleUnit}>
+          <Text style={styles.unitButtonText}>{unit.toUpperCase()}</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
@@ -135,13 +171,43 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
-  input: {
+  nameInput: {
     borderWidth: 1,
     borderColor: '#B0BEC5',
     borderRadius: 5,
     padding: 10,
     marginBottom: 20,
     backgroundColor: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  prInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  prInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#B0BEC5',
+    borderRadius: 5,
+    padding: 10,
+    backgroundColor: '#fff',
+    marginRight: 10,
+    fontSize: 16,
+  },
+  unitButton: {
+    backgroundColor: '#6200EE',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50, // Match the height of the PR input field
+  },
+  unitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   buttonContainer: {
     flexDirection: 'row',
