@@ -29,7 +29,7 @@ function calculatePercentages(weight: number) {
 
 export default function PRPage() {
   const router = useRouter();
-  const { name: movementName, pr: initialWeight, quickCalc = false, date } = useLocalSearchParams();
+  const { name: movementName, pr: initialWeight, quickCalc = false } = useLocalSearchParams();
   const [weight, setWeight] = useState<number>(Number(initialWeight) || 0);
   const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs');
   const [percentages, setPercentages] = useState(calculatePercentages(weight));
@@ -60,11 +60,7 @@ export default function PRPage() {
           setUnit(userUnit);
           setPercentages(calculatePercentages(userWeight));
 
-          if (user?.gender === 'F') {
-            setIsWomenBar(true);
-          } else {
-            setIsWomenBar(false);
-          }
+          user?.gender === 'F' ? setIsWomenBar(true) : setIsWomenBar(false);
         } catch (error) {
           console.error('Error fetching data:', error);
         }
@@ -206,7 +202,7 @@ export default function PRPage() {
 
         {/* Edit Floating Button */}
         {!quickCalc && (
-          <TouchableOpacity style={styles.floatingButton} onPress={() => router.push('/edit')}>
+          <TouchableOpacity style={styles.floatingButton} onPress={() => router.replace({ pathname: '/create-edit-movement', params: { name: movementName, pr: weight, } })}>
             <MaterialIcons name="edit" size={28} color="white" />
           </TouchableOpacity>
         )}

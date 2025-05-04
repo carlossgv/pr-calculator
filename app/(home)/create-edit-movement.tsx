@@ -46,8 +46,12 @@ export default function MovementForm() {
     // Convert to lbs if the current unit is kg
     const prInLbs = unit === 'kg' ? Number(pr) * KG_TO_LBS : Number(pr);
 
-    await saveMovement({ name, pr: prInLbs, date: new Date().toISOString() });
-    router.back();
+    if (initialName && initialName !== name) {
+      await deleteMovement(initialName as string);
+    }
+
+    await saveMovement({ name, prInLbs: prInLbs, date: new Date().toISOString() });
+    router.replace({ pathname: '/pr-details', params: { name, pr: prInLbs } });
   }
 
   async function handleDelete() {
