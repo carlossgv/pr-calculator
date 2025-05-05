@@ -23,13 +23,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FILE_NAME } from '@/constants/Files';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
+import { User } from '@/types/user.type';
 
 export default function MovementsList() {
   const router = useRouter();
   const [movements, setMovements] = useState<Movement[]>([]);
   const [filteredMovements, setFilteredMovements] = useState<Movement[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
-  const [userPreferences, setUserPreferences] = useState<{ weightUnit: 'kg' | 'lb' }>({ weightUnit: 'kg' });
+  const [user, setUser] = useState<User>({ gender: 'M', preferences: { weightUnit: 'kg' } });
   const [isExpanded, setIsExpanded] = useState(false); // State to toggle button visibility
   const animation = useRef(new Animated.Value(0)).current; // Animation state for smooth transitions
   const [titleTapCount, setTitleTapCount] = useState(0); // Counter for title taps
@@ -41,8 +42,10 @@ export default function MovementsList() {
       async function fetchData() {
         try {
           const [storedMovements, user] = await Promise.all([getAllMovements(), getUser()]);
+          console.debug('Fetched movements:', storedMovements);
+          console.debug('Fetched user:', user);
           setMovements(adjustMovementsToUnit(storedMovements, user?.preferences.weightUnit || 'kg'));
-          setUserPreferences(user?.preferences || { weightUnit: 'kg' });
+          user && setUser(user);
         } catch (error) {
           console.error('Error fetching data:', error);
         }
@@ -112,7 +115,7 @@ export default function MovementsList() {
 
       // Re-fetch and update the movements
       const updatedMovements = await getAllMovements();
-      setMovements(adjustMovementsToUnit(updatedMovements, userPreferences.weightUnit));
+      setMovements(adjustMovementsToUnit(updatedMovements, user.preferences.weightUnit));
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
       Alert.alert('Error', 'Failed to clear storage.');
@@ -173,7 +176,7 @@ export default function MovementsList() {
               // Save the valid data to Async Storage
               await filesystemClient.loadJSONToAsyncStorage(fileUri);
               const updatedMovements = await getAllMovements();
-              setMovements(adjustMovementsToUnit(updatedMovements, userPreferences.weightUnit));
+              setMovements(adjustMovementsToUnit(updatedMovements, user.preferences.weightUnit));
               Alert.alert('Success', 'Movements have been successfully loaded.');
             },
           },
@@ -264,7 +267,7 @@ export default function MovementsList() {
 
           {/* Movement List */}
           <FlatList
-            data={filteredMovements}
+            data={filteredMovements.length ? filteredMovements : movements}
             keyExtractor={(item) => item.name}
             renderItem={({ item }) => (
               <Pressable
@@ -274,7 +277,7 @@ export default function MovementsList() {
               >
                 <Text style={styles.movementName}>{item.name}</Text>
                 <Text style={styles.prValue}>
-                  {item.pr} {userPreferences.weightUnit}
+                  {item.pr} {user.preferences.weightUnit}
                 </Text>
               </Pressable>
             )}

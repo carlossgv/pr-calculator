@@ -50,7 +50,7 @@ export default function MovementForm() {
       await deleteMovement(initialName as string);
     }
 
-    await saveMovement({ name, prInLbs: prInLbs, date: new Date().toISOString() });
+    await saveMovement({ name, pr: prInLbs, date: new Date().toISOString() });
     router.replace({ pathname: '/pr-details', params: { name, pr: prInLbs } });
   }
 

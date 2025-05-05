@@ -142,10 +142,10 @@ export default function PRPage() {
                 is100Percent && styles.highlightedItem, // Highlight 100%
               ]}
             >
-              <Text style={[styles.gridLabel, isCustom && styles.customGridLabel]}>
+              <Text style={[styles.gridLabel]}>
                 {item.label}
               </Text>
-              <Text style={[styles.gridValue, isCustom && styles.customGridValue]}>
+              <Text style={[styles.gridValue]}>
                 {item.value} {unit}
               </Text>
             </TouchableOpacity>
