@@ -17,6 +17,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { KG_TO_LBS, LBS_TO_KG } from '@/constants/Units';
 import { getUser } from '@/utils/user.utils';
 import { getAllMovements } from '@/utils/movements.utils';
+import { User } from '@/types/user.type';
 
 function calculatePercentages(weight: number) {
   const percentages = [1.25, 1.2, 1.15, 1.1, 1.05, 1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4];
@@ -31,7 +32,7 @@ export default function PRPage() {
   const router = useRouter();
   const { name: movementName, pr: initialWeight, quickCalc = false } = useLocalSearchParams();
   const [weight, setWeight] = useState<number>(Number(initialWeight) || 0);
-  const [unit, setUnit] = useState<'kg' | 'lbs'>('lbs');
+  const [unit, setUnit] = useState<User['preferences']['weightUnit']>('lb');
   const [percentages, setPercentages] = useState(calculatePercentages(weight));
   const [modalVisible, setModalVisible] = useState(false); // For custom percentage input
   const [selectedWeightModal, setSelectedWeightModal] = useState(false); // For weight load modal
@@ -82,7 +83,7 @@ export default function PRPage() {
   function toggleUnit() {
     if (unit === 'kg') {
       const convertedWeight = weight * KG_TO_LBS;
-      setUnit('lbs');
+      setUnit('lb');
       setWeight(parseFloat(convertedWeight.toFixed(2)));
       setPercentages(calculatePercentages(convertedWeight));
     } else {
@@ -118,7 +119,7 @@ export default function PRPage() {
     setModalVisible(false); // Close the modal
   }
 
-  function renderGrid(percentages: { label: string; value: string; isCustom: boolean }[], unit: 'kg' | 'lbs') {
+  function renderGrid(percentages: { label: string; value: string; isCustom: boolean }[], unit: User['preferences']['weightUnit']) {
     const itemsPerRow = 2;
     const rows = [];
 

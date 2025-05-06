@@ -5,6 +5,7 @@ import { saveMovement, deleteMovement } from '@/utils/movements.utils';
 import { getUser } from '@/utils/user.utils'; // Import to fetch user preferences
 import { MaterialIcons } from '@expo/vector-icons'; // For the trash icon
 import { KG_TO_LBS } from '@/constants/Units';
+import { User } from '@/types/user.type';
 
 export default function MovementForm() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function MovementForm() {
 
   const [name, setName] = useState<string>(initialName as string || '');
   const [pr, setPR] = useState<string>(initialPR as string || '');
-  const [unit, setUnit] = useState<'lbs' | 'kg'>('lbs'); // Default unit is lbs
+  const [unit, setUnit] = useState<User['preferences']['weightUnit']>('lb'); // Default unit is lbs
 
   useEffect(() => {
     async function fetchUserPreferences() {
@@ -78,7 +79,7 @@ export default function MovementForm() {
   }
 
   function toggleUnit() {
-    if (unit === 'lbs') {
+    if (unit === 'lb') {
       // Convert lbs to kg
       const convertedPR = pr ? (Number(pr) / KG_TO_LBS).toFixed(2) : '';
       setPR(convertedPR);
@@ -87,7 +88,7 @@ export default function MovementForm() {
       // Convert kg to lbs
       const convertedPR = pr ? (Number(pr) * KG_TO_LBS).toFixed(2) : '';
       setPR(convertedPR);
-      setUnit('lbs');
+      setUnit('lb');
     }
   }
 

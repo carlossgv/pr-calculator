@@ -30,7 +30,7 @@ export default function MovementsList() {
   const [movements, setMovements] = useState<Movement[]>([]);
   const [filteredMovements, setFilteredMovements] = useState<Movement[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
-  const [user, setUser] = useState<User>({ gender: 'M', preferences: { weightUnit: 'kg' } });
+  const [user, setUser] = useState<User>({ gender: 'M', preferences: { weightUnit: 'lb' } });
   const [isExpanded, setIsExpanded] = useState(false); // State to toggle button visibility
   const animation = useRef(new Animated.Value(0)).current; // Animation state for smooth transitions
   const [titleTapCount, setTitleTapCount] = useState(0); // Counter for title taps
@@ -44,7 +44,7 @@ export default function MovementsList() {
           const [storedMovements, user] = await Promise.all([getAllMovements(), getUser()]);
           console.debug('Fetched movements:', storedMovements);
           console.debug('Fetched user:', user);
-          setMovements(adjustMovementsToUnit(storedMovements, user?.preferences.weightUnit || 'kg'));
+          setMovements(adjustMovementsToUnit(storedMovements, user?.preferences.weightUnit || 'lb'));
           user && setUser(user);
         } catch (error) {
           console.error('Error fetching data:', error);
