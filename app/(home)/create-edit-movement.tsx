@@ -2,49 +2,84 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { saveMovement, deleteMovement } from '@/utils/movements.utils';
-import { getUser } from '@/utils/user.utils'; // Import to fetch user preferences
-import { MaterialIcons } from '@expo/vector-icons'; // For the trash icon
+import { getUser } from '@/utils/user.utils';
+import { MaterialIcons } from '@expo/vector-icons';
 import { KG_TO_LBS } from '@/constants/Units';
 import { User } from '@/types/user.type';
+import { useTheme } from 'react-native-paper';
 
 export default function MovementForm() {
   const router = useRouter();
+  const theme = useTheme();
   const { name: initialName, pr: initialPR } = useLocalSearchParams();
 
   const [name, setName] = useState<string>(initialName as string || '');
   const [pr, setPR] = useState<string>(initialPR as string || '');
-  const [unit, setUnit] = useState<User['preferences']['weightUnit']>('lb'); // Default unit is lbs
+  const [unit, setUnit] = useState<User['preferences']['weightUnit']>('lb');
 
   useEffect(() => {
     async function fetchUserPreferences() {
       const user = await getUser();
       if (user?.preferences?.weightUnit) {
-        setUnit(user.preferences.weightUnit); // Set default unit based on user preferences
+        setUnit(user.preferences.weightUnit);
       }
     }
 
     fetchUserPreferences();
-
-    if (initialName) {
-      setName(initialName as string);
-    }
-    if (initialPR) {
-      setPR(initialPR as string);
-    }
+    if (initialName) setName(initialName as string);
+    if (initialPR) setPR(initialPR as string);
   }, [initialName, initialPR]);
+
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.background,
+    },
+    title: {
+      color: theme.colors.primary,
+    },
+    header: {
+      color: theme.colors.onBackground,
+    },
+    nameInput: {
+      borderColor: theme.colors.outline,
+      backgroundColor: theme.colors.surface,
+      color: theme.colors.onSurface,
+    },
+    prInput: {
+      borderColor: theme.colors.outline,
+      backgroundColor: theme.colors.surface,
+      color: theme.colors.onSurface,
+    },
+    unitButton: {
+      backgroundColor: theme.colors.primary,
+    },
+    unitButtonText: {
+      color: theme.colors.onPrimary,
+    },
+    saveButton: {
+      backgroundColor: theme.colors.primary,
+    },
+    cancelButton: {
+      backgroundColor: theme.colors.secondary,
+    },
+    buttonText: {
+      color: theme.colors.onPrimary,
+    },
+    trashButton: {
+      backgroundColor: theme.colors.error,
+    },
+  });
 
   async function handleSave() {
     if (!name.trim()) {
       Alert.alert('Error', 'Movement name is required.');
       return;
     }
-
     if (!pr || isNaN(Number(pr))) {
       Alert.alert('Error', `Please provide a valid PR value in ${unit}.`);
       return;
     }
 
-    // Convert to lbs if the current unit is kg
     const prInLbs = unit === 'kg' ? Number(pr) * KG_TO_LBS : Number(pr);
 
     if (initialName && initialName !== name) {
@@ -80,65 +115,60 @@ export default function MovementForm() {
 
   function toggleUnit() {
     if (unit === 'lb') {
-      // Convert lbs to kg
-      const convertedPR = pr ? (Number(pr) / KG_TO_LBS).toFixed(2) : '';
-      setPR(convertedPR);
+      const converted = pr ? (Number(pr) / KG_TO_LBS).toFixed(2) : '';
+      setPR(converted);
       setUnit('kg');
     } else {
-      // Convert kg to lbs
-      const convertedPR = pr ? (Number(pr) * KG_TO_LBS).toFixed(2) : '';
-      setPR(convertedPR);
+      const converted = pr ? (Number(pr) * KG_TO_LBS).toFixed(2) : '';
+      setPR(converted);
       setUnit('lb');
     }
   }
 
   return (
-    <View style={styles.container}>
-      {/* Trash Icon Button */}
+    <View style={[styles.container, dynamicStyles.container]}>
       {initialName && (
-        <TouchableOpacity style={styles.trashButton} onPress={handleDelete}>
+        <TouchableOpacity style={[styles.trashButton, dynamicStyles.trashButton]} onPress={handleDelete}>
           <MaterialIcons name="delete" size={20} color="white" />
         </TouchableOpacity>
       )}
 
-      {/* Title Section */}
       {initialName ? (
-        <Text style={styles.title}>{initialName}</Text>
+        <Text style={[styles.title, dynamicStyles.title]}>{initialName}</Text>
       ) : (
-        <Text style={styles.header}>Create Movement</Text>
+        <Text style={[styles.header, dynamicStyles.header]}>Create Movement</Text>
       )}
 
-      {/* Movement Name Input */}
       <TextInput
-        style={styles.nameInput}
+        style={[styles.nameInput, dynamicStyles.nameInput]}
         placeholder="Movement Name"
-        placeholderTextColor="#B0BEC5"
+        placeholderTextColor={theme.colors.onSurfaceVariant}
         value={name}
         onChangeText={setName}
       />
 
-      {/* PR Input and Unit Button */}
       <View style={styles.prInputContainer}>
         <TextInput
-          style={styles.prInput}
+          style={[styles.prInput, dynamicStyles.prInput]}
           placeholder={`PR (${unit})`}
-          placeholderTextColor="#B0BEC5"
+          placeholderTextColor={theme.colors.onSurfaceVariant}
           keyboardType="numeric"
           value={pr}
           onChangeText={setPR}
         />
-        <TouchableOpacity style={styles.unitButton} onPress={toggleUnit}>
-          <Text style={styles.unitButtonText}>{unit.toUpperCase()}</Text>
+        <TouchableOpacity style={[styles.unitButton, dynamicStyles.unitButton]} onPress={toggleUnit}>
+          <Text style={[styles.unitButtonText, dynamicStyles.unitButtonText]}>{unit.toUpperCase()}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Buttons */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.buttonText}>{initialName ? 'Save Changes' : 'Create Movement'}</Text>
+        <TouchableOpacity style={[styles.saveButton, dynamicStyles.saveButton]} onPress={handleSave}>
+          <Text style={[styles.buttonText, dynamicStyles.buttonText]}>
+            {initialName ? 'Save Changes' : 'Create Movement'}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => router.back()}>
-          <Text style={styles.buttonText}>Cancel</Text>
+        <TouchableOpacity style={[styles.cancelButton, dynamicStyles.cancelButton]} onPress={() => router.back()}>
+          <Text style={[styles.buttonText, dynamicStyles.buttonText]}>Cancel</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -149,13 +179,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   trashButton: {
     position: 'absolute',
     top: 20,
     right: 20,
-    backgroundColor: 'red',
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -168,7 +196,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
-    color: '#6200EE',
   },
   header: {
     fontSize: 24,
@@ -178,11 +205,9 @@ const styles = StyleSheet.create({
   },
   nameInput: {
     borderWidth: 1,
-    borderColor: '#B0BEC5',
     borderRadius: 5,
     padding: 10,
     marginBottom: 20,
-    backgroundColor: '#fff',
     fontSize: 18,
     textAlign: 'center',
   },
@@ -193,24 +218,20 @@ const styles = StyleSheet.create({
   prInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#B0BEC5',
     borderRadius: 5,
     padding: 10,
-    backgroundColor: '#fff',
     marginRight: 10,
     fontSize: 16,
   },
   unitButton: {
-    backgroundColor: '#6200EE',
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    height: 50, // Match the height of the PR input field
+    height: 50,
   },
   unitButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -221,7 +242,6 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    backgroundColor: '#6200EE',
     paddingVertical: 15,
     borderRadius: 5,
     alignItems: 'center',
@@ -229,14 +249,12 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: '#B0BEC5',
     paddingVertical: 15,
     borderRadius: 5,
     alignItems: 'center',
     marginLeft: 10,
   },
   buttonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
   },

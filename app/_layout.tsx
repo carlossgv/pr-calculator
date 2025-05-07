@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { PaperProvider } from 'react-native-paper';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -46,14 +47,14 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  // const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <PaperProvider>
       <Stack>
         {/* Main Stack */}
         <Stack.Screen name="(home)" options={{ headerShown: false }} />
       </Stack>
-    </ThemeProvider>
+    </PaperProvider>
   );
 }

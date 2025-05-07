@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
-  TouchableOpacity,
   TextInput,
   Modal,
   Pressable,
@@ -12,8 +10,10 @@ import {
   TouchableWithoutFeedback,
   Alert,
 } from 'react-native';
+import { Text } from 'react-native-paper';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Button, useTheme } from 'react-native-paper';
 import { KG_TO_LBS, LBS_TO_KG } from '@/constants/Units';
 import { getUser } from '@/utils/user.utils';
 import { getAllMovements } from '@/utils/movements.utils';
@@ -24,20 +24,22 @@ function calculatePercentages(weight: number) {
   return percentages.map((percentage) => ({
     label: `${(percentage * 100).toFixed(0)}%`,
     value: Math.round(weight * percentage).toString(),
-    isCustom: false, // Default percentages are not custom
+    isCustom: false,
   }));
 }
 
 export default function PRPage() {
   const router = useRouter();
   const { name: movementName, pr: initialWeight, quickCalc = false } = useLocalSearchParams();
+  const theme = useTheme();
+
   const [weight, setWeight] = useState<number>(Number(initialWeight) || 0);
   const [unit, setUnit] = useState<User['preferences']['weightUnit']>('lb');
   const [percentages, setPercentages] = useState(calculatePercentages(weight));
-  const [modalVisible, setModalVisible] = useState(false); // For custom percentage input
-  const [selectedWeightModal, setSelectedWeightModal] = useState(false); // For weight load modal
-  const [customPercentageInput, setCustomPercentageInput] = useState<string>(''); // Input for custom percentage
-  const [selectedWeight, setSelectedWeight] = useState<number | null>(null); // Selected weight for load modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedWeightModal, setSelectedWeightModal] = useState(false);
+  const [customPercentageInput, setCustomPercentageInput] = useState<string>('');
+  const [selectedWeight, setSelectedWeight] = useState<number | null>(null);
   const [isWomenBar, setIsWomenBar] = useState(false);
 
   const barWeight = isWomenBar ? (unit === 'kg' ? 15 : 35) : (unit === 'kg' ? 20 : 45);
@@ -51,7 +53,7 @@ export default function PRPage() {
           const movement = movements.find((item) => item.name === movementName);
 
           let userWeight = movement?.pr || 0;
-          let userUnit = user?.preferences?.weightUnit || 'lbs';
+          let userUnit = user?.preferences?.weightUnit || 'lb';
 
           if (userUnit === 'kg') {
             userWeight = userWeight * LBS_TO_KG;
@@ -60,7 +62,6 @@ export default function PRPage() {
           setWeight(userWeight);
           setUnit(userUnit);
           setPercentages(calculatePercentages(userWeight));
-
           user?.gender === 'F' ? setIsWomenBar(true) : setIsWomenBar(false);
         } catch (error) {
           console.error('Error fetching data:', error);
@@ -75,35 +76,33 @@ export default function PRPage() {
     setPercentages(calculatePercentages(weight));
   }, [weight]);
 
-  function handleWeightChange(input: string) {
+  const handleWeightChange = (input: string) => {
     const parsedWeight = parseFloat(input) || 0;
     setWeight(parsedWeight);
-  }
+  };
 
-  function toggleUnit() {
+  const toggleUnit = () => {
     if (unit === 'kg') {
       const convertedWeight = weight * KG_TO_LBS;
       setUnit('lb');
       setWeight(parseFloat(convertedWeight.toFixed(2)));
-      setPercentages(calculatePercentages(convertedWeight));
     } else {
       const convertedWeight = weight * LBS_TO_KG;
       setUnit('kg');
       setWeight(parseFloat(convertedWeight.toFixed(2)));
-      setPercentages(calculatePercentages(convertedWeight));
     }
-  }
+  };
 
-  function toggleBarGender() {
+  const toggleBarGender = () => {
     setIsWomenBar((prev) => !prev);
-  }
+  };
 
-  function handleWeightLoadPress(weight: string) {
+  const handleWeightLoadPress = (weight: string) => {
     setSelectedWeight(Number(weight));
-    setSelectedWeightModal(true); // Open weight load modal
-  }
+    setSelectedWeightModal(true);
+  };
 
-  function addCustomPercentage() {
+  const addCustomPercentage = () => {
     const customPercentage = parseFloat(customPercentageInput);
     if (isNaN(customPercentage) || customPercentage <= 0) {
       Alert.alert('Invalid Input', 'Please enter a valid percentage (greater than 0).');
@@ -112,146 +111,120 @@ export default function PRPage() {
     const newPercentage = {
       label: `${customPercentage}%`,
       value: Math.round(weight * (customPercentage / 100)).toString(),
-      isCustom: true, // Mark this percentage as custom
+      isCustom: true,
     };
-    setPercentages([newPercentage, ...percentages]); // Add custom percentage to the top
-    setCustomPercentageInput(''); // Clear the input
-    setModalVisible(false); // Close the modal
-  }
+    setPercentages([newPercentage, ...percentages]);
+    setCustomPercentageInput('');
+    setModalVisible(false);
+  };
 
-  function renderGrid(percentages: { label: string; value: string; isCustom: boolean }[], unit: User['preferences']['weightUnit']) {
+  const renderGrid = (items: { label: string; value: string; isCustom: boolean }[]) => {
     const itemsPerRow = 2;
     const rows = [];
 
-    for (let i = 0; i < percentages.length; i += itemsPerRow) {
-      const row = percentages.slice(i, i + itemsPerRow);
+    for (let i = 0; i < items.length; i += itemsPerRow) {
+      const row = items.slice(i, i + itemsPerRow);
       rows.push(row);
     }
 
     return rows.map((row, rowIndex) => (
       <View key={rowIndex} style={styles.gridRow}>
         {row.map((item, colIndex) => {
-          const isCustom = item.isCustom;
           const is100Percent = item.label === '100%';
           return (
-            <TouchableOpacity
+            <Button
               key={colIndex}
+              mode="outlined"
               onPress={() => handleWeightLoadPress(item.value)}
               style={[
                 styles.gridItem,
-                isCustom && styles.customGridItem, // Highlight custom percentages
-                is100Percent && styles.highlightedItem, // Highlight 100%
+                { backgroundColor: theme.colors.secondaryContainer },
+                item.isCustom && { backgroundColor: theme.colors.secondaryContainer },
+                is100Percent && { backgroundColor: '#FFBD33' },
               ]}
+              contentStyle={styles.buttonContent}
             >
-              <Text style={[styles.gridLabel]}>
-                {item.label}
-              </Text>
-              <Text style={[styles.gridValue]}>
-                {item.value} {unit}
-              </Text>
-            </TouchableOpacity>
+              <Text style={[styles.gridLabel, { color: theme.colors.onSecondaryContainer }]}>{item.label} / </Text>
+              <Text style={[styles.gridValue, { color: theme.colors.onSecondaryContainer }]}>{item.value} {unit}</Text>
+            </Button>
           );
         })}
       </View>
     ));
-  }
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        {/* Title */}
-        <Text style={styles.title}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <Text variant='headlineLarge' style={[styles.title, { color: theme.colors.primary }]}>
           {quickCalc ? 'Quick Weight Calculator' : movementName}
         </Text>
 
-        {/* Personal Record Row */}
         <View style={styles.personalRecordRow}>
           {quickCalc ? (
             <TextInput
-              style={styles.weightInput}
+              style={[styles.weightInput, { color: theme.colors.primary }]}
               keyboardType="numeric"
               value={weight.toString()}
               onChangeText={handleWeightChange}
             />
           ) : (
-            <Text style={styles.weightText}>{weight.toFixed(2)}</Text>
+            <Text variant='headlineLarge' style={[styles.weightText, { color: theme.colors.onSurface }]}>{weight.toFixed(2)}</Text>
           )}
-          <TouchableOpacity style={styles.unitGenderButton} onPress={toggleUnit}>
-            <Text style={styles.unitButtonText}>{unit.toUpperCase()}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.unitGenderButton} onPress={toggleBarGender}>
-            <FontAwesome5
-              name={isWomenBar ? 'female' : 'male'}
-              size={16}
-              color={'#FFFFFF'}
-            />
-          </TouchableOpacity>
+          <Button style={[styles.unitButton]} onPress={toggleUnit} mode='contained'>
+            {unit.toUpperCase()}
+          </Button>
+          <Button onPress={toggleBarGender} mode='contained'>
+            <FontAwesome5 name={isWomenBar ? 'female' : 'male'} size={16} />
+          </Button>
         </View>
 
-        {/* Percentages Grid */}
         <ScrollView style={styles.gridContainer}>
-          {renderGrid(percentages, unit)}
+          {renderGrid(percentages)}
         </ScrollView>
 
-        {/* Add Custom Percentage Floating Button */}
-        <TouchableOpacity
-          style={quickCalc ? styles.quickCalcAddButton : styles.addCustomButton}
+        <Button
+          style={[styles.addCustomButton, { backgroundColor: theme.colors.primary }]}
           onPress={() => setModalVisible(true)}
         >
           <MaterialIcons name="add" size={28} color="white" />
-        </TouchableOpacity>
+        </Button>
 
-        {/* Edit Floating Button */}
         {!quickCalc && (
-          <TouchableOpacity style={styles.floatingButton} onPress={() => router.replace({ pathname: '/create-edit-movement', params: { name: movementName, pr: weight, } })}>
+          <Button
+            style={[styles.floatingButton, { backgroundColor: theme.colors.primary }]}
+            onPress={() => router.replace({ pathname: '/create-edit-movement', params: { name: movementName, pr: weight } })}
+          >
             <MaterialIcons name="edit" size={28} color="white" />
-          </TouchableOpacity>
+          </Button>
         )}
 
-        {/* Modal for Adding Custom Percentage */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
+        <Modal transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
           <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Add Custom Percentage</Text>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+              <Text style={[styles.modalTitle, { color: theme.colors.onSurface }]}>Add Custom Percentage</Text>
               <TextInput
-                style={styles.modalInput}
+                style={[styles.modalInput, { color: theme.colors.onSurface, borderColor: theme.colors.outline }]}
                 placeholder="Enter %"
                 keyboardType="numeric"
                 value={customPercentageInput}
                 onChangeText={setCustomPercentageInput}
               />
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={addCustomPercentage}
-              >
+              <Button style={[styles.modalButton, { backgroundColor: theme.colors.primary }]} onPress={addCustomPercentage}>
                 <Text style={styles.modalButtonText}>Add</Text>
-              </TouchableOpacity>
+              </Button>
             </View>
           </View>
         </Modal>
 
-        {/* Modal for Weight Load Information */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={selectedWeightModal}
-          onRequestClose={() => setSelectedWeightModal(false)}
-        >
-          <Pressable
-            style={styles.modalOverlay}
-            onPress={() => setSelectedWeightModal(false)}
-          >
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Load Information</Text>
+        <Modal transparent visible={selectedWeightModal} onRequestClose={() => setSelectedWeightModal(false)}>
+          <Pressable style={styles.modalOverlay} onPress={() => setSelectedWeightModal(false)}>
+            <View style={[styles.modalContent, { backgroundColor: theme.colors.surface }]}>
+              <Text style={[styles.modalTitle, { color: theme.colors.onSurface }]}>Load Information</Text>
               {selectedWeight !== null && (
                 <>
-                  <Text style={styles.modalText}>Bar Weight: {barWeight} {unit}</Text>
-                  <Text style={styles.modalText}>
+                  <Text style={[styles.modalText, { color: theme.colors.onSurface }]}>Bar Weight: {barWeight} {unit}</Text>
+                  <Text style={[styles.modalText, { color: theme.colors.onSurface }]}>
                     Weight per Side: {((selectedWeight - barWeight) / 2).toFixed(2)} {unit}
                   </Text>
                 </>
@@ -268,31 +241,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#F5F5F5',
   },
   title: {
-    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#6200EE',
     marginBottom: 20,
   },
   weightInput: {
-    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#6200EE',
     borderBottomWidth: 1,
-    borderColor: '#CCCCCC',
     paddingBottom: 5,
     marginBottom: 10,
   },
   weightText: {
-    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#000000',
-    marginRight: 10,
+    marginRight: 5,
   },
   personalRecordRow: {
     flexDirection: 'row',
@@ -306,15 +271,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     paddingHorizontal: 15,
     paddingVertical: 5,
-    backgroundColor: '#6200EE',
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  unitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+  unitButton: {
+    marginHorizontal: 5,
   },
   gridContainer: {
     marginVertical: 20,
@@ -328,49 +290,29 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 5,
     paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
+    // paddingHorizontal: 15,
+    // borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
   },
-  highlightedItem: {
-    backgroundColor: '#FFD700', // Gold color for 100%
-  },
-  customGridItem: {
-    backgroundColor: '#D3D3D3', // Light gray for custom percentages
+  buttonContent: {
+    flexDirection: 'column', // Stack children vertically
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
   },
   gridLabel: {
-    fontSize: 16,
+    // fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
   },
   gridValue: {
-    fontSize: 16,
-    color: '#6200EE',
+    // fontSize: 16,
   },
   addCustomButton: {
     position: 'absolute',
     bottom: 100,
     right: 20,
-    backgroundColor: '#6200EE',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-  },
-  quickCalcAddButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#6200EE',
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -382,7 +324,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#6200EE',
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -399,7 +340,6 @@ const styles = StyleSheet.create({
   modalContent: {
     width: 300,
     padding: 20,
-    backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',
   },
@@ -411,14 +351,12 @@ const styles = StyleSheet.create({
   modalInput: {
     width: '100%',
     borderWidth: 1,
-    borderColor: '#CCCCCC',
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
     marginBottom: 15,
   },
   modalButton: {
-    backgroundColor: '#6200EE',
     paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',

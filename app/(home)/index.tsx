@@ -13,37 +13,76 @@ import {
   TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { MaterialIcons } from '@expo/vector-icons'; // For icons
+import { MaterialIcons } from '@expo/vector-icons';
 import { getAllMovements } from '@/utils/movements.utils';
 import { getUser } from '@/utils/user.utils';
-import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
+import { useFocusEffect } from '@react-navigation/native';
 import { Movement } from '@/types/movements.type';
-import filesystemClient from '@/utils/filesystem.client'; // Import the updated filesystem client
+import filesystemClient from '@/utils/filesystem.client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FILE_NAME } from '@/constants/Files';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import { User } from '@/types/user.type';
+import { useTheme } from 'react-native-paper';
 
 export default function MovementsList() {
   const router = useRouter();
+  const theme = useTheme();
   const [movements, setMovements] = useState<Movement[]>([]);
   const [filteredMovements, setFilteredMovements] = useState<Movement[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [user, setUser] = useState<User>({ gender: 'M', preferences: { weightUnit: 'lb' } });
-  const [isExpanded, setIsExpanded] = useState(false); // State to toggle button visibility
-  const animation = useRef(new Animated.Value(0)).current; // Animation state for smooth transitions
-  const [titleTapCount, setTitleTapCount] = useState(0); // Counter for title taps
-  const tapTimeout = useRef<NodeJS.Timeout | null>(null); // Reference to the timeout for resets
+  const [isExpanded, setIsExpanded] = useState(false);
+  const animation = useRef(new Animated.Value(0)).current;
+  const [titleTapCount, setTitleTapCount] = useState(0);
+  const tapTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Re-fetch movements and user preferences when the screen comes into focus
+  const dynamicStyles = StyleSheet.create({
+    movementRow: {
+      backgroundColor: theme.colors.secondaryContainer,
+    },
+    movementName: {
+      color: theme.colors.onPrimaryContainer,
+    },
+    prValue: {
+      color: theme.colors.onSecondaryContainer,
+    },
+    searchContainer: {
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.outline,
+    },
+    searchInput: {
+      color: theme.colors.onSurface,
+    },
+    emptyText: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    mainButton: {
+      backgroundColor: theme.colors.primary,
+    },
+    loadButton: {
+      backgroundColor: theme.colors.error,
+    },
+    exportButton: {
+      backgroundColor: theme.colors.tertiary,
+    },
+    quickCalcButton: {
+      backgroundColor: theme.colors.secondaryContainer,
+    },
+    addMovementButton: {
+      backgroundColor: theme.colors.primaryContainer,
+    },
+    preferencesButton: {
+      backgroundColor: theme.colors.secondary,
+    },
+  });
+
   useFocusEffect(
     React.useCallback(() => {
       async function fetchData() {
         try {
           const [storedMovements, user] = await Promise.all([getAllMovements(), getUser()]);
-          console.debug('Fetched movements:', storedMovements);
-          console.debug('Fetched user:', user);
           setMovements(adjustMovementsToUnit(storedMovements, user?.preferences.weightUnit || 'lb', true));
           user && setUser(user);
         } catch (error) {
@@ -51,7 +90,6 @@ export default function MovementsList() {
         }
       }
 
-      // Collapse the buttons when returning to the screen
       setIsExpanded(false);
       Animated.timing(animation, {
         toValue: 0,
@@ -74,52 +112,48 @@ export default function MovementsList() {
 
   function adjustMovementsToUnit(movements: Movement[], weightUnit: 'kg' | 'lb', initialLoad = false) {
     if (weightUnit === 'kg') {
-      // Convert lbs to kg (1 lb = 0.453592 kg)
       return movements.map((movement) => ({
         ...movement,
-        pr: Math.round(movement.pr * 0.453592 * 10) / 10, // Rounded to one decimal place
+        pr: Math.round(movement.pr * 0.453592 * 10) / 10,
       }));
     } else {
       if (initialLoad) {
         return movements.map((movement) => ({
           ...movement,
-          pr: Math.round(movement.pr * 10) / 10, // Rounded to one decimal place
-        }))
+          pr: Math.round(movement.pr * 10) / 10,
+        }));
       }
-      // Convert kg to lbs (1 kg = 2.20462 lbs)
       return movements.map((movement) => ({
         ...movement,
-        pr: Math.round(movement.pr * 2.20462 * 10) / 10, // Rounded to one decimal place
+        pr: Math.round(movement.pr * 2.20462 * 10) / 10,
       }));
     }
   }
 
   function goToPRPage(movement: Movement) {
-    collapseButtons(); // Collapse buttons before navigation
+    collapseButtons();
     router.push({ pathname: '/pr-details', params: movement });
   }
 
   function goToAddMovement() {
-    collapseButtons(); // Collapse buttons before navigation
-    router.push('/create-edit-movement'); // Navigate to the add/edit movement screen
+    collapseButtons();
+    router.push('/create-edit-movement');
   }
 
   function goToQuickCalc() {
-    collapseButtons(); // Collapse buttons before navigation
+    collapseButtons();
     router.push({ pathname: '/pr-details', params: { quickCalc: "true" } });
   }
 
   function goToUserPreferences() {
-    collapseButtons(); // Collapse buttons before navigation
-    router.push('/user-preferences'); // Navigate to the user preferences screen
+    collapseButtons();
+    router.push('/user-preferences');
   }
 
   async function clearStorage() {
     try {
       await AsyncStorage.clear();
       Alert.alert('Success', 'Storage has been cleared.');
-
-      // Re-fetch and update the movements
       const updatedMovements = await getAllMovements();
       setMovements(adjustMovementsToUnit(updatedMovements, user.preferences.weightUnit));
     } catch (error) {
@@ -135,7 +169,6 @@ export default function MovementsList() {
     }
 
     try {
-      // Use the filesystem client to write and share the JSON file
       const fileUri = await filesystemClient.writeJSON(FILE_NAME, movements);
       await filesystemClient.shareFile(fileUri);
     } catch (error) {
@@ -146,25 +179,13 @@ export default function MovementsList() {
 
   async function loadJSONData() {
     try {
-      // Open the file picker to select a JSON file
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/json', // Only allow JSON files
-      });
+      const result = await DocumentPicker.getDocumentAsync({ type: 'application/json' });
+      if (result.canceled) return;
 
-      // Check if the user canceled the document picker
-      if (result.canceled) {
-        console.log('User canceled the file picker.');
-        return;
-      }
-
-      // If the result is a success, get the file URI from the first asset
       const fileUri = result.assets[0].uri;
-
-      // Read the JSON file content
       const fileContent = await FileSystem.readAsStringAsync(fileUri);
       const parsedData: unknown = JSON.parse(fileContent);
 
-      // Validate that the parsed data matches the `Movement[]` type
       if (!Array.isArray(parsedData) || !parsedData.every(validateMovement)) {
         Alert.alert('Invalid Data', 'The selected JSON file does not match the expected format.');
         return;
@@ -179,7 +200,6 @@ export default function MovementsList() {
             text: 'Load',
             style: 'destructive',
             onPress: async () => {
-              // Save the valid data to Async Storage
               await filesystemClient.loadJSONToAsyncStorage(fileUri);
               const updatedMovements = await getAllMovements();
               setMovements(adjustMovementsToUnit(updatedMovements, user.preferences.weightUnit));
@@ -194,7 +214,6 @@ export default function MovementsList() {
     }
   }
 
-  // Validate that an object matches the Movement type
   function validateMovement(data: any): data is Movement {
     return (
       typeof data.name === 'string' &&
@@ -225,12 +244,10 @@ export default function MovementsList() {
   }
 
   function handleTitlePress() {
-    // Increment the title tap count
     setTitleTapCount((prevCount) => prevCount + 1);
 
-    // If the titleTapCount reaches 7, show confirmation alert
     if (titleTapCount + 1 === 7) {
-      setTitleTapCount(0); // Reset the counter
+      setTitleTapCount(0);
       Alert.alert(
         'Confirm Cache Clear',
         'Are you sure you want to clear all data? This action cannot be undone.',
@@ -242,85 +259,81 @@ export default function MovementsList() {
       return;
     }
 
-    // Reset the counter if no further taps within 1.5 seconds
     if (tapTimeout.current) {
       clearTimeout(tapTimeout.current);
     }
     tapTimeout.current = setTimeout(() => {
-      setTitleTapCount(0); // Reset the counter after timeout
+      setTitleTapCount(0);
     }, 1500);
   }
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <TouchableWithoutFeedback onPress={collapseButtons}>
-        <View style={[styles.container, styles.contentWrapper]}>
-          {/* Title with hidden functionality */}
-          <Pressable onPress={handleTitlePress} android_ripple={{ color: 'transparent' }}>
-            <Text style={styles.header}>Calculame Este</Text>
+        <View style={[styles.container, styles.contentWrapper, { backgroundColor: theme.colors.background }]}>
+          <Pressable onPress={handleTitlePress}>
+            <Text style={[styles.header, { color: theme.colors.primary }]}>Calculame Este</Text>
           </Pressable>
 
-          {/* Search Bar */}
-          <View style={styles.searchContainer}>
-            <MaterialIcons name="search" size={24} color="#B0BEC5" style={styles.searchIcon} />
+          <View style={[styles.searchContainer, dynamicStyles.searchContainer]}>
+            <MaterialIcons name="search" size={24} color={theme.colors.onSurface} style={styles.searchIcon} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, dynamicStyles.searchInput]}
               placeholder="Search movements..."
+              placeholderTextColor={theme.colors.onSurface}
               value={searchQuery}
               onChangeText={handleSearch}
             />
           </View>
 
-          {/* Movement List */}
           <FlatList
             data={filteredMovements.length ? filteredMovements : movements}
             keyExtractor={(item) => item.name}
             renderItem={({ item }) => (
               <Pressable
-                style={styles.movementRow}
+                style={[styles.movementRow, dynamicStyles.movementRow]}
                 onPress={() => goToPRPage(item)}
-                android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
               >
-                <Text style={styles.movementName}>{item.name}</Text>
-                <Text style={styles.prValue}>
+                <Text style={[styles.movementName, dynamicStyles.movementName]}>{item.name}</Text>
+                <Text style={[styles.prValue, dynamicStyles.prValue]}>
                   {item.pr} {user.preferences.weightUnit}
                 </Text>
               </Pressable>
             )}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No movements found. Add a new one!</Text>
+              <Text style={[styles.emptyText, dynamicStyles.emptyText]}>No movements found. Add a new one!</Text>
             }
           />
-          {/* Collapsible Buttons */}
+
           <View style={styles.collapsibleContainer}>
             {isExpanded && (
               <Animated.View style={styles.collapsibleButtons}>
+                {/* <TouchableOpacity */}
+                {/*   style={[styles.collapsibleButton, dynamicStyles.loadButton]} */}
+                {/*   onPress={loadJSONData} */}
+                {/* > */}
+                {/*   <MaterialIcons name="file-upload" size={28} color="white" /> */}
+                {/* </TouchableOpacity> */}
+                {/* <TouchableOpacity */}
+                {/*   style={[styles.collapsibleButton, dynamicStyles.exportButton]} */}
+                {/*   onPress={exportDataAsJSON} */}
+                {/* > */}
+                {/*   <MaterialIcons name="file-download" size={28} color="white" /> */}
+                {/* </TouchableOpacity> */}
                 <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.loadButton]}
-                  onPress={loadJSONData}
-                >
-                  <MaterialIcons name="file-upload" size={28} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.exportButton]}
-                  onPress={exportDataAsJSON}
-                >
-                  <MaterialIcons name="file-download" size={28} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.quickCalcButton]}
+                  style={[styles.collapsibleButton, dynamicStyles.quickCalcButton]}
                   onPress={goToQuickCalc}
                 >
                   <MaterialIcons name="calculate" size={28} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.addMovementButton]}
+                  style={[styles.collapsibleButton, dynamicStyles.addMovementButton]}
                   onPress={goToAddMovement}
                 >
                   <MaterialIcons name="add" size={28} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.preferencesButton]}
+                  style={[styles.collapsibleButton, dynamicStyles.preferencesButton]}
                   onPress={goToUserPreferences}
                 >
                   <MaterialIcons name="settings" size={28} color="white" />
@@ -328,8 +341,7 @@ export default function MovementsList() {
               </Animated.View>
             )}
 
-            {/* Main Button */}
-            <TouchableOpacity style={styles.mainButton} onPress={toggleButtons}>
+            <TouchableOpacity style={[styles.mainButton, dynamicStyles.mainButton]} onPress={toggleButtons}>
               <MaterialIcons name={isExpanded ? 'close' : 'menu'} size={32} color="white" />
             </TouchableOpacity>
           </View>
@@ -342,7 +354,6 @@ export default function MovementsList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   contentWrapper: {
     paddingHorizontal: 20,
@@ -360,7 +371,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     marginVertical: 5,
-    backgroundColor: '#fff',
     borderRadius: 5,
     shadowColor: '#000',
     shadowOpacity: 0.1,
@@ -374,12 +384,10 @@ const styles = StyleSheet.create({
   },
   prValue: {
     fontSize: 16,
-    color: '#6200EE',
   },
   emptyText: {
     textAlign: 'center',
     fontSize: 16,
-    color: '#B0BEC5',
     marginTop: 20,
   },
   collapsibleContainer: {
@@ -389,21 +397,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainButton: {
-    backgroundColor: '#6200EE',
     width: 56,
     height: 56,
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
     elevation: 5,
   },
   collapsibleButtons: {
     position: 'absolute',
-    bottom: 80, // Ensure buttons expand upwards
+    bottom: 80,
     alignItems: 'center',
   },
   collapsibleButton: {
@@ -413,35 +416,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
     elevation: 5,
-  },
-  loadButton: {
-    backgroundColor: '#FF5722', // Orange-red
-  },
-  exportButton: {
-    backgroundColor: '#4CAF50', // Green
-  },
-  quickCalcButton: {
-    backgroundColor: '#FF9800', // Orange
-  },
-  addMovementButton: {
-    backgroundColor: '#2196F3', // Blue
-  },
-  preferencesButton: {
-    backgroundColor: '#9C27B0', // Purple
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#B0BEC5',
     borderRadius: 5,
     paddingHorizontal: 10,
-    backgroundColor: '#fff',
     marginBottom: 20,
   },
   searchIcon: {
