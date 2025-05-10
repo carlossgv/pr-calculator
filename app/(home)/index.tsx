@@ -251,6 +251,13 @@ export default function MovementsList() {
     }, 1500);
   }
 
+  function toggleWeightUnit() {
+    const newWeightUnit = user.preferences.weightUnit === 'lb' ? 'kg' : 'lb';
+    setUser({ ...user, preferences: { ...user.preferences, weightUnit: newWeightUnit } });
+    setMovements(adjustMovementsToUnit(movements, newWeightUnit));
+    setFilteredMovements(adjustMovementsToUnit(filteredMovements, newWeightUnit));
+  }
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <TouchableWithoutFeedback onPress={collapseButtons}>
@@ -260,15 +267,22 @@ export default function MovementsList() {
             <Text style={styles.header}>Calculame Este</Text>
           </Pressable>
 
-          {/* Search Bar */}
           <View style={styles.searchContainer}>
-            <MaterialIcons name="search" size={24} color="#B0BEC5" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search movements..."
-              value={searchQuery}
-              onChangeText={handleSearch}
-            />
+            <View style={styles.searchBar}>
+              <MaterialIcons name="search" size={24} color="#B0BEC5" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search movements..."
+                value={searchQuery}
+                onChangeText={handleSearch}
+              />
+            </View>
+            {/* Toggle Weight Unit Button */}
+            <TouchableOpacity style={styles.unitToggleButton} onPress={toggleWeightUnit}>
+              <Text style={styles.unitToggleText}>
+                {user.preferences.weightUnit === 'lb' ? 'KG' : 'LB'}
+              </Text>
+            </TouchableOpacity>
           </View>
 
           {/* Movement List */}
@@ -295,18 +309,18 @@ export default function MovementsList() {
           <View style={styles.collapsibleContainer}>
             {isExpanded && (
               <Animated.View style={styles.collapsibleButtons}>
-                <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.loadButton]}
-                  onPress={loadJSONData}
-                >
-                  <MaterialIcons name="file-upload" size={28} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.exportButton]}
-                  onPress={exportDataAsJSON}
-                >
-                  <MaterialIcons name="file-download" size={28} color="white" />
-                </TouchableOpacity>
+                {/* <TouchableOpacity */}
+                {/*   style={[styles.collapsibleButton, styles.loadButton]} */}
+                {/*   onPress={loadJSONData} */}
+                {/* > */}
+                {/*   <MaterialIcons name="file-upload" size={28} color="white" /> */}
+                {/* </TouchableOpacity> */}
+                {/* <TouchableOpacity */}
+                {/*   style={[styles.collapsibleButton, styles.exportButton]} */}
+                {/*   onPress={exportDataAsJSON} */}
+                {/* > */}
+                {/*   <MaterialIcons name="file-download" size={28} color="white" /> */}
+                {/* </TouchableOpacity> */}
                 <TouchableOpacity
                   style={[styles.collapsibleButton, styles.quickCalcButton]}
                   onPress={goToQuickCalc}
@@ -437,19 +451,36 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 20,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1, // Takes up available space
     borderWidth: 1,
     borderColor: '#B0BEC5',
     borderRadius: 5,
     paddingHorizontal: 10,
     backgroundColor: '#fff',
-    marginBottom: 20,
   },
   searchIcon: {
     marginRight: 5,
   },
   searchInput: {
-    flex: 1,
+    flex: 1, // Takes up the remaining space in the search bar
     fontSize: 16,
     paddingVertical: 10,
+  },
+  unitToggleButton: {
+    marginLeft: 10, // Space between the search bar and the button
+    backgroundColor: '#6200EE',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 5,
+  },
+  unitToggleText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

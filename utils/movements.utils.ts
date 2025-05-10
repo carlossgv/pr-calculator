@@ -1,6 +1,7 @@
 import { Movement } from '@/types/movements.type';
 import storageClient from './async-storage.client';
 import { MOVEMENTS_STORAGE_KEY } from '@/constants/Files';
+import { KG_TO_LBS } from '@/constants/Units';
 
 /**
  * Fetch all movements from AsyncStorage.
@@ -52,3 +53,11 @@ export async function deleteMovement(name: string): Promise<void> {
     console.error('Error deleting movement:', error);
   }
 }
+
+export const convertToLbs = (value: number): number => {
+  return Math.round(value * KG_TO_LBS);
+}
+
+export const convertToKg = (value: number): number => {
+  return Math.round(value / KG_TO_LBS);
+};
