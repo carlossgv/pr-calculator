@@ -50,7 +50,7 @@ export default function PRPage() {
           const movements = await getAllMovements();
           const movement = movements.find((item) => item.name === movementName);
 
-          let userWeight = movement?.pr || 0;
+          let userWeight = movement?.data[0]?.weight || 0;
           let userUnit = user?.preferences?.weightUnit || 'lbs';
 
           if (userUnit === 'kg') {

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, FlatList } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { saveMovement, deleteMovement } from '@/utils/movements.utils';
+import { addMovementData, createMovement, deleteMovement, deleteMovementData, getMovement } from '@/utils/movements.utils';
 import { getUser } from '@/utils/user.utils'; // Import to fetch user preferences
 import { MaterialIcons } from '@expo/vector-icons'; // For the trash icon
 import { KG_TO_LBS } from '@/constants/Units';
 import { User } from '@/types/user.type';
+import { MovementData } from '@/types/movements.type';
 
 export default function MovementForm() {
   const router = useRouter();
@@ -14,16 +15,31 @@ export default function MovementForm() {
   const [name, setName] = useState<string>(initialName as string || '');
   const [pr, setPR] = useState<string>(initialPR as string || '');
   const [unit, setUnit] = useState<User['preferences']['weightUnit']>('lb'); // Default unit is lbs
+  const [movementData, setMovementData] = useState<MovementData[]>([]); // Holds the list of weights
 
   useEffect(() => {
-    async function fetchUserPreferences() {
+    async function fetchData() {
       const user = await getUser();
       if (user?.preferences?.weightUnit) {
         setUnit(user.preferences.weightUnit); // Set default unit based on user preferences
       }
+
+      if (initialName) {
+        const movement = await getMovement(initialName as string);
+        if (movement) {
+          setMovementData(movement.data);
+        }
+
+      console.debug('Fetched movement data:', movement);
+      console.debug('Initial name in EDIT:', initialName);
+      console.debug('Initial PR in CREATE:', initialPR);
+      }
+
+
     }
 
-    fetchUserPreferences();
+
+    fetchData();
 
     if (initialName) {
       setName(initialName as string);
@@ -47,12 +63,26 @@ export default function MovementForm() {
     // Convert to lbs if the current unit is kg
     const prInLbs = unit === 'kg' ? Number(pr) * KG_TO_LBS : Number(pr);
 
-    if (initialName && initialName !== name) {
-      await deleteMovement(initialName as string);
-    }
+    if (initialName) {
+      await addMovementData(initialName as string, {
+        weight: prInLbs,
+        reps: 1,
+        set: 0,
+        date: new Date().toISOString(),
+      })
 
-    await saveMovement({ name, pr: prInLbs, date: new Date().toISOString() });
+    } else {
+      await createMovement({ name, data: [{ date: new Date().toISOString(), weight: prInLbs, reps: 1, set: 0 }] });
+    }
     router.replace({ pathname: '/pr-details', params: { name, pr: prInLbs } });
+  }
+
+  async function handleDeleteRecord(index: number) {
+    console.debug('Deleting record at index:', index);
+    const record = movementData[index];
+    console.debug('Record to delete:', record);
+    await deleteMovementData(name, record.date);
+    setMovementData((prevData) => prevData.filter((_, i) => i !== index));
   }
 
   async function handleDelete() {
@@ -103,7 +133,7 @@ export default function MovementForm() {
 
       {/* Title Section */}
       {initialName ? (
-        <Text style={styles.title}>{initialName}</Text>
+        <Text style={styles.header}>Add new weight</Text>
       ) : (
         <Text style={styles.header}>Create Movement</Text>
       )}
@@ -115,6 +145,7 @@ export default function MovementForm() {
         placeholderTextColor="#B0BEC5"
         value={name}
         onChangeText={setName}
+        editable={!initialName} // Disable input if initialName is set
       />
 
       {/* PR Input and Unit Button */}
@@ -131,6 +162,22 @@ export default function MovementForm() {
           <Text style={styles.unitButtonText}>{unit.toUpperCase()}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* List of Weights */}
+      <FlatList
+        data={movementData}
+        keyExtractor={(item, index) => `${item.date}-${index}`}
+        renderItem={({ item, index }) => (
+          <View style={styles.record}>
+            <Text style={styles.recordText}>
+              {`${item.weight} ${unit.toUpperCase()} on ${new Date(item.date).toLocaleDateString()}`}
+            </Text>
+            <TouchableOpacity onPress={() => handleDeleteRecord(index)}>
+              <MaterialIcons name="delete" size={20} color="red" />
+            </TouchableOpacity>
+          </View>
+        )}
+      />
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
@@ -239,5 +286,19 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  record: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+  },
+  recordText: {
+    fontSize: 16,
   },
 });

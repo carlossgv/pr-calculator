@@ -17,7 +17,7 @@ import { MaterialIcons } from '@expo/vector-icons'; // For icons
 import { convertToKg, convertToLbs, getAllMovements } from '@/utils/movements.utils';
 import { getUser } from '@/utils/user.utils';
 import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
-import { Movement } from '@/types/movements.type';
+import { Movement, } from '@/types/movements.type';
 import filesystemClient from '@/utils/filesystem.client'; // Import the updated filesystem client
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FILE_NAME } from '@/constants/Files';
@@ -25,10 +25,15 @@ import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import { User } from '@/types/user.type';
 
+type MovementListData = {
+  name: string;
+  pr: number;
+}
+
 export default function MovementsList() {
   const router = useRouter();
-  const [movements, setMovements] = useState<Movement[]>([]);
-  const [filteredMovements, setFilteredMovements] = useState<Movement[]>([]);
+  const [movements, setMovements] = useState<MovementListData[]>([]);
+  const [filteredMovements, setFilteredMovements] = useState<MovementListData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
   const [user, setUser] = useState<User>({ gender: 'M', preferences: { weightUnit: 'lb' } });
   const [isExpanded, setIsExpanded] = useState(false); // State to toggle button visibility
@@ -42,10 +47,12 @@ export default function MovementsList() {
       async function fetchData() {
         try {
           const [storedMovements, user] = await Promise.all([getAllMovements(), getUser()]);
-          console.debug('Fetched movements:', storedMovements);
+          console.debug('Fetched movements:', JSON.stringify(storedMovements, null, 2));
+          const movementListData: MovementListData[] = storedMovements.map((movement) => ({ name: movement.name, pr: movement.data[0].weight }));
+          console.debug('Fetched PRs:', movementListData);
           console.debug('Fetched user:', user);
           user && setUser(user);
-          setMovements(adjustMovementsToUnit(storedMovements, user?.preferences.weightUnit || 'lb', true));
+          setMovements(adjustMovementsToUnit(movementListData, user?.preferences.weightUnit || 'lb', true));
         } catch (error) {
           console.error('Error fetching data:', error);
         }
@@ -72,10 +79,11 @@ export default function MovementsList() {
     setFilteredMovements(filtered);
   }
 
-  function adjustMovementsToUnit(movements: Movement[], weightUnit: 'kg' | 'lb', initialLoad = false) {
+  function adjustMovementsToUnit(movements: MovementListData[], weightUnit: 'kg' | 'lb', initialLoad = false) {
     if (weightUnit === 'lb') {
       if (initialLoad) {
-        return movements      }
+        return movements
+      }
       // Convert lbs to kg (1 lb = 0.453592 kg)
       return movements.map((movement) => ({
         ...movement,
@@ -96,9 +104,9 @@ export default function MovementsList() {
     }
   }
 
-  function goToPRPage(movement: Movement) {
+  function goToPRPage(movementName: string) {
     collapseButtons(); // Collapse buttons before navigation
-    router.push({ pathname: '/pr-details', params: movement });
+    router.push({ pathname: '/pr-details', params: { name: movementName } });
   }
 
   function goToAddMovement() {
@@ -123,7 +131,8 @@ export default function MovementsList() {
 
       // Re-fetch and update the movements
       const updatedMovements = await getAllMovements();
-      setMovements(adjustMovementsToUnit(updatedMovements, user.preferences.weightUnit));
+      const listData: MovementListData[] = updatedMovements.map((movement) => ({ name: movement.name, pr: movement.data[0].weight }));
+      setMovements(adjustMovementsToUnit(listData, user.preferences.weightUnit));
     } catch (error) {
       console.error('Error clearing AsyncStorage:', error);
       Alert.alert('Error', 'Failed to clear storage.');
@@ -184,7 +193,8 @@ export default function MovementsList() {
               // Save the valid data to Async Storage
               await filesystemClient.loadJSONToAsyncStorage(fileUri);
               const updatedMovements = await getAllMovements();
-              setMovements(adjustMovementsToUnit(updatedMovements, user.preferences.weightUnit));
+              const listData: MovementListData[] = updatedMovements.map((movement) => ({ name: movement.name, pr: movement.data[0].weight }));
+              setMovements(adjustMovementsToUnit(listData, user.preferences.weightUnit));
               Alert.alert('Success', 'Movements have been successfully loaded.');
             },
           },
@@ -294,7 +304,7 @@ export default function MovementsList() {
             renderItem={({ item }) => (
               <Pressable
                 style={styles.movementRow}
-                onPress={() => goToPRPage(item)}
+                onPress={() => goToPRPage(item.name)}
                 android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
               >
                 <Text style={styles.movementName}>{item.name}</Text>
