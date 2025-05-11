@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons'; // For icons
-import { getAllMovements } from '@/utils/movements.utils';
+import { convertToKg, convertToLbs, getAllMovements } from '@/utils/movements.utils';
 import { getUser } from '@/utils/user.utils';
 import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
 import { Movement } from '@/types/movements.type';
@@ -73,23 +73,24 @@ export default function MovementsList() {
   }
 
   function adjustMovementsToUnit(movements: Movement[], weightUnit: 'kg' | 'lb', initialLoad = false) {
-    if (weightUnit === 'kg') {
+    if (initialLoad && weightUnit === 'kg') {
+      return movements.map((movement) => ({
+        ...movement,
+        pr: convertToKg(movement.pr), // Convert to lbs: 
+      }))
+    }
+
+    if (weightUnit === 'lb') {
       // Convert lbs to kg (1 lb = 0.453592 kg)
       return movements.map((movement) => ({
         ...movement,
-        pr: Math.round(movement.pr * 0.453592 * 10) / 10, // Rounded to one decimal place
+        pr: convertToLbs(movement.pr), // Convert to lbs
       }));
     } else {
-      if (initialLoad) {
-        return movements.map((movement) => ({
-          ...movement,
-          pr: Math.round(movement.pr * 10) / 10, // Rounded to one decimal place
-        }))
-      }
       // Convert kg to lbs (1 kg = 2.20462 lbs)
       return movements.map((movement) => ({
         ...movement,
-        pr: Math.round(movement.pr * 2.20462 * 10) / 10, // Rounded to one decimal place
+        pr: convertToKg(movement.pr), // Convert to kg
       }));
     }
   }
