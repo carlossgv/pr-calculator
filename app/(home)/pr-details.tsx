@@ -193,20 +193,44 @@ export default function PRPage() {
           {renderGrid(percentages, unit)}
         </ScrollView>
 
-        {/* Add Custom Percentage Floating Button */}
-        <TouchableOpacity
-          style={quickCalc ? styles.quickCalcAddButton : styles.addCustomButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <MaterialIcons name="add" size={28} color="white" />
-        </TouchableOpacity>
-
-        {/* Edit Floating Button */}
-        {!quickCalc && (
-          <TouchableOpacity style={styles.floatingButton} onPress={() => router.replace({ pathname: '/create-edit-movement', params: { name: movementName, pr: weight, } })}>
-            <MaterialIcons name="edit" size={28} color="white" />
+        <View style={styles.floatingButtonContainer}>
+          {/* Add Custom Percentage Floating Button */}
+          <TouchableOpacity
+            // style={quickCalc ? styles.quickCalcAddButton : styles.addCustomButton}
+            onPress={() => setModalVisible(true)}
+          >
+            <MaterialIcons name="add" size={28} color="white" />
           </TouchableOpacity>
-        )}
+
+
+          {!quickCalc && (
+            <>
+              <TouchableOpacity
+                style={styles.floatingButton}
+                onPress={() =>
+                  router.push({
+                    pathname: '/create-edit-movement',
+                    params: { name: movementName, pr: weight },
+                  })
+                }
+              >
+                <MaterialIcons name="edit" size={28} color="white" />
+                <Text style={{ color: 'white', fontSize: 12 }}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.floatingButton}
+                onPress={() =>
+                  router.push({
+                    pathname: '/weight-graph',
+                    params: { name: movementName },
+                  })
+                }
+              >
+                <MaterialIcons name="show-chart" size={28} color="white" />
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
 
         {/* Modal for Adding Custom Percentage */}
         <Modal
@@ -431,5 +455,25 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 16,
     marginBottom: 10,
+  },
+  // graphFloatingButton: {
+  //   position: 'absolute',
+  //   bottom: 80,
+  //   right: 20,
+  //   backgroundColor: '#03A9F4',
+  //   width: 56,
+  //   height: 56,
+  //   borderRadius: 28,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   elevation: 5,
+  // },
+  floatingButtonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    flexDirection: 'column',
+    alignItems: 'center',
+    // justifyContent: 'space-between',
   },
 });
