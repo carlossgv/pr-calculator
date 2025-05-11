@@ -2,26 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { saveUser } from '@/utils/user.utils';
+import { getUser, saveUser } from '@/utils/user.utils';
 import { User } from '@/types/user.type';
 
 
 export default function UserDefaultsForm() {
   const router = useRouter();
   const { gender: initialGender, weightUnit: initialWeightUnit } = useLocalSearchParams();
-
   const [gender, setGender] = useState<User['gender']>(initialGender as User['gender'] || 'M');
   const [weightUnit, setWeightUnit] = useState<User['preferences']['weightUnit']>(
     initialWeightUnit as User['preferences']['weightUnit'] || 'kg'
   );
 
   useEffect(() => {
-    if (initialGender) {
-      setGender(initialGender as User['gender']);
-    }
-    if (initialWeightUnit) {
-      setWeightUnit(initialWeightUnit as User['preferences']['weightUnit']);
-    }
+      // Fetch user preferences (e.g., from an API or local storage)
+      async function fetchUserPreferences() {
+        const userPreferences = await getUser(); // Replace with actual API call or storage retrieval
+        if (userPreferences) {
+          setGender(userPreferences.gender)
+          setWeightUnit(userPreferences.preferences.weightUnit);
+        }
+      }
+
+      fetchUserPreferences();
   }, [initialGender, initialWeightUnit]);
 
   async function handleSave() {
