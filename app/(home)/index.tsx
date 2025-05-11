@@ -44,8 +44,8 @@ export default function MovementsList() {
           const [storedMovements, user] = await Promise.all([getAllMovements(), getUser()]);
           console.debug('Fetched movements:', storedMovements);
           console.debug('Fetched user:', user);
-          setMovements(adjustMovementsToUnit(storedMovements, user?.preferences.weightUnit || 'lb', true));
           user && setUser(user);
+          setMovements(adjustMovementsToUnit(storedMovements, user?.preferences.weightUnit || 'lb', true));
         } catch (error) {
           console.error('Error fetching data:', error);
         }
@@ -73,20 +73,21 @@ export default function MovementsList() {
   }
 
   function adjustMovementsToUnit(movements: Movement[], weightUnit: 'kg' | 'lb', initialLoad = false) {
-    if (initialLoad && weightUnit === 'kg') {
-      return movements.map((movement) => ({
-        ...movement,
-        pr: convertToKg(movement.pr), // Convert to lbs: 
-      }))
-    }
-
     if (weightUnit === 'lb') {
+      if (initialLoad) {
+        return movements      }
       // Convert lbs to kg (1 lb = 0.453592 kg)
       return movements.map((movement) => ({
         ...movement,
         pr: convertToLbs(movement.pr), // Convert to lbs
       }));
     } else {
+      if (initialLoad) {
+        return movements.map((movement) => ({
+          ...movement,
+          pr: convertToKg(movement.pr),
+        }))
+      }
       // Convert kg to lbs (1 kg = 2.20462 lbs)
       return movements.map((movement) => ({
         ...movement,
