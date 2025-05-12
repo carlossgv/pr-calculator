@@ -196,7 +196,7 @@ export default function PRPage() {
         <View style={styles.floatingButtonContainer}>
           {/* Add Custom Percentage Floating Button */}
           <TouchableOpacity
-            // style={quickCalc ? styles.quickCalcAddButton : styles.addCustomButton}
+            style={styles.floatingButton}
             onPress={() => setModalVisible(true)}
           >
             <MaterialIcons name="add" size={28} color="white" />
@@ -215,7 +215,6 @@ export default function PRPage() {
                 }
               >
                 <MaterialIcons name="edit" size={28} color="white" />
-                <Text style={{ color: 'white', fontSize: 12 }}>Edit</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.floatingButton}
@@ -402,18 +401,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
   },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#6200EE',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -456,24 +443,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
   },
-  // graphFloatingButton: {
-  //   position: 'absolute',
-  //   bottom: 80,
-  //   right: 20,
-  //   backgroundColor: '#03A9F4',
-  //   width: 56,
-  //   height: 56,
-  //   borderRadius: 28,
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   elevation: 5,
-  // },
   floatingButtonContainer: {
     position: 'absolute',
     bottom: 20,
     right: 20,
     flexDirection: 'column',
     alignItems: 'center',
-    // justifyContent: 'space-between',
+    rowGap: 10,
+    elevation: 5,
+  },
+  floatingButton: {
+    backgroundColor: '#6200EE',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

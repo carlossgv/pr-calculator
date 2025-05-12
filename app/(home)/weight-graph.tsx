@@ -9,7 +9,7 @@ import { getUser } from '@/utils/user.utils';
 export default function WeightGraphScreen() {
   const { name: movementName } = useLocalSearchParams();
   const [movementData, setMovementData] = useState<MovementData[]>([]);
-  const [unit, setUnit] = useState<'lb' | 'kg'>('lb'); // Default unit
+  const [unit, setUnit] = useState<'lb' | 'kg'>('lb');
 
   useEffect(function() {
     async function fetchData() {
@@ -42,31 +42,35 @@ export default function WeightGraphScreen() {
         Weight Progress for {movementName}
       </Text>
 
-      {movementData.length > 0 ? (
-        <LineChart
-          data={chartData}
-          width={Dimensions.get('window').width - 40} // Full width minus some padding
-          height={220}
-          yAxisLabelSuffix={` ${unit}`}
-          isAnimated
-          adjustToWidth
-          yAxisTextStyle={{ color: '#6200EE', fontSize: 12 }}
-          // xAxisTextStyle={{ color: '#6200EE', fontSize: 10 }}
-          yAxisColor="#6200EE"
-          xAxisColor="#6200EE"
-          hideDataPoints={false}
-          dataPointsColor="#6200EE"
-          dataPointsRadius={4}
-          thickness={2}
-          startFillColor="#6200EE"
-          endFillColor="#6200EE"
-          startOpacity={0.3}
-          endOpacity={0.1}
-          noOfSections={4} // Number of y-axis sections
-        />
-      ) : (
-        <Text style={styles.noDataText}>No data available to display</Text>
-      )}
+      <View style={{ flex: 1, alignItems: 'center' }}>
+        {movementData.length > 0 ? (
+          <LineChart
+            data={chartData}
+            width={Dimensions.get('window').width - 150}
+            height={220}
+            yAxisLabelSuffix={` ${unit}`}
+            isAnimated
+            animationDuration={500}
+            adjustToWidth
+            yAxisTextStyle={{ color: '#6200EE', fontSize: 12, }}
+            xAxisLabelTextStyle={{ color: '#6200EE', fontSize: 12 }}
+            yAxisColor="#6200EE"
+            xAxisColor="#6200EE"
+            showVerticalLines={true}
+            hideDataPoints={false}
+            dataPointsColor="#6200EE"
+            dataPointsRadius={4}
+            thickness={2}
+            startFillColor="#6200EE"
+            endFillColor="#6200EE"
+            startOpacity={0.3}
+            endOpacity={0.1}
+            noOfSections={4} // Number of y-axis sections
+          />
+        ) : (
+          <Text style={styles.noDataText}>No data available to display</Text>
+        )}
+      </View>
     </View>
   );
 }
