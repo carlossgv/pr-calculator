@@ -15,16 +15,16 @@ export default function UserDefaultsForm() {
   );
 
   useEffect(() => {
-      // Fetch user preferences (e.g., from an API or local storage)
-      async function fetchUserPreferences() {
-        const userPreferences = await getUser(); // Replace with actual API call or storage retrieval
-        if (userPreferences) {
-          setGender(userPreferences.gender)
-          setWeightUnit(userPreferences.preferences.weightUnit);
-        }
+    // Fetch user preferences (e.g., from an API or local storage)
+    async function fetchUserPreferences() {
+      const userPreferences = await getUser(); // Replace with actual API call or storage retrieval
+      if (userPreferences) {
+        setGender(userPreferences.gender)
+        setWeightUnit(userPreferences.preferences.weightUnit);
       }
+    }
 
-      fetchUserPreferences();
+    fetchUserPreferences();
   }, [initialGender, initialWeightUnit]);
 
   async function handleSave() {
@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     width: '100%',
+    color: '#333',
   },
   buttonContainer: {
     flexDirection: 'row',
