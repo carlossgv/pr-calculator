@@ -373,6 +373,7 @@ const styles = StyleSheet.create({
   contentWrapper: {
     paddingHorizontal: 20,
     paddingVertical: 20,
+    paddingTop: 40,
   },
   header: {
     fontSize: 24,
