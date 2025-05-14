@@ -34,8 +34,8 @@ type MovementListData = {
 
 export default function MovementsList() {
   const router = useRouter();
-  const { isDarkTheme, toggleTheme } = useThemeToggle()
   const { colors } = useTheme() as CustomTheme
+  const { toggleTheme } = useThemeToggle()
   const [movements, setMovements] = useState<MovementListData[]>([]);
   const [filteredMovements, setFilteredMovements] = useState<MovementListData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
@@ -44,7 +44,6 @@ export default function MovementsList() {
   const animation = useRef(new Animated.Value(0)).current; // Animation state for smooth transitions
   const [titleTapCount, setTitleTapCount] = useState(0); // Counter for title taps
   const tapTimeout = useRef<NodeJS.Timeout | null>(null); // Reference to the timeout for resets
-  // const [isDarkTheme, setIsDarkTheme] = useState(true); // State for theme toggling
 
   // Re-fetch movements and user preferences when the screen comes into focus
   useFocusEffect(

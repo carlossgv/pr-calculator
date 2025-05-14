@@ -144,7 +144,7 @@ export default function PRPage() {
                 marginHorizontal: 5,
                 paddingVertical: 10,
                 paddingHorizontal: 15,
-                backgroundColor: isCustom ? colors.accent : is100Percent ? colors.highlight : colors.surface,
+                backgroundColor: isCustom ? colors.accent : is100Percent ? colors.accent : colors.surface,
                 borderRadius: 8,
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -169,7 +169,7 @@ export default function PRPage() {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={{ flex: 1, padding: 20, backgroundColor: colors.background }}>
         {/* Title */}
-        <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: colors.primary }}>
+        <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: colors.primaryText }}>
           {quickCalc ? 'Quick Weight Calculator' : movementName}
         </Text>
 
@@ -210,7 +210,7 @@ export default function PRPage() {
             }}
             onPress={toggleUnit}
           >
-            <Text style={{ color: colors.surface, fontSize: 16, fontWeight: 'bold' }}>{unit.toUpperCase()}</Text>
+            <Text style={{ color: colors.onPrimaryText, fontSize: 16, fontWeight: 'bold' }}>{unit.toUpperCase()}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -229,7 +229,7 @@ export default function PRPage() {
             <FontAwesome5
               name={isWomenBar ? 'female' : 'male'}
               size={16}
-              color={colors.surface}
+              color={colors.onPrimaryText}
             />
           </TouchableOpacity>
         </View>
@@ -255,7 +255,7 @@ export default function PRPage() {
           }}
           onPress={() => setModalVisible(true)}
         >
-          <MaterialIcons name="add" size={28} color={colors.surface} />
+          <MaterialIcons name="add" size={28} color={colors.onPrimaryText} />
         </TouchableOpacity>
 
         {/* Edit Floating Button */}
@@ -275,7 +275,7 @@ export default function PRPage() {
             }}
             onPress={() => router.replace({ pathname: '/create-edit-movement', params: { name: movementName, pr: weight } })}
           >
-            <MaterialIcons name="edit" size={28} color={colors.surface} />
+            <MaterialIcons name="edit" size={28} color={colors.onPrimaryText} />
           </TouchableOpacity>
         )}
 

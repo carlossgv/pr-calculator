@@ -49,7 +49,9 @@ export const CustomLightTheme: CustomTheme = {
     primary: "#7209B7", // Light Greyish White
     primaryText: "#1E1E2F", // Dark Greyish Blue
     secondaryText: "#4B4B6D", // Muted Grey
-    accent: "#F72585",
+    // accent: "#F72585",
+    accent: "#847FF7",
+
     highlight: "#5BC0BE", // Soft Teal
     error: "#E63946", // Muted Red
     warning: "#F4A261", // Soft Orange
