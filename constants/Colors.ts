@@ -12,6 +12,7 @@ export type CustomColors = {
   surface: string;
   borders: string;
   lightGrey: string;
+  onPrimaryText: string;
 };
 
 export type CustomTheme = typeof DefaultTheme & {
@@ -27,7 +28,7 @@ export const CustomDarkTheme: CustomTheme = {
     primary: "#7209B7", // Light Greyish White
     primaryText: "#E1E1E6", // Light Greyish White
     secondaryText: "#A6A6B3", // Muted Grey
-    accent: "#3E7CBE", // Muted Blue
+    accent: "#3F37C9",
     highlight: "#5BC0BE", // Soft Teal
     error: "#E63946", // Muted Red
     warning: "#F4A261", // Soft Orange
@@ -35,6 +36,7 @@ export const CustomDarkTheme: CustomTheme = {
     surface: "#2B2B3B", // Darker Grey
     borders: "#3A3A4A", // Dark Grey
     lightGrey: "#F5F5F5", // Light Grey
+    onPrimaryText: "#E1E1E6", // Light Greyish White
   },
 };
 
@@ -44,9 +46,10 @@ export const CustomLightTheme: CustomTheme = {
   colors: {
     ...DefaultTheme.colors, // Include default colors
     background: "#F5F5F5", // Light Grey
+    primary: "#7209B7", // Light Greyish White
     primaryText: "#1E1E2F", // Dark Greyish Blue
     secondaryText: "#4B4B6D", // Muted Grey
-    accent: "#3E7CBE", // Muted Blue
+    accent: "#F72585",
     highlight: "#5BC0BE", // Soft Teal
     error: "#E63946", // Muted Red
     warning: "#F4A261", // Soft Orange
@@ -54,5 +57,6 @@ export const CustomLightTheme: CustomTheme = {
     surface: "#FFFFFF", // White
     borders: "#D1D1D6", // Light Grey
     lightGrey: "#E1E1E6", // Light Greyish White
+    onPrimaryText: "#E1E1E6", // Light Greyish White
   },
 };
