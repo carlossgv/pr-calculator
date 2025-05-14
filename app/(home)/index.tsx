@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import { User } from '@/types/user.type';
 import { CustomTheme } from '@/constants/Colors';
+import { useThemeToggle } from '../_layout';
 
 type MovementListData = {
   name: string;
@@ -33,8 +34,8 @@ type MovementListData = {
 
 export default function MovementsList() {
   const router = useRouter();
-  const { colors } = useTheme()
-  console.debug('MovementsList colors:', colors);
+  const { isDarkTheme, toggleTheme } = useThemeToggle()
+  const { colors } = useTheme() as CustomTheme
   const [movements, setMovements] = useState<MovementListData[]>([]);
   const [filteredMovements, setFilteredMovements] = useState<MovementListData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
@@ -43,6 +44,7 @@ export default function MovementsList() {
   const animation = useRef(new Animated.Value(0)).current; // Animation state for smooth transitions
   const [titleTapCount, setTitleTapCount] = useState(0); // Counter for title taps
   const tapTimeout = useRef<NodeJS.Timeout | null>(null); // Reference to the timeout for resets
+  // const [isDarkTheme, setIsDarkTheme] = useState(true); // State for theme toggling
 
   // Re-fetch movements and user preferences when the screen comes into focus
   useFocusEffect(
@@ -126,6 +128,11 @@ export default function MovementsList() {
     collapseButtons(); // Collapse buttons before navigation
     router.push('/user-preferences'); // Navigate to the user preferences screen
   }
+
+  // function toggleTheme() {
+  //   setIsDarkTheme((prev) => !prev);
+  //   Alert.alert('Theme Changed', `Theme has been changed to ${isDarkTheme ? 'Light' : 'Dark'}`);
+  // }
 
   async function clearStorage() {
     try {
@@ -295,7 +302,7 @@ export default function MovementsList() {
             </View>
             {/* Toggle Weight Unit Button */}
             <TouchableOpacity style={[styles.unitToggleButton, { backgroundColor: colors.primary }]} onPress={toggleWeightUnit}>]
-              <Text style={styles.unitToggleText}>
+              <Text style={[styles.unitToggleText, { color: "white" }]}>
                 {user.preferences.weightUnit === 'lb' ? 'KG' : 'LB'}
               </Text>
             </TouchableOpacity>
@@ -337,6 +344,12 @@ export default function MovementsList() {
                 {/* > */}
                 {/*   <MaterialIcons name="file-download" size={28} color="white" /> */}
                 {/* </TouchableOpacity> */}
+                <TouchableOpacity
+                  style={[styles.collapsibleButton, { backgroundColor: colors.primary }]}
+                  onPress={toggleTheme}
+                >
+                  <MaterialIcons name="brightness-6" size={28} color="white" />
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.collapsibleButton, { backgroundColor: colors.primary }]}
                   onPress={goToQuickCalc}
@@ -437,7 +450,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -466,13 +478,11 @@ const styles = StyleSheet.create({
   },
   unitToggleButton: {
     marginLeft: 10, // Space between the search bar and the button
-    // backgroundColor: '#6200EE',
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 5,
   },
   unitToggleText: {
-    color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
   },

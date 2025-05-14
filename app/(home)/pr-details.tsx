@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   TextInput,
   Modal,
@@ -14,10 +13,12 @@ import {
 } from 'react-native';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useTheme } from '@react-navigation/native';
 import { KG_TO_LBS, LBS_TO_KG } from '@/constants/Units';
 import { getUser } from '@/utils/user.utils';
 import { getAllMovements } from '@/utils/movements.utils';
 import { User } from '@/types/user.type';
+import { CustomTheme } from '@/constants/Colors';
 
 function calculatePercentages(weight: number) {
   const percentages = [1.25, 1.2, 1.15, 1.1, 1.05, 1.0, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4];
@@ -29,6 +30,7 @@ function calculatePercentages(weight: number) {
 }
 
 export default function PRPage() {
+  const { colors } = useTheme() as CustomTheme;
   const router = useRouter();
   const { name: movementName, pr: initialWeight, quickCalc = false } = useLocalSearchParams();
   const [weight, setWeight] = useState<number>(Number(initialWeight) || 0);
@@ -51,7 +53,7 @@ export default function PRPage() {
           const movement = movements.find((item) => item.name === movementName);
 
           let userWeight = movement?.data[0]?.weight || 0;
-          let userUnit = user?.preferences?.weightUnit || 'lbs';
+          let userUnit = user?.preferences?.weightUnit || 'lb';
 
           if (userUnit === 'kg') {
             userWeight = userWeight * LBS_TO_KG;
@@ -129,7 +131,7 @@ export default function PRPage() {
     }
 
     return rows.map((row, rowIndex) => (
-      <View key={rowIndex} style={styles.gridRow}>
+      <View key={rowIndex} style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 10 }}>
         {row.map((item, colIndex) => {
           const isCustom = item.isCustom;
           const is100Percent = item.label === '100%';
@@ -137,16 +139,23 @@ export default function PRPage() {
             <TouchableOpacity
               key={colIndex}
               onPress={() => handleWeightLoadPress(item.value)}
-              style={[
-                styles.gridItem,
-                isCustom && styles.customGridItem, // Highlight custom percentages
-                is100Percent && styles.highlightedItem, // Highlight 100%
-              ]}
+              style={{
+                flex: 1,
+                marginHorizontal: 5,
+                paddingVertical: 10,
+                paddingHorizontal: 15,
+                backgroundColor: isCustom ? colors.accent : is100Percent ? colors.highlight : colors.surface,
+                borderRadius: 8,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: colors.borders,
+                elevation: 3,
+              }}
             >
-              <Text style={[styles.gridLabel]}>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.primaryText }}>
                 {item.label}
               </Text>
-              <Text style={[styles.gridValue]}>
+              <Text style={{ fontSize: 16, color: colors.secondaryText }}>
                 {item.value} {unit}
               </Text>
             </TouchableOpacity>
@@ -158,53 +167,115 @@ export default function PRPage() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
+      <View style={{ flex: 1, padding: 20, backgroundColor: colors.background }}>
         {/* Title */}
-        <Text style={styles.title}>
+        <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: colors.primary }}>
           {quickCalc ? 'Quick Weight Calculator' : movementName}
         </Text>
 
         {/* Personal Record Row */}
-        <View style={styles.personalRecordRow}>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginVertical: 10 }}>
           {quickCalc ? (
             <TextInput
-              style={styles.weightInput}
+              style={{
+                fontSize: 28,
+                fontWeight: 'bold',
+                textAlign: 'center',
+                color: colors.primary,
+                borderBottomWidth: 1,
+                borderColor: colors.borders,
+                paddingBottom: 5,
+                marginBottom: 10,
+              }}
               keyboardType="numeric"
               value={weight.toString()}
               onChangeText={handleWeightChange}
             />
           ) : (
-            <Text style={styles.weightText}>{weight.toFixed(2)}</Text>
+            <Text style={{ fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: colors.primaryText, marginRight: 10 }}>
+              {weight.toFixed(2)}
+            </Text>
           )}
-          <TouchableOpacity style={styles.unitGenderButton} onPress={toggleUnit}>
-            <Text style={styles.unitButtonText}>{unit.toUpperCase()}</Text>
+          <TouchableOpacity
+            style={{
+              height: 40,
+              minWidth: 60,
+              marginHorizontal: 5,
+              paddingHorizontal: 15,
+              paddingVertical: 5,
+              backgroundColor: colors.primary,
+              borderRadius: 5,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={toggleUnit}
+          >
+            <Text style={{ color: colors.surface, fontSize: 16, fontWeight: 'bold' }}>{unit.toUpperCase()}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.unitGenderButton} onPress={toggleBarGender}>
+          <TouchableOpacity
+            style={{
+              height: 40,
+              minWidth: 60,
+              marginHorizontal: 5,
+              paddingHorizontal: 15,
+              paddingVertical: 5,
+              backgroundColor: colors.primary,
+              borderRadius: 5,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={toggleBarGender}
+          >
             <FontAwesome5
               name={isWomenBar ? 'female' : 'male'}
               size={16}
-              color={'#FFFFFF'}
+              color={colors.surface}
             />
           </TouchableOpacity>
         </View>
 
         {/* Percentages Grid */}
-        <ScrollView style={styles.gridContainer}>
+        <ScrollView style={{ marginVertical: 20 }}>
           {renderGrid(percentages, unit)}
         </ScrollView>
 
         {/* Add Custom Percentage Floating Button */}
         <TouchableOpacity
-          style={quickCalc ? styles.quickCalcAddButton : styles.addCustomButton}
+          style={{
+            position: 'absolute',
+            bottom: quickCalc ? 20 : 100,
+            right: 20,
+            backgroundColor: colors.primary,
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            justifyContent: 'center',
+            alignItems: 'center',
+            elevation: 5,
+          }}
           onPress={() => setModalVisible(true)}
         >
-          <MaterialIcons name="add" size={28} color="white" />
+          <MaterialIcons name="add" size={28} color={colors.surface} />
         </TouchableOpacity>
 
         {/* Edit Floating Button */}
         {!quickCalc && (
-          <TouchableOpacity style={styles.floatingButton} onPress={() => router.replace({ pathname: '/create-edit-movement', params: { name: movementName, pr: weight, } })}>
-            <MaterialIcons name="edit" size={28} color="white" />
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              bottom: 20,
+              right: 20,
+              backgroundColor: colors.primary,
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              justifyContent: 'center',
+              alignItems: 'center',
+              elevation: 5,
+            }}
+            onPress={() => router.replace({ pathname: '/create-edit-movement', params: { name: movementName, pr: weight } })}
+          >
+            <MaterialIcons name="edit" size={28} color={colors.surface} />
           </TouchableOpacity>
         )}
 
@@ -215,21 +286,48 @@ export default function PRPage() {
           visible={modalVisible}
           onRequestClose={() => setModalVisible(false)}
         >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Add Custom Percentage</Text>
+          <View style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <View style={{
+              width: 300,
+              padding: 20,
+              backgroundColor: colors.surface,
+              borderRadius: 10,
+              alignItems: 'center',
+            }}>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 15, color: colors.primaryText }}>Add Custom Percentage</Text>
               <TextInput
-                style={styles.modalInput}
+                style={{
+                  width: '100%',
+                  borderWidth: 1,
+                  borderColor: colors.borders,
+                  borderRadius: 8,
+                  padding: 10,
+                  fontSize: 16,
+                  marginBottom: 15,
+                  color: colors.primaryText,
+                }}
                 placeholder="Enter %"
+                placeholderTextColor={colors.secondaryText}
                 keyboardType="numeric"
                 value={customPercentageInput}
                 onChangeText={setCustomPercentageInput}
               />
               <TouchableOpacity
-                style={styles.modalButton}
+                style={{
+                  backgroundColor: colors.primary,
+                  paddingVertical: 10,
+                  borderRadius: 8,
+                  alignItems: 'center',
+                  width: '100%',
+                }}
                 onPress={addCustomPercentage}
               >
-                <Text style={styles.modalButtonText}>Add</Text>
+                <Text style={{ color: colors.surface, fontWeight: 'bold' }}>Add</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -243,15 +341,28 @@ export default function PRPage() {
           onRequestClose={() => setSelectedWeightModal(false)}
         >
           <Pressable
-            style={styles.modalOverlay}
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
             onPress={() => setSelectedWeightModal(false)}
           >
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Load Information</Text>
+            <View style={{
+              width: 300,
+              padding: 20,
+              backgroundColor: colors.surface,
+              borderRadius: 10,
+              alignItems: 'center',
+            }}>
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 15, color: colors.primaryText }}>Load Information</Text>
               {selectedWeight !== null && (
                 <>
-                  <Text style={styles.modalText}>Bar Weight: {barWeight} {unit}</Text>
-                  <Text style={styles.modalText}>
+                  <Text style={{ fontSize: 16, marginBottom: 10, color: colors.secondaryText }}>
+                    Bar Weight: {barWeight} {unit}
+                  </Text>
+                  <Text style={{ fontSize: 16, marginBottom: 10, color: colors.secondaryText }}>
                     Weight per Side: {((selectedWeight - barWeight) / 2).toFixed(2)} {unit}
                   </Text>
                 </>
@@ -263,173 +374,3 @@ export default function PRPage() {
     </TouchableWithoutFeedback>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#F5F5F5',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#6200EE',
-    marginBottom: 20,
-  },
-  weightInput: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#6200EE',
-    borderBottomWidth: 1,
-    borderColor: '#CCCCCC',
-    paddingBottom: 5,
-    marginBottom: 10,
-  },
-  weightText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: '#000000',
-    marginRight: 10,
-  },
-  personalRecordRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  unitGenderButton: {
-    height: 40,
-    minWidth: 60,
-    marginHorizontal: 5,
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    backgroundColor: '#6200EE',
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  unitButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  gridContainer: {
-    marginVertical: 20,
-  },
-  gridRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 10,
-  },
-  gridItem: {
-    flex: 1,
-    marginHorizontal: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  highlightedItem: {
-    backgroundColor: '#FFD700', // Gold color for 100%
-  },
-  customGridItem: {
-    backgroundColor: '#D3D3D3', // Light gray for custom percentages
-  },
-  gridLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  gridValue: {
-    fontSize: 16,
-    color: '#6200EE',
-  },
-  addCustomButton: {
-    position: 'absolute',
-    bottom: 100,
-    right: 20,
-    backgroundColor: '#6200EE',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-  },
-  quickCalcAddButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#6200EE',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-  },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#6200EE',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 5,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: 300,
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-  },
-  modalInput: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#CCCCCC',
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
-    marginBottom: 15,
-  },
-  modalButton: {
-    backgroundColor: '#6200EE',
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    width: '100%',
-  },
-  modalButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-});

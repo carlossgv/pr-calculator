@@ -1,13 +1,12 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState, createContext, useContext } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
-import { CustomDarkTheme } from '@/constants/Colors';
+import { CustomDarkTheme, CustomLightTheme } from '@/constants/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export {
@@ -22,6 +21,16 @@ export const unstable_settings = {
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// Create a context for theme state
+const ThemeToggleContext = createContext({
+  isDarkTheme: true,
+  toggleTheme: () => { },
+});
+
+export function useThemeToggle() {
+  return useContext(ThemeToggleContext);
+}
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -44,14 +53,22 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
-}
+  const [isDarkTheme, setIsDarkTheme] = useState(true);
 
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const toggleTheme = () => {
+    setIsDarkTheme((prevTheme) => !prevTheme);
+  };
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? CustomDarkTheme : DefaultTheme}>
+    <ThemeToggleContext.Provider value={{ isDarkTheme, toggleTheme }}>
+      <RootLayoutNav isDarkTheme={isDarkTheme} />
+    </ThemeToggleContext.Provider>
+  );
+}
+
+function RootLayoutNav({ isDarkTheme }: { isDarkTheme: boolean }) {
+  return (
+    <ThemeProvider value={isDarkTheme ? CustomDarkTheme : CustomLightTheme}>
       <SafeAreaView style={{ flex: 1 }}>
         <Stack>
           {/* Main Stack */}
