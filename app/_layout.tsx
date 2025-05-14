@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -50,10 +51,12 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        {/* Main Stack */}
-        <Stack.Screen name="(home)" options={{ headerShown: false }} />
-      </Stack>
+      <SafeAreaView style={{ flex: 1 }}>
+        <Stack>
+          {/* Main Stack */}
+          <Stack.Screen name="(home)" options={{ headerShown: false }} />
+        </Stack>
+      </SafeAreaView>
     </ThemeProvider>
   );
 }
