@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useTheme } from '@react-navigation/native'; // Import useTheme
 import { getUser, saveUser } from '@/utils/user.utils';
 import { User } from '@/types/user.type';
+import { CustomTheme } from '@/constants/Colors';
+import CustomAlert from '@/components/CustomAlert';
 
 export default function UserDefaultsForm() {
   const router = useRouter();
+  const { colors } = useTheme() as CustomTheme
   const { gender: initialGender, weightUnit: initialWeightUnit } = useLocalSearchParams();
   const [gender, setGender] = useState<User['gender']>(initialGender as User['gender'] || 'M');
   const [weightUnit, setWeightUnit] = useState<User['preferences']['weightUnit']>(
@@ -18,7 +22,7 @@ export default function UserDefaultsForm() {
     async function fetchUserPreferences() {
       const userPreferences = await getUser(); // Replace with actual API call or storage retrieval
       if (userPreferences) {
-        setGender(userPreferences.gender)
+        setGender(userPreferences.gender);
         setWeightUnit(userPreferences.preferences.weightUnit);
       }
     }
@@ -45,18 +49,55 @@ export default function UserDefaultsForm() {
   }
 
   return (
-    <View style={styles.container}>
+    <View
+      style={{
+        flex: 1,
+        padding: 20,
+        backgroundColor: colors.background,
+      }}
+    >
       {/* Title Section */}
-      <Text style={styles.title}>Edit User Defaults</Text>
+      <Text
+        style={{
+          fontSize: 28,
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: 20,
+          color: colors.primaryText,
+        }}
+      >
+        Edit User Defaults
+      </Text>
 
       {/* Gender Picker */}
-      <Text style={styles.label}>Gender</Text>
-      <View style={styles.pickerContainer}>
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: 'bold',
+          marginBottom: 10,
+          color: colors.secondaryText,
+        }}
+      >
+        Gender
+      </Text>
+      <View
+        style={{
+          borderWidth: 1,
+          borderColor: colors.borders,
+          borderRadius: 5,
+          marginBottom: 20,
+          backgroundColor: colors.surface,
+        }}
+      >
         <Picker
           selectedValue={gender}
-          style={styles.picker}
+          style={{
+            height: 50,
+            width: '100%',
+            color: colors.primaryText,
+          }}
           onValueChange={(itemValue) => setGender(itemValue as User['gender'])}
-          dropdownIconColor="#333"
+          dropdownIconColor={colors.primaryText}
         >
           <Picker.Item label="Male" value="M" />
           <Picker.Item label="Female" value="F" />
@@ -64,11 +105,32 @@ export default function UserDefaultsForm() {
       </View>
 
       {/* Weight Unit Picker */}
-      <Text style={styles.label}>Weight Unit</Text>
-      <View style={styles.pickerContainer}>
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: 'bold',
+          marginBottom: 10,
+          color: colors.secondaryText,
+        }}
+      >
+        Weight Unit
+      </Text>
+      <View
+        style={{
+          borderWidth: 1,
+          borderColor: colors.borders,
+          borderRadius: 5,
+          marginBottom: 20,
+          backgroundColor: colors.surface,
+        }}
+      >
         <Picker
           selectedValue={weightUnit}
-          style={styles.picker}
+          style={{
+            height: 50,
+            width: '100%',
+            color: colors.primaryText,
+          }}
           onValueChange={(itemValue) =>
             setWeightUnit(itemValue as User['preferences']['weightUnit'])
           }
@@ -79,73 +141,56 @@ export default function UserDefaultsForm() {
       </View>
 
       {/* Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.buttonText}>Save</Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          marginTop: 20,
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: colors.primary,
+            paddingVertical: 15,
+            borderRadius: 5,
+            alignItems: 'center',
+            marginRight: 10,
+          }}
+          onPress={handleSave}
+        >
+          <Text
+            style={{
+              color: colors.onPrimaryText,
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}
+          >
+            Save
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={() => router.back()}>
-          <Text style={styles.buttonText}>Cancel</Text>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: colors.borders,
+            paddingVertical: 15,
+            borderRadius: 5,
+            alignItems: 'center',
+            marginLeft: 10,
+          }}
+          onPress={() => router.back()}
+        >
+          <Text
+            style={{
+              color: colors.primaryText,
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}
+          >
+            Cancel
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#6200EE',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#B0BEC5',
-    borderRadius: 5,
-    marginBottom: 20,
-    backgroundColor: '#fff',
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-    color: '#333',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  saveButton: {
-    flex: 1,
-    backgroundColor: '#6200EE',
-    paddingVertical: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: '#B0BEC5',
-    paddingVertical: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginLeft: 10,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});

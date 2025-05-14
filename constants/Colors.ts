@@ -30,7 +30,7 @@ export const CustomDarkTheme: CustomTheme = {
     secondaryText: "#A6A6B3", // Muted Grey
     accent: "#3F37C9",
     highlight: "#5BC0BE", // Soft Teal
-    error: "#E63946", // Muted Red
+    error: "#FF6B6B", 
     warning: "#F4A261", // Soft Orange
     success: "#4CAF50", // Muted Green
     surface: "#2B2B3B", // Darker Grey
@@ -49,11 +49,9 @@ export const CustomLightTheme: CustomTheme = {
     primary: "#7209B7", // Light Greyish White
     primaryText: "#1E1E2F", // Dark Greyish Blue
     secondaryText: "#4B4B6D", // Muted Grey
-    // accent: "#F72585",
     accent: "#847FF7",
-
     highlight: "#5BC0BE", // Soft Teal
-    error: "#E63946", // Muted Red
+    error: "#FF6B6B", 
     warning: "#F4A261", // Soft Orange
     success: "#4CAF50", // Muted Green
     surface: "#FFFFFF", // White

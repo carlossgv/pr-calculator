@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 
 import { CustomDarkTheme, CustomLightTheme } from '@/constants/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, View } from 'react-native';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -25,7 +26,7 @@ SplashScreen.preventAutoHideAsync();
 // Create a context for theme state
 const ThemeToggleContext = createContext({
   isDarkTheme: true,
-  toggleTheme: () => { },
+  toggleTheme: () => {},
 });
 
 export function useThemeToggle() {
@@ -33,31 +34,28 @@ export function useThemeToggle() {
 }
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [fontsLoaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
 
   const toggleTheme = () => {
     setIsDarkTheme((prevTheme) => !prevTheme);
   };
+
+  // Hide the splash screen when fonts are loaded
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  // Render a loading screen while fonts are being loaded
+  if (!fontsLoaded) {
+    return <LoadingScreen />;
+  }
 
   return (
     <ThemeToggleContext.Provider value={{ isDarkTheme, toggleTheme }}>
@@ -76,5 +74,14 @@ function RootLayoutNav({ isDarkTheme }: { isDarkTheme: boolean }) {
         </Stack>
       </SafeAreaView>
     </ThemeProvider>
+  );
+}
+
+// Placeholder component for the splash screen
+function LoadingScreen() {
+  return (
+    <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Loading...</Text>
+    </SafeAreaView>
   );
 }
