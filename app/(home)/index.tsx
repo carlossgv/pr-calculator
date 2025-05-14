@@ -16,7 +16,7 @@ import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons'; // For icons
 import { convertToKg, convertToLbs, getAllMovements } from '@/utils/movements.utils';
 import { getUser } from '@/utils/user.utils';
-import { useFocusEffect } from '@react-navigation/native'; // To handle screen focus
+import { useFocusEffect, useTheme } from '@react-navigation/native'; // To handle screen focus
 import { Movement, } from '@/types/movements.type';
 import filesystemClient from '@/utils/filesystem.client'; // Import the updated filesystem client
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -24,6 +24,7 @@ import { FILE_NAME } from '@/constants/Files';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import { User } from '@/types/user.type';
+import { CustomTheme } from '@/constants/Colors';
 
 type MovementListData = {
   name: string;
@@ -32,6 +33,8 @@ type MovementListData = {
 
 export default function MovementsList() {
   const router = useRouter();
+  const { colors } = useTheme()
+  console.debug('MovementsList colors:', colors);
   const [movements, setMovements] = useState<MovementListData[]>([]);
   const [filteredMovements, setFilteredMovements] = useState<MovementListData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>(''); // State for search query
@@ -273,24 +276,25 @@ export default function MovementsList() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       <TouchableWithoutFeedback onPress={collapseButtons}>
-        <View style={[styles.container, styles.contentWrapper]}>
+        <View style={[styles.container, styles.contentWrapper, { backgroundColor: colors.background }]}>
           {/* Title with hidden functionality */}
           <Pressable onPress={handleTitlePress} android_ripple={{ color: 'transparent' }}>
-            <Text style={styles.header}>Calculame Este</Text>
+            <Text style={[styles.header, { color: colors.primaryText }]}>Calculame Este</Text>
           </Pressable>
-
+          [
           <View style={styles.searchContainer}>
-            <View style={styles.searchBar}>
-              <MaterialIcons name="search" size={24} color="#B0BEC5" style={styles.searchIcon} />
+            <View style={[styles.searchBar, { borderColor: colors.borders, backgroundColor: colors.surface }]}>
+              <MaterialIcons name="search" size={24} color={colors.primaryText} style={styles.searchIcon} />
               <TextInput
-                style={styles.searchInput}
+                style={[styles.searchInput, { color: colors.primaryText }]}
                 placeholder="Search movements..."
+                placeholderTextColor={colors.secondaryText}
                 value={searchQuery}
                 onChangeText={handleSearch}
               />
             </View>
             {/* Toggle Weight Unit Button */}
-            <TouchableOpacity style={styles.unitToggleButton} onPress={toggleWeightUnit}>
+            <TouchableOpacity style={[styles.unitToggleButton, { backgroundColor: colors.primary }]} onPress={toggleWeightUnit}>]
               <Text style={styles.unitToggleText}>
                 {user.preferences.weightUnit === 'lb' ? 'KG' : 'LB'}
               </Text>
@@ -303,18 +307,18 @@ export default function MovementsList() {
             keyExtractor={(item) => item.name}
             renderItem={({ item }) => (
               <Pressable
-                style={styles.movementRow}
+                style={[styles.movementRow, { backgroundColor: colors.surface, shadowColor: colors.borders }]}
                 onPress={() => goToPRPage(item.name)}
-                android_ripple={{ color: 'rgba(0, 0, 0, 0.1)' }}
+                android_ripple={{ color: colors.lightGrey }}
               >
-                <Text style={styles.movementName}>{item.name}</Text>
-                <Text style={styles.prValue}>
+                <Text style={[styles.movementName, { color: colors.primaryText }]}>{item.name}</Text>
+                <Text style={[styles.prValue, { color: colors.primaryText }]}>
                   {item.pr} {user.preferences.weightUnit}
                 </Text>
               </Pressable>
             )}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No movements found. Add a new one!</Text>
+              <Text style={[styles.emptyText, { color: colors.secondaryText }]}>No movements found. Add a new one!</Text>
             }
           />
           {/* Collapsible Buttons */}
@@ -334,19 +338,19 @@ export default function MovementsList() {
                 {/*   <MaterialIcons name="file-download" size={28} color="white" /> */}
                 {/* </TouchableOpacity> */}
                 <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.quickCalcButton]}
+                  style={[styles.collapsibleButton, { backgroundColor: colors.primary }]}
                   onPress={goToQuickCalc}
                 >
                   <MaterialIcons name="calculate" size={28} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.addMovementButton]}
+                  style={[styles.collapsibleButton, { backgroundColor: colors.primary }]}
                   onPress={goToAddMovement}
                 >
                   <MaterialIcons name="add" size={28} color="white" />
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.collapsibleButton, styles.preferencesButton]}
+                  style={[styles.collapsibleButton, { backgroundColor: colors.primary }]}
                   onPress={goToUserPreferences}
                 >
                   <MaterialIcons name="settings" size={28} color="white" />
@@ -355,7 +359,7 @@ export default function MovementsList() {
             )}
 
             {/* Main Button */}
-            <TouchableOpacity style={styles.mainButton} onPress={toggleButtons}>
+            <TouchableOpacity style={[styles.mainButton, { backgroundColor: colors.primary }]} onPress={toggleButtons}>
               <MaterialIcons name={isExpanded ? 'close' : 'menu'} size={32} color="white" />
             </TouchableOpacity>
           </View>
@@ -368,7 +372,6 @@ export default function MovementsList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   contentWrapper: {
     paddingHorizontal: 20,
@@ -387,9 +390,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     marginVertical: 5,
-    backgroundColor: '#fff',
     borderRadius: 5,
-    shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 5,
@@ -401,12 +402,10 @@ const styles = StyleSheet.create({
   },
   prValue: {
     fontSize: 16,
-    color: '#6200EE',
   },
   emptyText: {
     textAlign: 'center',
     fontSize: 16,
-    color: '#B0BEC5',
     marginTop: 20,
   },
   collapsibleContainer: {
@@ -416,13 +415,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainButton: {
-    backgroundColor: '#6200EE',
     width: 56,
     height: 56,
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
@@ -446,21 +443,6 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
-  loadButton: {
-    backgroundColor: '#FF5722', // Orange-red
-  },
-  exportButton: {
-    backgroundColor: '#4CAF50', // Green
-  },
-  quickCalcButton: {
-    backgroundColor: '#FF9800', // Orange
-  },
-  addMovementButton: {
-    backgroundColor: '#2196F3', // Blue
-  },
-  preferencesButton: {
-    backgroundColor: '#9C27B0', // Purple
-  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -471,10 +453,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1, // Takes up available space
     borderWidth: 1,
-    borderColor: '#B0BEC5',
     borderRadius: 5,
     paddingHorizontal: 10,
-    backgroundColor: '#fff',
   },
   searchIcon: {
     marginRight: 5,
@@ -486,7 +466,7 @@ const styles = StyleSheet.create({
   },
   unitToggleButton: {
     marginLeft: 10, // Space between the search bar and the button
-    backgroundColor: '#6200EE',
+    // backgroundColor: '#6200EE',
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 5,

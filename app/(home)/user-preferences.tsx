@@ -5,7 +5,6 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getUser, saveUser } from '@/utils/user.utils';
 import { User } from '@/types/user.type';
 
-
 export default function UserDefaultsForm() {
   const router = useRouter();
   const { gender: initialGender, weightUnit: initialWeightUnit } = useLocalSearchParams();
