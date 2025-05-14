@@ -57,6 +57,7 @@ export default function UserDefaultsForm() {
           selectedValue={gender}
           style={styles.picker}
           onValueChange={(itemValue) => setGender(itemValue as User['gender'])}
+          dropdownIconColor="#333"
         >
           <Picker.Item label="Male" value="M" />
           <Picker.Item label="Female" value="F" />
