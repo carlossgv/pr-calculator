@@ -6,7 +6,6 @@ import { useTheme } from '@react-navigation/native'; // Import useTheme
 import { getUser, saveUser } from '@/utils/user.utils';
 import { User } from '@/types/user.type';
 import { CustomTheme } from '@/constants/Colors';
-import CustomAlert from '@/components/CustomAlert';
 
 export default function UserDefaultsForm() {
   const router = useRouter();

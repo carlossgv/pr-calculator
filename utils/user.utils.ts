@@ -10,7 +10,11 @@ export async function getUser(): Promise<User | null> {
       await saveUser(DEFAULT_USER)
     }
 
-    return user 
+    if (user && !user?.preferences.theme) {
+      user.preferences.theme = DEFAULT_USER.preferences.theme;
+    }
+
+    return user
   } catch (error) {
     console.error('Error fetching user:', error);
     return null;

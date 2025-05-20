@@ -7,6 +7,7 @@ export const DEFAULT_USER: User = {
   gender: "M",
   preferences: {
     weightUnit: 'lb',
+    theme: 'dark'
   }
 }
 

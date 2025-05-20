@@ -8,25 +8,20 @@ import 'react-native-reanimated';
 
 import { CustomDarkTheme, CustomLightTheme } from '@/constants/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, View } from 'react-native';
+import { Text } from 'react-native';
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+import { getUser, saveUser } from '@/utils/user.utils';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   // initialRouteName: 'home',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-// Create a context for theme state
+// Context
 const ThemeToggleContext = createContext({
   isDarkTheme: true,
-  toggleTheme: () => {},
+  toggleTheme: () => { },
 });
 
 export function useThemeToggle() {
@@ -40,20 +35,39 @@ export default function RootLayout() {
   });
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
+  const [appReady, setAppReady] = useState(false);
 
-  const toggleTheme = () => {
-    setIsDarkTheme((prevTheme) => !prevTheme);
-  };
-
-  // Hide the splash screen when fonts are loaded
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
+    async function prepare() {
+      const user = await getUser();
+      if (user?.preferences?.theme === 'dark') {
+        setIsDarkTheme(true);
+      } else {
+        setIsDarkTheme(false);
+      }
+
+      if (fontsLoaded) {
+        await SplashScreen.hideAsync();
+      }
+
+      setAppReady(true);
     }
+
+    prepare();
   }, [fontsLoaded]);
 
-  // Render a loading screen while fonts are being loaded
-  if (!fontsLoaded) {
+  const toggleTheme = async () => {
+    const newTheme = !isDarkTheme;
+    setIsDarkTheme(newTheme);
+
+    const user = await getUser();
+    if (user) {
+      user.preferences.theme = newTheme ? 'dark' : 'light';
+      await saveUser(user);
+    }
+  };
+
+  if (!appReady) {
     return <LoadingScreen />;
   }
 
@@ -69,7 +83,6 @@ function RootLayoutNav({ isDarkTheme }: { isDarkTheme: boolean }) {
     <ThemeProvider value={isDarkTheme ? CustomDarkTheme : CustomLightTheme}>
       <SafeAreaView style={{ flex: 1 }}>
         <Stack>
-          {/* Main Stack */}
           <Stack.Screen name="(home)" options={{ headerShown: false }} />
         </Stack>
       </SafeAreaView>
@@ -77,7 +90,6 @@ function RootLayoutNav({ isDarkTheme }: { isDarkTheme: boolean }) {
   );
 }
 
-// Placeholder component for the splash screen
 function LoadingScreen() {
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
