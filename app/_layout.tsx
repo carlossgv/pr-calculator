@@ -11,6 +11,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from 'react-native';
 
 import { getUser, saveUser } from '@/utils/user.utils';
+import { supabase } from '@/utils/supabase';
+import Auth from '@/components/Auth'; // You may need to adjust the path if Auth is placed elsewhere
 
 export const unstable_settings = {
   // initialRouteName: 'home',
@@ -37,8 +39,13 @@ export default function RootLayout() {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [appReady, setAppReady] = useState(false);
 
+  // New: Auth state
+  const [session, setSession] = useState<any>(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+
   useEffect(() => {
     async function prepare() {
+      // Theme preference
       const user = await getUser();
       if (user?.preferences?.theme === 'dark') {
         setIsDarkTheme(true);
@@ -46,14 +53,34 @@ export default function RootLayout() {
         setIsDarkTheme(false);
       }
 
+      // Auth check
+      const {
+        data: { session: supabaseSession },
+        error,
+      } = await supabase.auth.getSession();
+      if (!error) {
+        setSession(supabaseSession);
+      }
+      // Subscribe to auth state changes
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, sessionArg) => {
+        setSession(sessionArg);
+      });
+
       if (fontsLoaded) {
         await SplashScreen.hideAsync();
       }
 
       setAppReady(true);
+      setCheckingSession(false);
+
+      // Clean up the listener on unmount
+      return () => {
+        listener?.subscription?.unsubscribe();
+      };
     }
 
     prepare();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fontsLoaded]);
 
   const toggleTheme = async () => {
@@ -67,26 +94,31 @@ export default function RootLayout() {
     }
   };
 
-  if (!appReady) {
+  if (!appReady || checkingSession) {
     return <LoadingScreen />;
   }
 
   return (
     <ThemeToggleContext.Provider value={{ isDarkTheme, toggleTheme }}>
-      <RootLayoutNav isDarkTheme={isDarkTheme} />
+      <ThemeProvider value={isDarkTheme ? CustomDarkTheme : CustomLightTheme}>
+        <SafeAreaView style={{ flex: 1 }}>
+          {session ? (
+            <RootLayoutNav />
+          ) : (
+            <Auth />
+          )}
+        </SafeAreaView>
+      </ThemeProvider>
     </ThemeToggleContext.Provider>
   );
 }
 
-function RootLayoutNav({ isDarkTheme }: { isDarkTheme: boolean }) {
+// Remove isDarkTheme prop from RootLayoutNav, as we now have ThemeProvider wrapping it
+function RootLayoutNav() {
   return (
-    <ThemeProvider value={isDarkTheme ? CustomDarkTheme : CustomLightTheme}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Stack>
-          <Stack.Screen name="(home)" options={{ headerShown: false }} />
-        </Stack>
-      </SafeAreaView>
-    </ThemeProvider>
+    <Stack>
+      <Stack.Screen name="(home)" options={{ headerShown: false }} />
+    </Stack>
   );
 }
 
