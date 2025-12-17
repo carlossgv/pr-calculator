@@ -116,6 +116,45 @@ export function PreferencesPage() {
         </div>
       </section>
 
+      {/* CONTEXTS */}
+      <section style={{ display: "grid", gap: 10 }}>
+        <div style={{ fontWeight: 600 }}>{t.prefs.contexts.title}</div>
+
+        <label>
+          {t.prefs.contexts.kg}
+          <select
+            value={prefs.contexts.kg}
+            onChange={(e) =>
+              save({
+                ...prefs,
+                contexts: { ...prefs.contexts, kg: e.target.value as any },
+              })
+            }
+            style={{ display: "block", width: "100%" }}
+          >
+            <option value="olympic">{t.prefs.contexts.olympic}</option>
+            <option value="custom">{t.prefs.contexts.custom}</option>
+          </select>
+        </label>
+
+        <label>
+          {t.prefs.contexts.lb}
+          <select
+            value={prefs.contexts.lb}
+            onChange={(e) =>
+              save({
+                ...prefs,
+                contexts: { ...prefs.contexts, lb: e.target.value as any },
+              })
+            }
+            style={{ display: "block", width: "100%" }}
+          >
+            <option value="crossfit">{t.prefs.contexts.crossfit}</option>
+            <option value="custom">{t.prefs.contexts.custom}</option>
+          </select>
+        </label>
+      </section>
+
       {/* PRESETS */}
       <section style={{ display: "grid", gap: 10 }}>
         <div style={{ fontWeight: 600 }}>{t.prefs.presets.title}</div>

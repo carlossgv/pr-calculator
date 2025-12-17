@@ -15,7 +15,7 @@ export const en = {
     to: "To",
     step: "Step",
     platesPerSide: "Plates / side",
-        perSideTotal: "Per side total",
+    perSideTotal: "Per side total",
     bar: "Bar",
     achieved: "Achieved",
   },
@@ -26,13 +26,27 @@ export const en = {
     plates: "Available plates (per side, comma-separated)",
     save: "Save",
     saved: "✅ Saved",
+    contexts: {
+      title: "Contexts",
+      kg: "KG context",
+      lb: "LB context",
+      olympic: "Olympic",
+      crossfit: "CrossFit",
+      custom: "Custom (use my plates)",
+    },
+    presets: {
+      title: "Plate presets",
+      olympicKg: "Olympic (KG)",
+      crossfitLb: "CrossFit (LB + KG change plates)",
+      applied: "Preset applied",
+    },
   },
   movements: {
     placeholder: "e.g. Back Squat",
     add: "Add",
     delete: "delete",
   },
-    movement: {
+  movement: {
     title: "Movement",
     prs: "PR entries",
     weight: "Weight",
@@ -44,11 +58,10 @@ export const en = {
     loading: "Loading…",
     empty: "No PR entries yet.",
   },
-    presets: {
-    title: "Plate presets",
-    olympicKg: "Olympic (KG)",
-    crossfitLb: "CrossFit (LB + KG change plates)",
-    applied: "Preset applied",
+  context: {
+    label: "Context",
+    olympic: "Olympic",
+    crossfit: "CrossFit",
+    custom: "Custom",
   },
-
 } as const;

@@ -6,6 +6,7 @@ import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { PercentCards } from "../components/PercentCards";
 import { prefsForUnit } from "../utils/equipment";
+import { ContextBadge } from "../components/ContextBadge";
 
 function round1(n: number) {
   return Math.round(n * 10) / 10;
@@ -39,14 +40,35 @@ export function HomePage() {
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <button onClick={() => switchUnit("kg")} aria-pressed={unit === "kg"} style={{ opacity: unit === "kg" ? 1 : 0.6 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        <button
+          onClick={() => switchUnit("kg")}
+          aria-pressed={unit === "kg"}
+          style={{ opacity: unit === "kg" ? 1 : 0.6 }}
+        >
           KG
         </button>
-        <button onClick={() => switchUnit("lb")} aria-pressed={unit === "lb"} style={{ opacity: unit === "lb" ? 1 : 0.6 }}>
+
+        <button
+          onClick={() => switchUnit("lb")}
+          aria-pressed={unit === "lb"}
+          style={{ opacity: unit === "lb" ? 1 : 0.6 }}
+        >
           LB
         </button>
-        <span style={{ opacity: 0.75 }}>(default: {prefs.defaultUnit.toUpperCase()})</span>
+
+        <ContextBadge context={prefs.contexts[unit]} />
+
+        <span style={{ opacity: 0.6, fontSize: 12 }}>
+          (default: {prefs.defaultUnit.toUpperCase()})
+        </span>
       </div>
 
       <label style={{ display: "grid", gap: 6 }}>

@@ -19,9 +19,16 @@ export const repo = {
     const row = await db.preferences.get("prefs");
     const value = (row as any)?.value;
 
-    if (isNewPrefsShape(value)) return value;
+    if (isNewPrefsShape(value)) {
+      const contexts = value.contexts ?? { kg: "olympic", lb: "crossfit" };
+      if (!value.contexts) {
+        const next = { ...value, contexts };
+        await db.preferences.put({ id: "prefs", value: next });
+        return next;
+      }
+      return value;
+    }
 
-    // si venía del shape antiguo, o no existe, reseteamos a defaults por ahora
     await db.preferences.put({ id: "prefs", value: DEFAULT_PREFS });
     return DEFAULT_PREFS;
   },

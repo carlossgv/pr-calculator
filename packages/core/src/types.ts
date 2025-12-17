@@ -13,10 +13,12 @@ export type Plate = {
 };
 
 export type UserPreferences = {
-  defaultUnit: Unit;   // unidad preferida para UI
-  bar: Plate;          // bar como “plate” para tener label+unit
-  rounding: Weight;    // step de redondeo en su propia unidad
-  plates: Plate[];     // placas disponibles por lado (mezcla kg/lb)
+  defaultUnit: Unit;
+  contexts: Record<Unit, UnitContext>;
+
+  bar: Plate;
+  rounding: Weight;
+  plates: Plate[];
 };
 
 export type Movement = {
@@ -32,3 +34,6 @@ export type PrEntry = {
   reps: number;
   date: string; // ISO
 };
+
+export type UnitContext = "olympic" | "crossfit" | "custom";
+

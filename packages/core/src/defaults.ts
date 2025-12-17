@@ -7,6 +7,10 @@ function plate(value: number, unit: "kg" | "lb", label?: string): Plate {
 
 export const DEFAULT_PREFS: UserPreferences = {
   defaultUnit: "kg",
+  contexts: {
+    kg: "olympic",
+    lb: "crossfit",
+  },
   bar: plate(20, "kg", "20 kg bar"),
   rounding: { value: 2.5, unit: "kg" },
   plates: [
@@ -20,13 +24,13 @@ export const DEFAULT_PREFS: UserPreferences = {
   ],
 };
 
-// CrossFit LB plates + KG change plates (por lado)
 export const CROSSFIT_LB_WITH_KG_CHANGES: UserPreferences = {
   defaultUnit: "lb",
+  contexts: {
+    kg: "olympic",
+    lb: "crossfit",
+  },
   bar: plate(45, "lb", "45 lb bar"),
-  // En tu box: mínimo LB es 10, pero sí hay changes KG.
-  // El step real lo define el par más pequeño disponible.
-  // Aquí lo dejamos “amigable” en 1 lb (ajustable en UI).
   rounding: { value: 1, unit: "lb" },
   plates: [
     plate(45, "lb"),

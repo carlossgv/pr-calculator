@@ -17,12 +17,10 @@ function round1(n: number) {
 }
 
 function formatPickLabel(originalLabel: string | undefined, originalUnit: Unit, valueInUnit: number, unit: Unit) {
-  // Si la placa es de otra unidad (ej: 2.5 kg), mostramos ambos
   if (originalUnit !== unit) {
-    const base = (originalLabel?.trim() ? originalLabel : `${round1(valueInUnit)} ${unit}`);
+    const base = originalLabel?.trim() ? originalLabel : `${round1(valueInUnit)} ${unit}`;
     return `${base} (${round1(valueInUnit)} ${unit})`;
   }
-
   return originalLabel?.trim() ? originalLabel : `${round1(valueInUnit)} ${unit}`;
 }
 
@@ -51,44 +49,54 @@ export function PercentCards({
 
   return (
     <div style={{ display: "grid", gap: 10 }}>
-      {cards.map(({ pct, target, load }) => (
-        <div
-          key={pct}
-          style={{
-            border: "1px solid #ddd",
-            borderRadius: 12,
-            padding: 12,
-            display: "grid",
-            gap: 6,
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>{pct}%</div>
-            <div style={{ fontSize: 18 }}>
-              {round1(target)}{unit}
+      {cards.map(({ pct, target, load }) => {
+        const is100 = pct === 100;
+
+        return (
+          <div
+            key={pct}
+            style={{
+              border: is100 ? "2px solid #111" : "1px solid #ddd",
+              borderRadius: 12,
+              padding: 12,
+              display: "grid",
+              gap: 6,
+              background: is100 ? "#fafafa" : "transparent",
+              boxShadow: is100 ? "0 1px 10px rgba(0,0,0,0.08)" : "none",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+              <div style={{ fontSize: 18, fontWeight: 700 }}>
+                {pct}% {is100 ? <span style={{ fontSize: 12, opacity: 0.7 }}>(MAX)</span> : null}
+              </div>
+              <div style={{ fontSize: 18 }}>
+                {round1(target)}
+                {unit}
+              </div>
+            </div>
+
+            <div style={{ opacity: 0.85 }}>
+              <b>{t.home.bar}:</b> {formatPickLabel(load.bar.plate.label, load.bar.plate.unit, load.bar.valueInUnit, unit)} ·{" "}
+              <b>{t.home.platesPerSide}:</b>{" "}
+              {load.platesPerSide.length === 0
+                ? "—"
+                : load.platesPerSide
+                    .map((p) => formatPickLabel(p.plate.label, p.plate.unit, p.valueInUnit, unit))
+                    .join(" + ")}
+            </div>
+
+            <div style={{ opacity: 0.85 }}>
+              <b>{t.home.perSideTotal}:</b> {round1(load.perSide)}
+              {unit}
+            </div>
+
+            <div style={{ opacity: 0.85 }}>
+              <b>{t.home.achieved}:</b> {round1(load.achievedTotal)}
+              {unit} (Δ {round1(load.delta)})
             </div>
           </div>
-
-          <div style={{ opacity: 0.85 }}>
-            <b>{t.home.bar}:</b>{" "}
-            {formatPickLabel(load.bar.plate.label, load.bar.plate.unit, load.bar.valueInUnit, unit)} ·{" "}
-            <b>{t.home.platesPerSide}:</b>{" "}
-            {load.platesPerSide.length === 0
-              ? "—"
-              : load.platesPerSide
-                  .map((p) => formatPickLabel(p.plate.label, p.plate.unit, p.valueInUnit, unit))
-                  .join(" + ")}
-          </div>
-
-          <div style={{ opacity: 0.85 }}>
-            <b>{t.home.perSideTotal}:</b> {round1(load.perSide)}{unit}
-          </div>
-
-          <div style={{ opacity: 0.85 }}>
-            <b>{t.home.achieved}:</b> {round1(load.achievedTotal)}{unit} (Δ {round1(load.delta)})
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
