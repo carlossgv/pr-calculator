@@ -302,120 +302,6 @@ select:focus-visible {
   }
 }
 
-/* apps/web/src/global.css */
-
-/* ---- Unit switch (KG/LB) ---- */
-.unitSwitch {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.unitSwitch:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.unitSwitch__track {
-  position: relative;
-  display: inline-block;
-  width: 168px;
-  height: 40px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  /* ✅ more visible in light */
-  background: color-mix(in oklab, var(--fg) 10%, var(--bg));
-  overflow: hidden;
-}
-
-.unitSwitch__labels {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  text-align: center;
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.4px;
-  user-select: none;
-
-  /* ✅ make sure labels are visible */
-  z-index: 2;
-  pointer-events: none;
-
-  color: var(--muted);
-}
-
-.unitSwitch__label {
-  display: grid;
-  place-items: center;
-  height: 100%;
-}
-
-.unitSwitch__thumb {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: calc(50% - 6px);
-  height: calc(100% - 6px);
-  border-radius: 999px;
-
-  /* ✅ thumb distinct from track in light */
-  background: var(--bg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-
-  /* ✅ thumb under labels */
-  z-index: 1;
-
-  transform: translateX(0);
-  transition: transform 150ms ease;
-}
-
-/* ✅ FIX: align to right edge perfectly */
-.unitSwitch[aria-checked="true"] .unitSwitch__thumb {
-  transform: translateX(calc(100% + 6px));
-}
-
-/* Active label contrast (works because labels are above thumb) */
-.unitSwitch[aria-checked="false"] .unitSwitch__labels > :first-child {
-  color: var(--fg);
-}
-.unitSwitch[aria-checked="true"] .unitSwitch__labels > :last-child {
-  color: var(--fg);
-}
-
-/* ✅ App theme (your system): use data-theme instead of prefers-color-scheme */
-:root[data-theme="dark"] .unitSwitch__track {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.16);
-}
-
-:root[data-theme="dark"] .unitSwitch__thumb {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
-}
-
-:root[data-theme="dark"] .unitSwitch__labels {
-  color: rgba(245, 245, 245, 0.7);
-}
-
-:root[data-theme="dark"]
-  .unitSwitch[aria-checked="false"]
-  .unitSwitch__labels
-  > :first-child,
-:root[data-theme="dark"]
-  .unitSwitch[aria-checked="true"]
-  .unitSwitch__labels
-  > :last-child {
-  color: rgba(245, 245, 245, 0.95);
-}
-
 /* =========================
    Native-app tap feel
    ========================= */
@@ -448,4 +334,197 @@ a:active,
 .bottomNavLink:active,
 .iconButton:active {
   transform: translateY(1px);
+}
+
+.cardButton {
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+/* =========================
+   Custom controls
+   ========================= */
+
+/* Ensure custom button-like components don't inherit global button/input styling */
+.unitSwitch,
+.appSwitch {
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* ---- Unit switch (KG/LB) ---- */
+.unitSwitch {
+  appearance: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.unitSwitch:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.unitSwitch__track {
+  position: relative;
+  display: inline-block;
+  width: 168px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--fg) 10%, var(--bg));
+  overflow: hidden;
+}
+
+.unitSwitch__labels {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  text-align: center;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  user-select: none;
+
+  z-index: 2;
+  pointer-events: none;
+  color: var(--muted);
+}
+
+.unitSwitch__label {
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+
+.unitSwitch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(50% - 6px);
+  height: calc(100% - 6px);
+  border-radius: 999px;
+
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+
+  z-index: 1;
+
+  transform: translateX(0);
+  transition: transform 150ms ease;
+}
+
+.unitSwitch[aria-checked="true"] .unitSwitch__thumb {
+  transform: translateX(calc(100% + 6px));
+}
+
+.unitSwitch[aria-checked="false"] .unitSwitch__labels > :first-child {
+  color: var(--fg);
+}
+
+.unitSwitch[aria-checked="true"] .unitSwitch__labels > :last-child {
+  color: var(--fg);
+}
+
+/* Dark theme adjustments (your system) */
+:root[data-theme="dark"] .unitSwitch__track {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+:root[data-theme="dark"] .unitSwitch__thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="dark"] .unitSwitch__labels {
+  color: rgba(245, 245, 245, 0.7);
+}
+
+:root[data-theme="dark"] .unitSwitch[aria-checked="false"] .unitSwitch__labels > :first-child,
+:root[data-theme="dark"] .unitSwitch[aria-checked="true"] .unitSwitch__labels > :last-child {
+  color: rgba(245, 245, 245, 0.95);
+}
+
+/* Weight input: centered, fixed width, big numbers */
+.weightInput {
+  width: min(240px, 100%);
+  text-align: center;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--fg);
+}
+
+/* Remove spinners (optional, looks more app-like) */
+.weightInput::-webkit-outer-spin-button,
+.weightInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.weightInput[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* iOS-like switch */
+.appSwitch {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.appSwitch:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.appSwitch__track {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--fg) 14%, var(--bg));
+  transition: background 150ms ease;
+}
+
+.appSwitch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  transition: transform 150ms ease;
+}
+
+.appSwitch[aria-checked="true"] .appSwitch__track {
+  background: color-mix(in oklab, var(--fg) 28%, var(--bg));
+}
+
+.appSwitch[aria-checked="true"] .appSwitch__thumb {
+  transform: translateX(20px);
+}
+
+:root[data-theme="dark"] .appSwitch__track {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(245, 245, 245, 0.16);
+}
+
+:root[data-theme="dark"] .appSwitch[aria-checked="true"] .appSwitch__track {
+  background: rgba(255, 255, 255, 0.22);
 }

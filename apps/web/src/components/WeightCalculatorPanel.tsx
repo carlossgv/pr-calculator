@@ -9,6 +9,7 @@ import { prefsForUnit } from "../utils/equipment";
 import { ContextBadge } from "../components/ContextBadge";
 import { nearestLoadableTotalUnlimited } from "../utils/nearest-loadable";
 import { UnitSwitch } from "./UnitSwitch";
+import { Switch } from "./Switch";
 
 function round1(n: number) {
   return Math.round(n * 10) / 10;
@@ -41,11 +42,8 @@ export function WeightCalculatorPanel({
   onChange,
 }: Props) {
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
-
-  // raw state (lo que el usuario “pide”)
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [rawWeight, setRawWeight] = useState<number>(initialWeight ?? 100);
-
   const [roundToPlates, setRoundToPlates] = useState(false);
 
   useEffect(() => {
@@ -92,10 +90,8 @@ export function WeightCalculatorPanel({
     const converted = round1(convertWeightValue(rawWeight, unit, next));
     setUnit(next);
     setRawWeight(converted);
-    // emit lo hará el effect de abajo al cambiar displayWeight
   }
 
-  // URL/share state: emitimos el "displayWeight" (rounded si aplica)
   useEffect(() => {
     emit(unit, displayWeight);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,29 +99,20 @@ export function WeightCalculatorPanel({
 
   if (!prefs || !effectivePrefs) return <p>{t.home.loading}</p>;
 
-  const segmentedBtn = (active: boolean) =>
-    ({
-      padding: "10px 12px",
-      border: "1px solid var(--border, #ddd)",
-      background: active ? "var(--card, #fff)" : "transparent",
-      opacity: active ? 1 : 0.75,
-      fontWeight: 700,
-      flex: 1,
-    }) as const;
-
   return (
     <div style={{ display: "grid", gap: 12 }}>
       {title ? <h2 style={{ margin: 0 }}>{title}</h2> : null}
 
       <section
         style={{
-          border: "1px solid var(--border, #ddd)",
+          border: "1px solid var(--border)",
           borderRadius: 14,
           padding: 12,
           display: "grid",
-          gap: 10,
+          gap: 12,
         }}
       >
+        {/* Row 1: unit + context */}
         <div
           style={{
             display: "flex",
@@ -137,33 +124,31 @@ export function WeightCalculatorPanel({
         >
           <UnitSwitch value={unit} onChange={switchUnit} />
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <ContextBadge context={prefs.contexts[unit]} />
-            <span style={{ opacity: 0.6, fontSize: 12 }}>
-              default: {prefs.defaultUnit.toUpperCase()}
-            </span>
-          </div>
+          <ContextBadge context={prefs.contexts[unit]} />
         </div>
 
+        {/* Weight */}
         {mode === "editable" ? (
-          <label style={{ display: "grid", gap: 6 }}>
-            <span style={{ fontSize: 13, opacity: 0.8 }}>
-              {t.home.maxWeight} ({unit})
-            </span>
-            <input
-              type="number"
-              inputMode="decimal"
-              value={rawWeight}
-              onChange={(e) => setRawWeight(Number(e.target.value))}
-              style={{
-                width: "100%",
-                padding: "12px 12px",
-                borderRadius: 12,
-                border: "1px solid var(--border, #ddd)",
-                fontSize: 16,
-              }}
-            />
-          </label>
+          <div style={{ display: "grid", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontSize: 13, fontWeight: 700 }}>
+                Max
+              </span>
+              <span style={{ fontSize: 12, opacity: 0.6 }}>
+                100%
+              </span>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <input
+                className="weightInput"
+                type="number"
+                inputMode="decimal"
+                value={rawWeight}
+                onChange={(e) => setRawWeight(Number(e.target.value))}
+              />
+            </div>
+          </div>
         ) : (
           <div
             style={{
@@ -175,9 +160,9 @@ export function WeightCalculatorPanel({
           >
             <div style={{ display: "grid", gap: 4 }}>
               <span style={{ fontSize: 13, opacity: 0.8 }}>
-                {t.home.maxWeight} ({unit})
+                Max · 100%
               </span>
-              <div style={{ fontSize: 22, fontWeight: 800 }}>
+              <div style={{ fontSize: 26, fontWeight: 900 }}>
                 {displayWeight}{" "}
                 <span style={{ fontSize: 14, opacity: 0.7 }}>{unit}</span>
               </div>
@@ -194,33 +179,38 @@ export function WeightCalculatorPanel({
           </div>
         )}
 
-        <label
+        {/* Round row */}
+        <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             gap: 12,
-            paddingTop: 2,
           }}
         >
-          <span style={{ fontSize: 13 }}>Round to nearest plates</span>
-          <input
-            type="checkbox"
-            checked={roundToPlates}
-            onChange={(e) => setRoundToPlates(e.target.checked)}
-            style={{ transform: "scale(1.1)" }}
-          />
-        </label>
-
-        {roundToPlates && rounding && Number.isFinite(rounding.stepTotal) ? (
-          <div style={{ fontSize: 12, opacity: 0.8 }}>
-            Step:{" "}
-            <b>
-              {round1(rounding.stepTotal)} {unit}
-            </b>{" "}
-            total
+          <div style={{ display: "grid", gap: 2 }}>
+            <span style={{ fontSize: 13, fontWeight: 700 }}>
+              Round to nearest plates
+            </span>
+            {roundToPlates &&
+            rounding &&
+            Number.isFinite(rounding.stepTotal) ? (
+              <span style={{ fontSize: 12, opacity: 0.75 }}>
+                step {round1(rounding.stepTotal)} {unit} total
+              </span>
+            ) : (
+              <span style={{ fontSize: 12, opacity: 0.75 }}>
+                match your available plates
+              </span>
+            )}
           </div>
-        ) : null}
+
+          <Switch
+            checked={roundToPlates}
+            onCheckedChange={setRoundToPlates}
+            ariaLabel="Round to nearest plates"
+          />
+        </div>
       </section>
 
       <PercentCards
