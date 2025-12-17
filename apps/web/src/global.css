@@ -523,13 +523,11 @@ a:active,
   border-radius: 999px;
   border: 1px solid var(--border);
   background: color-mix(in oklab, var(--accent) 12%, var(--bg));
-  transition:
-    background 150ms ease,
-    border-color 150ms ease;
 
-  /* tweak */
   --switch-inset: 2px;
   --switch-x: 0px;
+
+  transition: background 150ms ease, border-color 150ms ease;
 }
 
 .appSwitch__thumb {
@@ -550,10 +548,6 @@ a:active,
   background: color-mix(in oklab, var(--accent) 28%, var(--bg));
   border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
 
-  /* 52 - 26 - 2*2 = 22 */
+  /* visual > matemático */
   --switch-x: 20px;
 }
-
-/* .appSwitch[aria-checked="true"] .appSwitch__thumb { */
-/*   transform: translateX(20px); */
-/* } */
