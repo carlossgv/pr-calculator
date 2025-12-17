@@ -1,5 +1,5 @@
 {
-  "name": "pr-calculator",
+  "name": "pr-calculator-web",
   "private": true,
   "packageManager": "pnpm@9.0.0",
   "scripts": {
