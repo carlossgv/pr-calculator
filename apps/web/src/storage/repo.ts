@@ -1,16 +1,23 @@
 // apps/web/src/storage/repo.ts
-import { DEFAULT_PREFS, type Movement, type PrEntry, type UserPreferences } from "@repo/core";
+import {
+  DEFAULT_PREFS,
+  type Movement,
+  type PrEntry,
+  type UserPreferences,
+} from "@repo/core";
+import Dexie from "dexie";
 import { db } from "./db";
 
-function isNewPrefsShape(p: any): p is UserPreferences {
+function isNewPrefsShape(p: unknown): p is UserPreferences {
+  const v = p as any;
   return Boolean(
-    p &&
-      typeof p === "object" &&
-      (p.defaultUnit === "kg" || p.defaultUnit === "lb") &&
-      p.bar &&
-      typeof p.bar.value === "number" &&
-      (p.bar.unit === "kg" || p.bar.unit === "lb") &&
-      Array.isArray(p.plates)
+    v &&
+      typeof v === "object" &&
+      (v.defaultUnit === "kg" || v.defaultUnit === "lb") &&
+      v.bar &&
+      typeof v.bar.value === "number" &&
+      (v.bar.unit === "kg" || v.bar.unit === "lb") &&
+      Array.isArray(v.plates),
   );
 }
 
@@ -24,7 +31,7 @@ export const repo = {
       const theme = value.theme ?? "system";
 
       if (!value.contexts || !value.theme) {
-        const next = { ...value, contexts, theme };
+        const next: UserPreferences = { ...value, contexts, theme };
         await db.preferences.put({ id: "prefs", value: next });
         return next;
       }
@@ -44,6 +51,10 @@ export const repo = {
     return db.movements.orderBy("createdAt").reverse().toArray();
   },
 
+  async getMovement(id: string): Promise<Movement | null> {
+    return (await db.movements.get(id)) ?? null;
+  },
+
   async upsertMovement(m: Movement): Promise<void> {
     await db.movements.put(m);
   },
@@ -54,10 +65,19 @@ export const repo = {
   },
 
   async listPrEntries(movementId: string): Promise<PrEntry[]> {
-    return db.prEntries.where("movementId").equals(movementId).reverse().toArray();
+    // ordered by movementId then updatedAt (asc), we reverse to get latest first
+    return db.prEntries
+      .where("[movementId+updatedAt]")
+      .between([movementId, Dexie.minKey], [movementId, Dexie.maxKey])
+      .reverse()
+      .toArray();
   },
 
   async addPrEntry(e: PrEntry): Promise<void> {
+    await db.prEntries.put(e);
+  },
+
+  async upsertPrEntry(e: PrEntry): Promise<void> {
     await db.prEntries.put(e);
   },
 

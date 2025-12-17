@@ -11,10 +11,14 @@ export class AppDb extends Dexie {
 
   constructor() {
     super("pr-calculator");
+
+    // Single schema (fresh start)
     this.version(1).stores({
       preferences: "id",
       movements: "id, createdAt",
-      prEntries: "id, movementId, date",
+      // ✅ timestamps + compound index para listar por movement y ordenar por updatedAt
+      prEntries:
+        "id, movementId, date, createdAt, updatedAt, [movementId+updatedAt]",
     });
   }
 }

@@ -1,0 +1,291 @@
+/* apps/web/src/pages/MovementDetailsPage.module.css */
+
+.page {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.topLink {
+  font-weight: 800;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden; /* por si algún hijo se pasa */
+}
+
+.cardTitle {
+  margin: 0;
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.labelText {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  opacity: 1;
+}
+
+.dateInput {
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-size: 16px;
+  color-scheme: light dark;
+}
+
+/* icono calendario en dark */
+:global(:root[data-theme="dark"]) .dateInput::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.1);
+  opacity: 0.9;
+}
+
+.hint {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 6px;
+}
+
+.error {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: color-mix(in oklab, var(--danger) 12%, var(--card-bg));
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.primaryBtn {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-weight: 900;
+}
+
+/* -------- Weight × Reps row -------- */
+
+.setRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 96px);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.field {
+  min-width: 0;
+}
+
+/* 🔑 esto evita overflow en grids/flex */
+.field :global(input) {
+  width: 100%;
+  min-width: 0;
+}
+
+.fieldReps {
+  min-width: 0;
+  width: 96px;
+}
+
+.fieldReps :global(input) {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.unitWrap {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.times {
+  opacity: 0.6;
+  font-weight: 900;
+  user-select: none;
+  line-height: 1;
+}
+
+/* en pantallas MUY chicas, baja a 2 filas */
+@media (max-width: 360px) {
+  .setRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "w u"
+      "x r";
+  }
+
+  .field {
+    grid-area: w;
+  }
+
+  .unitWrap {
+    grid-area: u;
+  }
+
+  .times {
+    grid-area: x;
+    justify-self: center;
+  }
+
+  .fieldReps {
+    grid-area: r;
+    width: 100%;
+  }
+}
+
+/* -------- list -------- */
+
+.divider {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.dividerTitle {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  opacity: 0.85;
+  text-transform: uppercase;
+}
+
+.count {
+  font-size: 12px;
+  opacity: 0.7;
+  font-weight: 800;
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.itemMeta {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.itemMetaText {
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}
+
+.unitHint {
+  opacity: 0.7;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.editGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.actionBtn {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.actionBtnStrong {
+  font-weight: 900;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:active {
+  transform: translateY(1px);
+}
+
+.iconBtnDanger {
+  border-color: color-mix(in oklab, var(--danger) 45%, var(--border));
+  background: color-mix(in oklab, var(--danger) 10%, var(--card-bg));
+  color: var(--danger);
+}

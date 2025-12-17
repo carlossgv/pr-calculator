@@ -23,11 +23,12 @@ export type PrEntry = {
   movementId: string;
   weight: number;
   reps: number;
-  date: string; // ISO
+  date: string; // ISO (fecha del PR)
+  createdAt: string; // ISO (cuando se creó el registro)
+  updatedAt: string; // ISO (última edición del registro)
 };
 
 export type UnitContext = "olympic" | "crossfit" | "custom";
-
 
 export type ThemePreference = "system" | "light" | "dark";
 

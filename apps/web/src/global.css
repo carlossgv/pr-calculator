@@ -75,6 +75,7 @@
 html,
 body {
   height: 100%;
+  overflow-x: hidden; /* ✅ evita “salirse” horizontal en mobile */
 }
 
 body {
@@ -337,8 +338,8 @@ select:focus-visible {
   grid-template-columns: 1fr 1fr;
 }
 
-/* iPhone SE / mini phones: avoid cramped fields */
-@media (max-width: 360px) {
+/* Mobile phones (realistic): avoid 2-column forms */
+@media (max-width: 520px) {
   .form-grid-2 {
     grid-template-columns: 1fr;
   }
@@ -393,6 +394,7 @@ a:active,
   border: 0 !important;
   background: transparent !important;
   padding: 0 !important;
+  min-width: 168px; /* reserve space in flex rows */
 }
 
 /* ---- Unit switch (KG/LB) ---- */
@@ -410,7 +412,7 @@ a:active,
 .unitSwitch__track {
   position: relative;
   display: inline-block;
-  width: 168px;
+  width: min(168px, 100%); /* ✅ no overflow en móvil */
   height: 40px;
   border-radius: 999px;
   border: 1px solid var(--border);
@@ -469,6 +471,34 @@ a:active,
 
 .unitSwitch[aria-checked="true"] .unitSwitch__labels > :last-child {
   color: var(--fg);
+}
+
+/* ✅ Fallback if color-mix is not supported (or buggy on mobile Chromium builds) */
+@supports not (background: color-mix(in oklab, white 10%, black)) {
+  .unitSwitch__track {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  :root:not([data-theme="dark"]) .unitSwitch__track {
+    background: rgba(2, 6, 23, 0.04);
+    border: 1px solid rgba(2, 6, 23, 0.12);
+  }
+
+  .unitSwitch__thumb {
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: var(--shadow);
+  }
+
+  .unitSwitch__labels {
+    color: var(--muted);
+  }
+
+  .unitSwitch[aria-checked="false"] .unitSwitch__labels > :first-child,
+  .unitSwitch[aria-checked="true"] .unitSwitch__labels > :last-child {
+    color: var(--fg);
+  }
 }
 
 /* Weight input: centered, fixed width, big numbers */
@@ -555,13 +585,16 @@ a:active,
 }
 
 /* =========================
-   Percent tiles + bottom sheet
+   Percent tiles + bottom detail + bottom sheet
    ========================= */
 
 .percentGrid {
   display: grid;
   gap: 10px;
   grid-template-columns: 1fr 1fr;
+
+  /* ✅ deja espacio para el detail fixed */
+  padding-bottom: 170px;
 }
 
 @media (max-width: 360px) {
@@ -636,19 +669,48 @@ a:active,
   font-size: 12px;
   opacity: 0.85;
   line-height: 1.25;
+
+  /* ✅ evita overflow por strings largas */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-.percentDeltaRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+/* ✅ Always-visible bottom detail (above bottom nav) */
+.percentDetailSticky {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(64px + 12px + env(safe-area-inset-bottom));
+  z-index: 80; /* above bottom nav */
+  max-width: 720px;
+  margin: 0 auto;
+
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
   gap: 10px;
-  font-size: 12px;
-  opacity: 0.85;
+
+  background: var(--bg);
+  border: 1px solid color-mix(in oklab, var(--fg) 18%, var(--border));
+  box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.45);
 }
 
-.percentDelta {
-  font-weight: 800;
+/* No gradient scrim for fixed */
+.percentDetailSticky::before {
+  content: none;
+}
+
+/* If you use header/body classes, allow wrapping so it never “grows” width */
+.percentDetailBody,
+.sheetValue {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.percentDetailHeaderTitle,
+.percentDetailHeaderSub,
+.percentDetailHeaderRight {
+  white-space: normal;
 }
 
 /* Bottom sheet */
@@ -744,6 +806,10 @@ a:active,
 .sheetValue {
   font-size: 14px;
   line-height: 1.35;
+
+  /* ✅ evita overflow por strings largas */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .kbdHint {
@@ -752,111 +818,25 @@ a:active,
   margin-top: 10px;
 }
 
-/* ===== Sticky detail (default/light) ===== */
-.percentDetailSticky {
-  position: sticky;
-  bottom: calc(64px + 12px + env(safe-area-inset-bottom));
-  z-index: 10;
-
-  /* Light: slightly elevated card */
-  background: color-mix(in oklab, var(--card-bg) 92%, var(--bg));
+.unitPill {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
   border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-}
+  background: color-mix(in oklab, var(--card-bg) 88%, var(--bg));
+  color: var(--fg);
 
-/* (Opcional) el fade detrás: en light puede quedar ok */
-.percentDetailSticky::before {
-  content: "";
-  position: absolute;
-  inset: -18px -12px -12px -12px;
-  border-radius: 18px;
-  pointer-events: none;
-  z-index: -1;
-  background: linear-gradient(
-    to top,
-    color-mix(in oklab, var(--bg) 65%, transparent),
-    transparent
-  );
-}
-
-/* ===== Dark: force opaque background ===== */
-:root[data-theme="dark"] .percentDetailSticky {
-  /* 100% opaco, nada de translucidez */
-  background: var(--bg);
-
-  /* más contraste en el borde (para separar del contenido detrás) */
-  border: 1px solid color-mix(in oklab, var(--fg) 22%, var(--border));
-
-  /* sombra más fuerte hacia arriba (porque está pegado abajo) */
-  box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.65);
-}
-
-/* En dark, el ::before anterior puede “ensuciar” o seguir dejando mezcla visual.
-   Mejor reemplazarlo por un scrim opaco sutil. */
-:root[data-theme="dark"] .percentDetailSticky::before {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
-}
-
-/* apps/web/src/global.css */
-
-/* Header clickeable del sticky */
-.percentDetailHeaderBtn {
-  width: 100%;
-  text-align: left;
-  padding: 10px 10px;
-  border-radius: 12px;
-
-  background: transparent;
-  border: 1px solid color-mix(in oklab, var(--border) 85%, transparent);
-
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.percentDetailHeaderBtn:hover {
-  border-color: color-mix(in oklab, var(--accent) 30%, var(--border));
-}
-
-.percentDetailHeaderLeft {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  min-width: 0;
-}
-
-.percentDetailHeaderTitle {
-  font-size: 15px;
   font-weight: 900;
+  letter-spacing: 0.4px;
+
+  /* 🔑 no permitir que empuje */
   white-space: nowrap;
+  min-width: 56px; /* ancho estable para KG/LB */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.percentDetailHeaderSub {
-  font-size: 12px;
-  opacity: 0.75;
-  white-space: nowrap;
-}
-
-.percentDetailHeaderRight {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  white-space: nowrap;
-}
-
-.percentDetailDelta {
-  font-weight: 900;
-}
-
-.percentDetailChevron {
-  opacity: 0.7;
-  font-weight: 900;
-}
-
-/* Contenido expandido */
-.percentDetailBody {
-  margin-top: 10px;
-  display: grid;
-  gap: 10px;
+.unitPill:active {
+  transform: translateY(1px);
 }

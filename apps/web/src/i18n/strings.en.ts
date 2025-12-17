@@ -57,6 +57,7 @@ export const en = {
     back: "← Back",
     loading: "Loading…",
     empty: "No PR entries yet.",
+    savedIn: "Saved in", 
   },
   context: {
     label: "Context",

@@ -1,4 +1,5 @@
-// apps/web/src/pages/MovementCalcPage.tsx
+
+/* apps/web/src/pages/MovementCalcPage.tsx */
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { WeightCalculatorPanel } from "../components/WeightCalculatorPanel";
 import type { Unit } from "@repo/core";
@@ -20,18 +21,25 @@ export function MovementCalcPage() {
   if (!movementId) return null;
 
   const initialUnit = parseUnit(unit) ?? "kg";
-  const initialWeight = Number(weight);
+  const parsedWeight = Number(weight);
+  const initialWeight =
+    Number.isFinite(parsedWeight) && parsedWeight > 0 ? parsedWeight : 100;
 
   function handleChange(next: { unit: Unit; weight: number }) {
-    navigate(
-      `/movements/${movementId}/calc/${next.unit}/${next.weight}`,
-      { replace: true },
-    );
+    navigate(`/movements/${movementId}/calc/${next.unit}/${next.weight}`, {
+      replace: true,
+    });
   }
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
-      <Link to={`/movements/${movementId}`}>{t.movement.back}</Link>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center" }}>
+        <Link to="/movements">{t.movement.back}</Link>
+
+        <Link to={`/movements/${movementId}/manage`} style={{ fontWeight: 800 }}>
+          Manage PRs
+        </Link>
+      </div>
 
       <WeightCalculatorPanel
         mode="readonly"
@@ -43,3 +51,4 @@ export function MovementCalcPage() {
     </div>
   );
 }
+
