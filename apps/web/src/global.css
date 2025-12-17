@@ -309,7 +309,7 @@ select:focus-visible {
   }
 
   .appShell {
-        max-width: 100%;
+    max-width: 100%;
     margin: 0;
     padding-left: 14px;
     padding-right: 14px;
@@ -595,13 +595,68 @@ a:active,
   gap: 10px;
   grid-template-columns: 1fr 1fr;
 
-  /* ✅ deja espacio para el detail fixed */
-  padding-bottom: 170px;
+  /* desktop: no reserve space */
+  padding-bottom: 0;
 }
 
 @media (max-width: 360px) {
   .percentGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ✅ Detail behaves differently per breakpoint:
+   - desktop: inline card (normal flow)
+   - mobile: fixed bottom */
+/* apps/web/src/global.css */
+
+/* Desktop: inline, full-width, nicer layout */
+.percentDetail {
+  position: static;
+  z-index: auto;
+
+  /* ✅ key fix: stretch to container */
+  width: 100%;
+  max-width: none;
+  margin: 0;
+
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+
+  /* make it feel like a “selected row header” */
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 16px;
+  align-items: start;
+}
+
+/* Make the first line (title) sit left, and allow right side later if you want */
+.percentDetail > :first-child {
+  grid-column: 1 / -1;
+}
+
+/* Mobile: fixed bottom sheet style */
+@media (max-width: 520px) {
+  .percentDetail {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(64px + 12px + env(safe-area-inset-bottom));
+    z-index: 80;
+
+    /* ✅ mobile should be centered within max width */
+    width: auto;
+    max-width: 720px;
+    margin: 0 auto;
+
+    background: var(--bg);
+    border: 1px solid color-mix(in oklab, var(--fg) 18%, var(--border));
+    box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.45);
+
+    /* reset desktop layout */
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
 

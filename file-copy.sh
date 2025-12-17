@@ -28,8 +28,9 @@ add_file () {
 
 echo "Writing dump to: $OUT"
 
-add_file "apps/web/src/main.tsx"
-add_file "apps/web/src/router.tsx"
+add_file "apps/web/src/components/PercentCards.tsx"
+add_file "apps/web/src/components/PercentCards.module.css"
+add_file "apps/web/src/global.css"
 
 echo "DONE ✅  Open the file with:"
 echo "  less -R $OUT"
