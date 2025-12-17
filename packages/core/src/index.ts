@@ -1,2 +1,3 @@
 export * from "./types";
-export * from "./bar-math";
+export * from "./bar-maths";
+export * from "./defaults";
