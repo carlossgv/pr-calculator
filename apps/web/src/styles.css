@@ -1,7 +1,34 @@
-/* apps/web/src/styles.css */
-
 :root {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  /* Light theme defaults */
+  --bg: #ffffff;
+  --fg: #111111;
+  --muted: rgba(17, 17, 17, 0.7);
+
+  --border: #dddddd;
+  --card-bg: #fafafa;
+
+  --shadow: 0 1px 10px rgba(0, 0, 0, 0.08);
+
+  --nav-bg: #ffffff;
+  --nav-active-bg: #f2f2f2;
+
+  --input-bg: #ffffff;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b0c0f;
+  --fg: #f5f5f5;
+  --muted: rgba(245, 245, 245, 0.7);
+
+  --border: rgba(245, 245, 245, 0.16);
+  --card-bg: rgba(245, 245, 245, 0.06);
+
+  --shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+
+  --nav-bg: #0b0c0f;
+  --nav-active-bg: rgba(245, 245, 245, 0.12);
+
+  --input-bg: rgba(245, 245, 245, 0.06);
 }
 
 * {
@@ -10,6 +37,15 @@
 
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Helvetica,
+    Arial;
 }
 
 a {
@@ -23,11 +59,15 @@ a.active {
   text-decoration: underline;
 }
 
-input, select, button {
+input,
+select,
+button {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   font-size: 16px;
+  background: var(--input-bg);
+  color: var(--fg);
 }
 
 button {
@@ -38,7 +78,7 @@ button {
   max-width: 720px;
   margin: 0 auto;
   padding: 16px;
-  padding-bottom: 84px; /* espacio para bottom nav en mobile */
+  padding-bottom: 84px;
 }
 
 .topHeader {
@@ -48,10 +88,10 @@ button {
   gap: 12px;
 }
 
-.appTitle {
-  margin: 0;
-  font-size: 22px;
-  line-height: 1.2;
+.topRight {
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .topNav {
@@ -60,23 +100,32 @@ button {
   white-space: nowrap;
 }
 
+.topControls {
+  display: flex;
+  align-items: center;
+}
+
+.appTitle {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
 .mainContent {
   margin-top: 16px;
 }
 
-/* Bottom nav: hidden en desktop */
 .bottomNav {
   display: none;
 }
 
-/* Mobile: hide top nav, show bottom nav */
 @media (max-width: 520px) {
-  .topHeader {
-    align-items: center;
-  }
-
   .topNav {
     display: none;
+  }
+
+  .topHeader {
+    align-items: center;
   }
 
   .appShell {
@@ -91,8 +140,8 @@ button {
     right: 0;
     bottom: 0;
     height: 64px;
-    background: #fff;
-    border-top: 1px solid #ddd;
+    background: var(--nav-bg);
+    border-top: 1px solid var(--border);
     justify-content: space-around;
     align-items: center;
     padding: 0 10px;
@@ -107,6 +156,23 @@ button {
 
   .bottomNavLink.active {
     opacity: 1;
-    background: #f2f2f2;
+    background: var(--nav-active-bg);
   }
+}
+
+.iconButton {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconButton:active {
+  transform: translateY(1px);
 }

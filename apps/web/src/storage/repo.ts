@@ -21,11 +21,14 @@ export const repo = {
 
     if (isNewPrefsShape(value)) {
       const contexts = value.contexts ?? { kg: "olympic", lb: "crossfit" };
-      if (!value.contexts) {
-        const next = { ...value, contexts };
+      const theme = value.theme ?? "system";
+
+      if (!value.contexts || !value.theme) {
+        const next = { ...value, contexts, theme };
         await db.preferences.put({ id: "prefs", value: next });
         return next;
       }
+
       return value;
     }
 

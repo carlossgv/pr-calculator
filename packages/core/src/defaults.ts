@@ -11,6 +11,7 @@ export const DEFAULT_PREFS: UserPreferences = {
     kg: "olympic",
     lb: "crossfit",
   },
+  theme: "system",
   bar: plate(20, "kg", "20 kg bar"),
   rounding: { value: 2.5, unit: "kg" },
   plates: [
@@ -30,6 +31,7 @@ export const CROSSFIT_LB_WITH_KG_CHANGES: UserPreferences = {
     kg: "olympic",
     lb: "crossfit",
   },
+  theme: "system",
   bar: plate(45, "lb", "45 lb bar"),
   rounding: { value: 1, unit: "lb" },
   plates: [

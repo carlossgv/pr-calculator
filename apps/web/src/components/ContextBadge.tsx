@@ -11,14 +11,14 @@ type Props = {
 export function ContextBadge({ context }: Props) {
   return (
     <span
-      style={{
-        fontSize: 12,
-        padding: "4px 8px",
-        borderRadius: 999,
-        border: "1px solid #ddd",
-        background: "#fafafa",
-        whiteSpace: "nowrap",
-      }}
+style={{
+  fontSize: 12,
+  padding: "4px 8px",
+  borderRadius: 999,
+  border: "1px solid var(--border)",
+  background: "var(--card-bg)",
+  whiteSpace: "nowrap",
+}}
     >
       {t.context.label}: {contextLabel(context)}
     </span>

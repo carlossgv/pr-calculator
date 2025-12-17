@@ -55,15 +55,15 @@ export function PercentCards({
         return (
           <div
             key={pct}
-            style={{
-              border: is100 ? "2px solid #111" : "1px solid #ddd",
-              borderRadius: 12,
-              padding: 12,
-              display: "grid",
-              gap: 6,
-              background: is100 ? "#fafafa" : "transparent",
-              boxShadow: is100 ? "0 1px 10px rgba(0,0,0,0.08)" : "none",
-            }}
+style={{
+  border: is100 ? "2px solid var(--fg)" : "1px solid var(--border)",
+  borderRadius: 12,
+  padding: 12,
+  display: "grid",
+  gap: 6,
+  background: is100 ? "var(--card-bg)" : "transparent",
+  boxShadow: is100 ? "var(--shadow)" : "none",
+}}
           >
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
               <div style={{ fontSize: 18, fontWeight: 700 }}>

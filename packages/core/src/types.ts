@@ -12,15 +12,6 @@ export type Plate = {
   label?: string; // ej: "45 lb", "2.5 kg"
 };
 
-export type UserPreferences = {
-  defaultUnit: Unit;
-  contexts: Record<Unit, UnitContext>;
-
-  bar: Plate;
-  rounding: Weight;
-  plates: Plate[];
-};
-
 export type Movement = {
   id: string;
   name: string;
@@ -37,3 +28,16 @@ export type PrEntry = {
 
 export type UnitContext = "olympic" | "crossfit" | "custom";
 
+
+export type ThemePreference = "system" | "light" | "dark";
+
+export type UserPreferences = {
+  defaultUnit: Unit;
+  contexts: Record<Unit, UnitContext>;
+
+  theme: ThemePreference;
+
+  bar: Plate;
+  rounding: Weight;
+  plates: Plate[];
+};
