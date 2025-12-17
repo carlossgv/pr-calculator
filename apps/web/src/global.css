@@ -585,3 +585,100 @@ a:active,
   /* visual > matemático */
   --switch-x: 20px;
 }
+
+
+/* apps/web/src/global.css */
+
+/* =========================
+   PWA Update Toast (pro)
+   ========================= */
+
+.pwaToast {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 74px; /* arriba del bottom nav */
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 12px;
+  border-radius: 16px;
+
+  background: color-mix(in oklab, var(--card-bg) 92%, var(--bg));
+  border: 1px solid color-mix(in oklab, var(--border) 75%, var(--accent) 25%);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.pwaToast__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwaToast__title {
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.15;
+  color: var(--fg);
+}
+
+.pwaToast__subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+.pwaToast__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pwaToast__btn {
+  border-radius: 999px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--fg);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pwaToast__btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.pwaToast__btn--primary {
+  background: var(--accent);
+  border-color: color-mix(in oklab, var(--accent) 70%, var(--border));
+  color: var(--accent-contrast);
+}
+
+.pwaToast__btn--ghost {
+  background: color-mix(in oklab, var(--card-bg) 80%, transparent);
+}
+
+.pwaToast__btn--icon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Desktop/tablet: abajo-derecha y sin tapar contenido */
+@media (min-width: 720px) {
+  .pwaToast {
+    left: auto;
+    right: 16px;
+    bottom: 16px;
+    width: 420px;
+  }
+}

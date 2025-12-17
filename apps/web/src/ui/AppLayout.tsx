@@ -6,6 +6,7 @@ import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { applyTheme, detectSystemTheme } from "../theme/theme";
 import { Home, Dumbbell, Settings } from "lucide-react";
+import { PwaUpdateBanner } from "../components/PwaUpdateBanner";
 
 function topIconClassName({ isActive }: { isActive: boolean }) {
   return isActive ? "navIconLink isActive" : "navIconLink";
@@ -101,6 +102,9 @@ export function AppLayout() {
       </main>
 
       <BottomNav />
+
+      {/* 👇 Overlay global para update pro */}
+      <PwaUpdateBanner />
     </div>
   );
 }
