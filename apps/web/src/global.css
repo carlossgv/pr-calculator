@@ -309,6 +309,8 @@ select:focus-visible {
   }
 
   .appShell {
+        max-width: 100%;
+    margin: 0;
     padding-left: 14px;
     padding-right: 14px;
   }

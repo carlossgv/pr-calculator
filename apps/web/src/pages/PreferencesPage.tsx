@@ -11,7 +11,7 @@ import {
   detectSystemTheme,
   type ResolvedTheme,
 } from "../theme/theme";
-import { Mars, Venus } from "lucide-react";
+import { Mars, Venus, ChevronRight } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
 
 type BarGender = "male" | "female";
@@ -33,6 +33,13 @@ function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
   // back-compat si existe data vieja con "system"
   if ((p as any).theme === "system") return detectSystemTheme();
   return p.theme === "dark" ? "dark" : "light";
+}
+
+function onRowKeyDown(e: React.KeyboardEvent, onActivate: () => void) {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    onActivate();
+  }
 }
 
 export function PreferencesPage() {
@@ -63,8 +70,6 @@ export function PreferencesPage() {
   }
 
   async function toggleTheme() {
-    if (!prefs) return;
-
     const current = resolvePrefsTheme(prefs);
     const nextTheme: ResolvedTheme = current === "dark" ? "light" : "dark";
 
@@ -85,16 +90,13 @@ export function PreferencesPage() {
         unit,
         value: barValueFor(unit, barGender),
       },
-      // Mantener theme actual al aplicar presets (si prefieres que el preset lo cambie, lo sacamos)
-      theme: prefs.theme,
+      theme: prefs.theme, // consistente
     };
 
     save(next);
   }
 
   function setGender(nextGender: BarGender) {
-    if (!prefs) return;
-
     setBarGender(nextGender);
 
     const next: UserPreferences = {
@@ -113,18 +115,25 @@ export function PreferencesPage() {
 
   return (
     <div className={styles.page}>
+      <header className={styles.header}>
+        <h2 className={styles.title}>{t.nav.preferences}</h2>
+        <div className={styles.subtitle}>{t.appName}</div>
+      </header>
+
       {/* THEME */}
-      <section className={styles.section}>
+      <section className={styles.section} aria-label={t.prefs.theme.title}>
         <div className={styles.sectionTitle}>{t.prefs.theme.title}</div>
 
         <div className={styles.card}>
-          <button
-            type="button"
-            className={styles.rowButton}
+          <div
+            className={styles.rowPressable}
+            role="button"
+            tabIndex={0}
             onClick={toggleTheme}
+            onKeyDown={(e) => onRowKeyDown(e, toggleTheme)}
             aria-label={t.prefs.theme.toggleRowAria}
           >
-            <div className={styles.rowLabel}>
+            <div className={styles.rowLeft}>
               <div className={styles.rowTitle}>{t.prefs.theme.title}</div>
               <div className={styles.rowHint}>
                 {t.prefs.theme.current}:{" "}
@@ -132,30 +141,34 @@ export function PreferencesPage() {
               </div>
             </div>
 
-            <div
-              className={styles.rowControl}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ThemeToggle value={resolvedTheme} onToggle={toggleTheme} />
+            <div className={styles.rowRight}>
+              {/* IMPORTANTE: parar propagación para que no toggle 2 veces */}
+              <span
+                className={styles.iconWrap}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
+                <ThemeToggle value={resolvedTheme} onToggle={toggleTheme} />
+              </span>
             </div>
-          </button>
+          </div>
         </div>
       </section>
 
       {/* BAR */}
-      <section className={styles.section}>
+      <section className={styles.section} aria-label={t.prefs.bar.title}>
         <div className={styles.sectionTitle}>
           {t.prefs.bar.title} ({barUnit.toUpperCase()})
         </div>
 
         <div className={styles.card}>
           <div className={styles.row}>
-            <div className={styles.rowLabel}>
+            <div className={styles.rowLeft}>
               <div className={styles.rowTitle}>{t.prefs.bar.genderTitle}</div>
               <div className={styles.rowHint}>{t.prefs.bar.genderHint}</div>
             </div>
 
-            <div className={styles.rowControl}>
+            <div className={styles.rowRight}>
               <span
                 aria-hidden="true"
                 title={t.prefs.bar.male}
@@ -183,12 +196,12 @@ export function PreferencesPage() {
           </div>
 
           <div className={styles.row}>
-            <div className={styles.rowLabel}>
+            <div className={styles.rowLeft}>
               <div className={styles.rowTitle}>{t.prefs.bar.currentTitle}</div>
               <div className={styles.rowHint}>{t.prefs.bar.currentHint}</div>
             </div>
 
-            <div className={styles.rowControl}>
+            <div className={styles.rowRight}>
               <span className={styles.valuePill}>
                 <span className={styles.mono}>
                   {barValueFor(barUnit, barGender)}
@@ -200,8 +213,8 @@ export function PreferencesPage() {
         </div>
       </section>
 
-      {/* PLATE PRESETS */}
-      <section className={styles.section}>
+      {/* PRESETS */}
+      <section className={styles.section} aria-label={t.prefs.presets.title}>
         <div className={styles.sectionTitle}>{t.prefs.presets.title}</div>
 
         <div className={styles.card}>
@@ -210,12 +223,17 @@ export function PreferencesPage() {
             className={styles.actionRow}
             onClick={() => applyPreset(DEFAULT_PREFS)}
           >
-            <div className={styles.actionTitle}>
-              {t.prefs.presets.olympicKg}
+            <div className={styles.actionLeft}>
+              <div className={styles.actionTitle}>
+                {t.prefs.presets.olympicKg}
+              </div>
+              <div className={styles.actionHint}>20kg bar, kg plates</div>
             </div>
-            <div className={styles.actionChevron} aria-hidden="true">
-              →
-            </div>
+            <ChevronRight
+              className={styles.chev}
+              size={18}
+              aria-hidden="true"
+            />
           </button>
 
           <button
@@ -223,12 +241,19 @@ export function PreferencesPage() {
             className={styles.actionRow}
             onClick={() => applyPreset(CROSSFIT_LB_WITH_KG_CHANGES)}
           >
-            <div className={styles.actionTitle}>
-              {t.prefs.presets.crossfitLb}
+            <div className={styles.actionLeft}>
+              <div className={styles.actionTitle}>
+                {t.prefs.presets.crossfitLb}
+              </div>
+              <div className={styles.actionHint}>
+                45lb bar, lb plates + kg change
+              </div>
             </div>
-            <div className={styles.actionChevron} aria-hidden="true">
-              →
-            </div>
+            <ChevronRight
+              className={styles.chev}
+              size={18}
+              aria-hidden="true"
+            />
           </button>
         </div>
       </section>
