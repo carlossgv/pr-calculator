@@ -16,7 +16,8 @@ let snapshot: PwaUpdateSnapshot = {
 };
 
 let listeners: Listener[] = [];
-let updateServiceWorkerFn: ((reloadPage?: boolean) => Promise<void>) | null = null;
+let updateServiceWorkerFn: ((reloadPage?: boolean) => Promise<void>) | null =
+  null;
 let initialized = false;
 
 function emit(next: Partial<PwaUpdateSnapshot>) {
@@ -45,11 +46,14 @@ export function initPwa() {
       // reset dismiss when a real update arrives
       emit({ needRefresh: true, dismissed: false });
     },
-    onRegisteredSW(_swUrl, _registration) {
-      // no-op (but handy if you want logging later)
+    onRegisteredSW(
+      _swUrl: string,
+      _registration: ServiceWorkerRegistration | undefined,
+    ) {
+      // no-op
     },
-    onRegisterError(_error) {
-      // no-op (avoid noisy console in prod)
+    onRegisterError(_error: unknown) {
+      // no-op
     },
   });
 }
