@@ -24,11 +24,16 @@ export function MovementDetailsPage() {
 
   const [weight, setWeight] = useState<number>(100);
   const [reps, setReps] = useState<number>(1);
-  const [date, setDate] = useState<string>(toDateInputValue(new Date().toISOString()));
+  const [date, setDate] = useState<string>(
+    toDateInputValue(new Date().toISOString()),
+  );
 
   async function reload() {
     setLoading(true);
-    const [movements, list] = await Promise.all([repo.listMovements(), repo.listPrEntries(id)]);
+    const [movements, list] = await Promise.all([
+      repo.listMovements(),
+      repo.listPrEntries(id),
+    ]);
     setMovement(movements.find((m) => m.id === id) ?? null);
     setEntries(list);
     setLoading(false);
@@ -79,6 +84,9 @@ export function MovementDetailsPage() {
 
   if (loading) return <p>{t.movement.loading}</p>;
 
+  // apps/web/src/pages/MovementDetailsPage.tsx
+  // (solo muestro el return modificado; el resto igual)
+
   return (
     <div style={{ display: "grid", gap: 12 }}>
       <div>
@@ -89,63 +97,125 @@ export function MovementDetailsPage() {
         {t.movement.title}: {movement?.name ?? "(not found)"}
       </h2>
 
-      <section style={{ border: "1px solid #ddd", borderRadius: 12, padding: 12 }}>
-        <h3 style={{ marginTop: 0 }}>{t.movement.prs}</h3>
+      <section
+        style={{
+          border: "1px solid var(--border, #ddd)",
+          borderRadius: 14,
+          padding: 12,
+          display: "grid",
+          gap: 12,
+        }}
+      >
+        <h3 style={{ margin: 0 }}>{t.movement.prs}</h3>
 
+        {/* Form */}
         <div style={{ display: "grid", gap: 10 }}>
-          <div style={{ display: "grid", gap: 6 }}>
-            <label>
+          <label style={{ display: "grid", gap: 6 }}>
+            <span style={{ fontSize: 13, opacity: 0.8 }}>
               {t.movement.date}
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                style={{ display: "block", width: "100%" }}
-              />
-            </label>
-          </div>
-
-          <div style={{ display: "flex", gap: 10 }}>
-            <label style={{ flex: 1 }}>
-              {t.movement.weight}
+            </span>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "12px 12px",
+                borderRadius: 12,
+                border: "1px solid var(--border, #ddd)",
+                fontSize: 16,
+              }}
+            />
+          </label>
+          <div className="form-grid-2">
+            <label style={{ display: "grid", gap: 6 }}>
+              <span style={{ fontSize: 13, opacity: 0.8 }}>
+                {t.movement.weight}
+              </span>
               <input
                 type="number"
+                inputMode="decimal"
                 value={weight}
                 onChange={(e) => setWeight(Number(e.target.value))}
-                style={{ display: "block", width: "100%" }}
+                style={{
+                  width: "100%",
+                  padding: "12px 12px",
+                  borderRadius: 12,
+                  border: "1px solid var(--border, #ddd)",
+                  fontSize: 16,
+                }}
               />
             </label>
 
-            <label style={{ flex: 1 }}>
-              {t.movement.reps}
+            <label style={{ display: "grid", gap: 6 }}>
+              <span style={{ fontSize: 13, opacity: 0.8 }}>
+                {t.movement.reps}
+              </span>
               <input
                 type="number"
+                inputMode="numeric"
                 value={reps}
                 onChange={(e) => setReps(Number(e.target.value))}
-                style={{ display: "block", width: "100%" }}
+                style={{
+                  width: "100%",
+                  padding: "12px 12px",
+                  borderRadius: 12,
+                  border: "1px solid var(--border, #ddd)",
+                  fontSize: 16,
+                }}
               />
             </label>
           </div>
-
-          <button onClick={addEntry}>{t.movement.add}</button>
+          <button
+            onClick={addEntry}
+            style={{
+              padding: "12px 14px",
+              borderRadius: 12,
+              border: "1px solid var(--border, #ddd)",
+              fontWeight: 700,
+            }}
+          >
+            {t.movement.add}
+          </button>
         </div>
 
-        <div style={{ marginTop: 16 }}>
+        {/* List */}
+        <div style={{ display: "grid", gap: 10 }}>
           {sorted.length === 0 ? (
-            <p style={{ margin: 0 }}>{t.movement.empty}</p>
+            <p style={{ margin: 0, opacity: 0.8 }}>{t.movement.empty}</p>
           ) : (
-            <ul style={{ paddingLeft: 18 }}>
-              {sorted.map((e) => (
-                <li key={e.id} style={{ marginBottom: 10 }}>
-                  <div>
-                    <b>{toDateInputValue(e.date)}</b> — {e.weight} × {e.reps}
-                    <button onClick={() => removeEntry(e.id)} style={{ marginLeft: 10 }}>
-                      {t.movement.delete}
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            sorted.map((e) => (
+              <div
+                key={e.id}
+                style={{
+                  border: "1px solid var(--border, #ddd)",
+                  borderRadius: 12,
+                  padding: 12,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 10,
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ display: "grid", gap: 4 }}>
+                  <b>{toDateInputValue(e.date)}</b>
+                  <span style={{ opacity: 0.85 }}>
+                    {e.weight} × {e.reps}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => removeEntry(e.id)}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 12,
+                    border: "1px solid var(--border, #ddd)",
+                  }}
+                >
+                  {t.movement.delete}
+                </button>
+              </div>
+            ))
           )}
         </div>
       </section>
