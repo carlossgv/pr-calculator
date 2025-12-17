@@ -29,6 +29,12 @@ function barValueFor(unit: Unit, gender: BarGender): number {
   return gender === "male" ? 20 : 15;
 }
 
+function barLabelFor(unit: Unit, gender: BarGender): string {
+  // language-neutral label (evita i18n extra y siempre calza con el valor)
+  const v = barValueFor(unit, gender);
+  return `${v} ${unit} bar`;
+}
+
 function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
   // back-compat si existiera data vieja con "system"
   if ((p as any).theme === "system") return detectSystemTheme();
@@ -40,6 +46,7 @@ function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
  * - defaultUnit siempre existe
  * - bar.unit siempre coincide con defaultUnit
  * - bar.value siempre existe (si no, pone uno razonable)
+ * - bar.label siempre calza con bar.value (evita “20kg bar” mostrando 15kg)
  */
 function ensurePrefs(
   p: Partial<UserPreferences> & { defaultUnit?: Unit; bar?: any },
@@ -54,6 +61,9 @@ function ensurePrefs(
         ? fallback.bar.value
         : barValueFor(unit, "male");
 
+  const nextGender: BarGender =
+    unit === "lb" ? (barValue === 35 ? "female" : "male") : barValue === 15 ? "female" : "male";
+
   return {
     ...(fallback as UserPreferences),
     ...(p as UserPreferences),
@@ -63,6 +73,7 @@ function ensurePrefs(
       ...(p.bar ?? {}),
       unit,
       value: barValue,
+      label: barLabelFor(unit, nextGender),
     },
   };
 }
@@ -80,8 +91,11 @@ export function PreferencesPage() {
 
   useEffect(() => {
     repo.getPreferences().then((p) => {
-      setPrefs(p);
-      setBarGender(inferGenderFromPrefs(p));
+      // normaliza para asegurar label consistente desde data vieja
+      const safe = ensurePrefs(p, p);
+      setPrefs(safe);
+      setBarGender(inferGenderFromPrefs(safe));
+      repo.setPreferences(safe);
     });
   }, []);
 
@@ -102,7 +116,6 @@ export function PreferencesPage() {
   }
 
   async function toggleTheme() {
-    // ✅ guard para TS (y runtime)
     if (!prefs) return;
 
     const current = resolvePrefsTheme(prefs);
@@ -116,22 +129,22 @@ export function PreferencesPage() {
   }
 
   function applyPreset(preset: UserPreferences) {
-    // ✅ guard para TS
     if (!prefs) return;
 
-    // Mantener gender actual, aplicar preset pero con invariantes (defaultUnit requerido)
+    // Mantener gender actual, aplicar preset pero con invariantes
     const unit: Unit = preset.defaultUnit;
+    const v = barValueFor(unit, barGender);
 
     const next = ensurePrefs(
       {
         ...preset,
-        // consistente: conservar theme actual
         theme: prefs.theme,
         defaultUnit: unit,
         bar: {
           ...preset.bar,
           unit,
-          value: barValueFor(unit, barGender),
+          value: v,
+          label: barLabelFor(unit, barGender),
         },
       },
       prefs,
@@ -145,13 +158,16 @@ export function PreferencesPage() {
 
     setBarGender(nextGender);
 
+    const v = barValueFor(barUnit, nextGender);
+
     const next = ensurePrefs(
       {
         ...prefs,
         bar: {
           ...prefs.bar,
           unit: barUnit,
-          value: barValueFor(barUnit, nextGender),
+          value: v,
+          label: barLabelFor(barUnit, nextGender),
         },
       },
       prefs,
@@ -161,6 +177,10 @@ export function PreferencesPage() {
   }
 
   const isFemale = barGender === "female";
+
+  // Preset hints dinámicos (antes estaban hardcodeados a hombre)
+  const olympicHint = `${barValueFor("kg", barGender)}kg bar, kg plates`;
+  const crossfitHint = `${barValueFor("lb", barGender)}lb bar, lb plates + kg change`;
 
   return (
     <div className={styles.page}>
@@ -250,9 +270,7 @@ export function PreferencesPage() {
 
             <div className={styles.rowRight}>
               <span className={styles.valuePill}>
-                <span className={styles.mono}>
-                  {barValueFor(barUnit, barGender)}
-                </span>
+                <span className={styles.mono}>{prefs.bar.value}</span>
                 <span className={styles.valueUnit}>{barUnit}</span>
               </span>
             </div>
@@ -274,13 +292,9 @@ export function PreferencesPage() {
               <div className={styles.actionTitle}>
                 {t.prefs.presets.olympicKg}
               </div>
-              <div className={styles.actionHint}>20kg bar, kg plates</div>
+              <div className={styles.actionHint}>{olympicHint}</div>
             </div>
-            <ChevronRight
-              className={styles.chev}
-              size={18}
-              aria-hidden="true"
-            />
+            <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
           </button>
 
           <button
@@ -292,15 +306,9 @@ export function PreferencesPage() {
               <div className={styles.actionTitle}>
                 {t.prefs.presets.crossfitLb}
               </div>
-              <div className={styles.actionHint}>
-                45lb bar, lb plates + kg change
-              </div>
+              <div className={styles.actionHint}>{crossfitHint}</div>
             </div>
-            <ChevronRight
-              className={styles.chev}
-              size={18}
-              aria-hidden="true"
-            />
+            <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
           </button>
         </div>
       </section>

@@ -22,21 +22,27 @@ function formatPickLabel(
   valueInUnit: number,
   unit: Unit,
 ) {
-  if (originalUnit !== unit) {
-    const base = originalLabel?.trim()
-      ? originalLabel
-      : `${round1(valueInUnit)} ${unit}`;
-    return `${base} (${round1(valueInUnit)} ${unit})`;
+  const numeric = `${round1(valueInUnit)} ${unit}`;
+
+  // Si hay label, igual mostramos el número real para evitar “label viejo” (ej 20kg bar con 15kg).
+  // Si cambian unidades, también mostramos el número en la unidad actual.
+  if (originalLabel?.trim()) {
+    return originalUnit === unit ? `${originalLabel} (${numeric})` : `${originalLabel} (${numeric})`;
   }
-  return originalLabel?.trim()
-    ? originalLabel
-    : `${round1(valueInUnit)} ${unit}`;
+
+  if (originalUnit !== unit) return numeric;
+  return numeric;
 }
 
-function platesPerSideLabel(load: ReturnType<typeof calculateLoad>, unit: Unit) {
+function platesPerSideLabel(
+  load: ReturnType<typeof calculateLoad>,
+  unit: Unit,
+) {
   if (load.platesPerSide.length === 0) return "—";
   return load.platesPerSide
-    .map((p) => formatPickLabel(p.plate.label, p.plate.unit, p.valueInUnit, unit))
+    .map((p) =>
+      formatPickLabel(p.plate.label, p.plate.unit, p.valueInUnit, unit),
+    )
     .join(" + ");
 }
 
@@ -151,16 +157,13 @@ export function PercentCards({
 
           <div>
             <b>{t.home.bar}:</b>{" "}
-            {formatPickLabel(
-              selected.load.bar.plate.label,
-              selected.load.bar.plate.unit,
-              selected.load.bar.valueInUnit,
-              unit,
-            )}
+            {/* Mostrar SIEMPRE el valor real; el label puede existir pero no manda */}
+            {round1(selected.load.bar.valueInUnit)} {unit}
           </div>
 
           <div>
-            <b>{t.home.platesPerSide}:</b> {platesPerSideLabel(selected.load, unit)}
+            <b>{t.home.platesPerSide}:</b>{" "}
+            {platesPerSideLabel(selected.load, unit)}
           </div>
 
           <div>
