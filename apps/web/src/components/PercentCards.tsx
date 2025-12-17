@@ -1,7 +1,8 @@
-// apps/web/src/components/PercentCards.tsx
+/* apps/web/src/components/PercentCards.tsx */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { calculateLoad, type Unit, type UserPreferences } from "@repo/core";
 import { t } from "../i18n/strings";
+import styles from "./PercentCards.module.css";
 
 type Props = {
   maxWeight: number;
@@ -22,16 +23,15 @@ function formatPickLabel(
   valueInUnit: number,
   unit: Unit,
 ) {
-  const numeric = `${round1(valueInUnit)} ${unit}`;
-
-  // Si hay label, igual mostramos el número real para evitar “label viejo” (ej 20kg bar con 15kg).
-  // Si cambian unidades, también mostramos el número en la unidad actual.
-  if (originalLabel?.trim()) {
-    return originalUnit === unit ? `${originalLabel} (${numeric})` : `${originalLabel} (${numeric})`;
+  if (originalUnit !== unit) {
+    const base = originalLabel?.trim()
+      ? originalLabel
+      : `${round1(valueInUnit)} ${unit}`;
+    return `${base} (${round1(valueInUnit)} ${unit})`;
   }
-
-  if (originalUnit !== unit) return numeric;
-  return numeric;
+  return originalLabel?.trim()
+    ? originalLabel
+    : `${round1(valueInUnit)} ${unit}`;
 }
 
 function platesPerSideLabel(
@@ -67,7 +67,6 @@ export function PercentCards({
 
     update();
 
-    // Safari < 14 uses addListener/removeListener
     if (typeof mq.addEventListener === "function") {
       mq.addEventListener("change", update);
       return () => mq.removeEventListener("change", update);
@@ -105,7 +104,6 @@ export function PercentCards({
   }
 
   useEffect(() => {
-    // only needed on mobile (fixed)
     if (!isMobile || !selected) {
       setDetailSpacePx(0);
       return;
@@ -114,7 +112,7 @@ export function PercentCards({
     const el = detailRef.current;
     if (!el) return;
 
-    const EXTRA = 12; // breathing room
+    const EXTRA = 12;
     const measure = () => {
       const h = el.getBoundingClientRect().height;
       setDetailSpacePx(Math.ceil(h + EXTRA));
@@ -130,48 +128,42 @@ export function PercentCards({
 
   return (
     <div
+      className={styles.root}
       style={
         {
-          display: "grid",
-          gap: 12,
           ["--percent-detail-space" as any]: `${detailSpacePx}px`,
         } as React.CSSProperties
       }
     >
       {/* DETAIL (desktop inline; mobile fixed via CSS) */}
       {selected ? (
-        <section
-          ref={detailRef as any}
-          className="percentDetail"
-          style={{
-            borderRadius: 16,
-            padding: 14,
-            display: "grid",
-            gap: 10,
-          }}
-        >
-          <div style={{ fontSize: 16, fontWeight: 900 }}>
+        <section ref={detailRef as any} className={styles.detail}>
+          <div className={styles.detailTitle}>
             {selected.pct}% · {round1(selected.target)}
             {unit}
           </div>
 
-          <div>
+          <div className={styles.detailRow}>
             <b>{t.home.bar}:</b>{" "}
-            {/* Mostrar SIEMPRE el valor real; el label puede existir pero no manda */}
-            {round1(selected.load.bar.valueInUnit)} {unit}
+            {formatPickLabel(
+              selected.load.bar.plate.label,
+              selected.load.bar.plate.unit,
+              selected.load.bar.valueInUnit,
+              unit,
+            )}
           </div>
 
-          <div>
+          <div className={[styles.detailRow, styles.detailClamp].join(" ")}>
             <b>{t.home.platesPerSide}:</b>{" "}
             {platesPerSideLabel(selected.load, unit)}
           </div>
 
-          <div>
+          <div className={styles.detailRow}>
             <b>{t.home.perSideTotal}:</b> {round1(selected.load.perSide)}
             {unit}
           </div>
 
-          <div style={{ opacity: 0.78 }}>
+          <div className={styles.detailAchieved}>
             {t.home.achieved}: {round1(selected.load.achievedTotal)}
             {unit} (Δ {round1(selected.load.delta)}
             {unit})
@@ -180,38 +172,40 @@ export function PercentCards({
       ) : null}
 
       {/* GRID */}
-      <div className="percentGrid">
+      <div className={styles.grid}>
         {cards.map(({ pct, target, load }) => {
           const isSelected = pct === selectedPct;
           const is100 = pct === 100;
+
+          const className = [
+            styles.tile,
+            is100 ? styles.tileMax : "",
+            isSelected ? styles.tileSelected : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
 
           return (
             <button
               key={pct}
               type="button"
-              className={[
-                "percentTile",
-                is100 ? "percentTile--max" : "",
-                isSelected ? "percentTile--selected" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              className={className}
               onClick={() => selectPct(pct)}
               aria-pressed={isSelected}
             >
-              <div className="percentTileTop">
-                <div className="percentPct">
+              <div className={styles.tileTop}>
+                <div className={styles.pct}>
                   {pct}%{" "}
-                  {is100 ? <span className="percentPctHint">(MAX)</span> : null}
+                  {is100 ? <span className={styles.pctHint}>(MAX)</span> : null}
                 </div>
 
-                <div className="percentTarget">
+                <div className={styles.target}>
                   {round1(target)}
                   {unit}
                 </div>
               </div>
 
-              <div className="percentMeta">
+              <div className={styles.meta}>
                 <b>{t.home.platesPerSide}:</b> {platesPerSideLabel(load, unit)}
               </div>
             </button>
