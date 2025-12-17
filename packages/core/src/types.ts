@@ -1,11 +1,22 @@
-
+// packages/core/src/types.ts
 export type Unit = "kg" | "lb";
 
-export type UserPreferences = {
+export type Weight = {
+  value: number;
   unit: Unit;
-  barWeight: number;
-  plates: number[];    // por lado (ej: [25, 20, 15, 10, 5, 2.5, 1.25])
-  rounding: number;    // ej: 2.5kg, 5lb
+};
+
+export type Plate = {
+  value: number;
+  unit: Unit;
+  label?: string; // ej: "45 lb", "2.5 kg"
+};
+
+export type UserPreferences = {
+  defaultUnit: Unit;   // unidad preferida para UI
+  bar: Plate;          // bar como “plate” para tener label+unit
+  rounding: Weight;    // step de redondeo en su propia unidad
+  plates: Plate[];     // placas disponibles por lado (mezcla kg/lb)
 };
 
 export type Movement = {

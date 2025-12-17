@@ -1,71 +1,137 @@
-
 // apps/web/src/pages/PreferencesPage.tsx
-import React, { useEffect, useState } from "react";
-import type { UserPreferences } from "@repo/core";
-import { DEFAULT_PREFS } from "@repo/core";
+import { useEffect, useState } from "react";
+import type { Unit, UserPreferences } from "@repo/core";
+import {
+  DEFAULT_PREFS,
+  CROSSFIT_LB_WITH_KG_CHANGES,
+} from "@repo/core";
 import { repo } from "../storage/repo";
+import { t } from "../i18n/strings";
 
 export function PreferencesPage() {
-  const [prefs, setPrefs] = useState<UserPreferences>(DEFAULT_PREFS);
+  const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [saved, setSaved] = useState(false);
+  const [presetApplied, setPresetApplied] = useState(false);
 
   useEffect(() => {
     repo.getPreferences().then(setPrefs);
   }, []);
 
-  async function onSave() {
-    await repo.setPreferences(prefs);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1200);
+  if (!prefs) return <p>{t.home.loading}</p>;
+
+  function save(next: UserPreferences) {
+    setPrefs(next);
+    repo.setPreferences(next).then(() => {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1200);
+    });
+  }
+
+  function applyPreset(preset: UserPreferences) {
+    save(preset);
+    setPresetApplied(true);
+    setTimeout(() => setPresetApplied(false), 1200);
   }
 
   return (
-    <div style={{ display: "grid", gap: 12 }}>
-      <label style={{ display: "grid", gap: 6 }}>
-        <span>Unidad</span>
-        <select
-          value={prefs.unit}
-          onChange={(e) => setPrefs({ ...prefs, unit: e.target.value as "kg" | "lb" })}
-        >
-          <option value="kg">kg</option>
-          <option value="lb">lb</option>
-        </select>
-      </label>
+    <div style={{ display: "grid", gap: 16 }}>
+      {/* DEFAULT UNIT */}
+      <section style={{ display: "grid", gap: 8 }}>
+        <label>
+          {t.prefs.unit}
+          <select
+            value={prefs.defaultUnit}
+            onChange={(e) =>
+              save({ ...prefs, defaultUnit: e.target.value as Unit })
+            }
+            style={{ display: "block", width: "100%" }}
+          >
+            <option value="kg">KG</option>
+            <option value="lb">LB</option>
+          </select>
+        </label>
+      </section>
 
-      <label style={{ display: "grid", gap: 6 }}>
-        <span>Peso barra</span>
-        <input
-          type="number"
-          value={prefs.barWeight}
-          onChange={(e) => setPrefs({ ...prefs, barWeight: Number(e.target.value) })}
-        />
-      </label>
+      {/* BAR */}
+      <section style={{ display: "grid", gap: 8 }}>
+        <div style={{ fontWeight: 600 }}>Bar</div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            type="number"
+            value={prefs.bar.value}
+            onChange={(e) =>
+              save({
+                ...prefs,
+                bar: { ...prefs.bar, value: Number(e.target.value) },
+              })
+            }
+          />
+          <select
+            value={prefs.bar.unit}
+            onChange={(e) =>
+              save({
+                ...prefs,
+                bar: { ...prefs.bar, unit: e.target.value as Unit },
+              })
+            }
+          >
+            <option value="kg">kg</option>
+            <option value="lb">lb</option>
+          </select>
+        </div>
+      </section>
 
-      <label style={{ display: "grid", gap: 6 }}>
-        <span>Rounding (redondeo)</span>
-        <input
-          type="number"
-          value={prefs.rounding}
-          onChange={(e) => setPrefs({ ...prefs, rounding: Number(e.target.value) })}
-        />
-      </label>
+      {/* ROUNDING */}
+      <section style={{ display: "grid", gap: 8 }}>
+        <div style={{ fontWeight: 600 }}>{t.prefs.rounding}</div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            type="number"
+            value={prefs.rounding.value}
+            onChange={(e) =>
+              save({
+                ...prefs,
+                rounding: {
+                  ...prefs.rounding,
+                  value: Number(e.target.value),
+                },
+              })
+            }
+          />
+          <select
+            value={prefs.rounding.unit}
+            onChange={(e) =>
+              save({
+                ...prefs,
+                rounding: {
+                  ...prefs.rounding,
+                  unit: e.target.value as Unit,
+                },
+              })
+            }
+          >
+            <option value="kg">kg</option>
+            <option value="lb">lb</option>
+          </select>
+        </div>
+      </section>
 
-      <label style={{ display: "grid", gap: 6 }}>
-        <span>Placas disponibles (por lado, separadas por coma)</span>
-        <input
-          value={prefs.plates.join(",")}
-          onChange={(e) => {
-            const plates = e.target.value
-              .split(",")
-              .map((x) => Number(x.trim()))
-              .filter((n) => Number.isFinite(n) && n > 0);
-            setPrefs({ ...prefs, plates });
-          }}
-        />
-      </label>
+      {/* PRESETS */}
+      <section style={{ display: "grid", gap: 10 }}>
+        <div style={{ fontWeight: 600 }}>{t.prefs.presets.title}</div>
 
-      <button onClick={onSave}>Guardar</button>
-      {saved && <p style={{ margin: 0 }}>✅ Guardado</p>}
+        <button onClick={() => applyPreset(DEFAULT_PREFS)}>
+          {t.prefs.presets.olympicKg}
+        </button>
+
+        <button onClick={() => applyPreset(CROSSFIT_LB_WITH_KG_CHANGES)}>
+          {t.prefs.presets.crossfitLb}
+        </button>
+
+        {presetApplied && <div>✅ {t.prefs.presets.applied}</div>}
+      </section>
+
+      {saved && <div>{t.prefs.saved}</div>}
     </div>
   );
 }

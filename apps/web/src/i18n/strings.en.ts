@@ -1,0 +1,54 @@
+// apps/web/src/i18n/strings.en.ts
+export const en = {
+  appName: "PR Calculator",
+  nav: {
+    home: "Home",
+    movements: "Movements",
+    preferences: "Preferences",
+  },
+  home: {
+    loading: "Loading…",
+    maxWeight: "Max (100%)",
+    unit: "Unit",
+    range: "Percent range",
+    from: "From",
+    to: "To",
+    step: "Step",
+    platesPerSide: "Plates / side",
+        perSideTotal: "Per side total",
+    bar: "Bar",
+    achieved: "Achieved",
+  },
+  prefs: {
+    unit: "Unit",
+    barWeight: "Bar weight",
+    rounding: "Rounding",
+    plates: "Available plates (per side, comma-separated)",
+    save: "Save",
+    saved: "✅ Saved",
+  },
+  movements: {
+    placeholder: "e.g. Back Squat",
+    add: "Add",
+    delete: "delete",
+  },
+    movement: {
+    title: "Movement",
+    prs: "PR entries",
+    weight: "Weight",
+    reps: "Reps",
+    date: "Date",
+    add: "Add PR",
+    delete: "delete",
+    back: "← Back",
+    loading: "Loading…",
+    empty: "No PR entries yet.",
+  },
+    presets: {
+    title: "Plate presets",
+    olympicKg: "Olympic (KG)",
+    crossfitLb: "CrossFit (LB + KG change plates)",
+    applied: "Preset applied",
+  },
+
+} as const;

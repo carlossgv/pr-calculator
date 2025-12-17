@@ -1,13 +1,22 @@
+// packages/core/src/bar-math.ts
+import type { Plate, Unit, UserPreferences } from "./types";
+import { convertWeightValue } from "./units";
 
-import type { UserPreferences } from "./types";
+export type PlatePick = {
+  plate: Plate;        // original (con label y unidad original)
+  valueInUnit: number; // valor convertido a la unidad de trabajo
+};
 
 export type LoadResult = {
+  unit: Unit;
   targetTotal: number;
-  barWeight: number;
-  perSide: number;
-  platesPerSide: number[];
+
+  bar: PlatePick;      // bar convertido
+  perSide: number;     // total por lado (placas) en unit
+  platesPerSide: PlatePick[];
+
   achievedTotal: number;
-  delta: number; // achieved - target (0 ideal)
+  delta: number;
 };
 
 function roundTo(value: number, step: number) {
@@ -15,37 +24,40 @@ function roundTo(value: number, step: number) {
   return Math.round(value / step) * step;
 }
 
-/**
- * Calcula la carga por lado usando estrategia greedy (placas grandes primero).
- * Para CrossFit / gimnasios suele ser suficiente y súper estable.
- */
 export function calculateLoad(
-  targetTotal: number,
+  targetTotalInUnit: number,
+  unit: Unit,
   prefs: UserPreferences
 ): LoadResult {
-  const roundedTarget = roundTo(targetTotal, prefs.rounding);
+  const roundingInUnit = convertWeightValue(prefs.rounding.value, prefs.rounding.unit, unit);
+  const roundedTarget = roundTo(targetTotalInUnit, roundingInUnit);
 
-  const targetPlatesTotal = Math.max(0, roundedTarget - prefs.barWeight);
+  const barInUnit = convertWeightValue(prefs.bar.value, prefs.bar.unit, unit);
+  const targetPlatesTotal = Math.max(0, roundedTarget - barInUnit);
   const perSideTarget = targetPlatesTotal / 2;
 
-  const platesSorted = [...prefs.plates].sort((a, b) => b - a);
+  // Convertimos placas a “unidad de trabajo” pero mantenemos la referencia original
+  const candidates: PlatePick[] = prefs.plates
+    .map((p) => ({ plate: p, valueInUnit: convertWeightValue(p.value, p.unit, unit) }))
+    .sort((a, b) => b.valueInUnit - a.valueInUnit);
 
-  const platesPerSide: number[] = [];
+  const platesPerSide: PlatePick[] = [];
   let remaining = perSideTarget;
 
-  for (const p of platesSorted) {
-    while (remaining + 1e-9 >= p) {
-      platesPerSide.push(p);
-      remaining = +(remaining - p).toFixed(5);
+  for (const c of candidates) {
+    while (remaining + 1e-9 >= c.valueInUnit) {
+      platesPerSide.push(c);
+      remaining = +(remaining - c.valueInUnit).toFixed(5);
     }
   }
 
-  const achievedPerSide = platesPerSide.reduce((s, n) => s + n, 0);
-  const achievedTotal = prefs.barWeight + achievedPerSide * 2;
+  const achievedPerSide = platesPerSide.reduce((s, p) => s + p.valueInUnit, 0);
+  const achievedTotal = barInUnit + achievedPerSide * 2;
 
   return {
+    unit,
     targetTotal: roundedTarget,
-    barWeight: prefs.barWeight,
+    bar: { plate: prefs.bar, valueInUnit: barInUnit },
     perSide: achievedPerSide,
     platesPerSide,
     achievedTotal,

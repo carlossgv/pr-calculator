@@ -1,12 +1,29 @@
-
 // apps/web/src/storage/repo.ts
 import { DEFAULT_PREFS, type Movement, type PrEntry, type UserPreferences } from "@repo/core";
 import { db } from "./db";
 
+function isNewPrefsShape(p: any): p is UserPreferences {
+  return Boolean(
+    p &&
+      typeof p === "object" &&
+      (p.defaultUnit === "kg" || p.defaultUnit === "lb") &&
+      p.bar &&
+      typeof p.bar.value === "number" &&
+      (p.bar.unit === "kg" || p.bar.unit === "lb") &&
+      Array.isArray(p.plates)
+  );
+}
+
 export const repo = {
   async getPreferences(): Promise<UserPreferences> {
     const row = await db.preferences.get("prefs");
-    return row?.value ?? DEFAULT_PREFS;
+    const value = (row as any)?.value;
+
+    if (isNewPrefsShape(value)) return value;
+
+    // si venía del shape antiguo, o no existe, reseteamos a defaults por ahora
+    await db.preferences.put({ id: "prefs", value: DEFAULT_PREFS });
+    return DEFAULT_PREFS;
   },
 
   async setPreferences(prefs: UserPreferences): Promise<void> {
@@ -36,5 +53,5 @@ export const repo = {
 
   async deletePrEntry(id: string): Promise<void> {
     await db.prEntries.delete(id);
-  }
+  },
 };

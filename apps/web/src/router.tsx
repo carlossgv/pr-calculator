@@ -1,11 +1,10 @@
-
 // apps/web/src/router.tsx
-import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { AppLayout } from "./ui/AppLayout";
 import { HomePage } from "./pages/HomePage";
 import { PreferencesPage } from "./pages/PreferencesPage";
 import { MovementsPage } from "./pages/MovementsPage";
+import { MovementDetailsPage } from "./pages/MovementDetailsPage";
 
 export const router = createBrowserRouter([
   {
@@ -13,8 +12,9 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: "preferencias", element: <PreferencesPage /> },
-      { path: "movimientos", element: <MovementsPage /> }
-    ]
-  }
+      { path: "preferences", element: <PreferencesPage /> },
+      { path: "movements", element: <MovementsPage /> },
+      { path: "movements/:movementId", element: <MovementDetailsPage /> },
+    ],
+  },
 ]);
