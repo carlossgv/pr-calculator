@@ -5,7 +5,14 @@ import { DEFAULT_PREFS, CROSSFIT_LB_WITH_KG_CHANGES } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { Switch } from "../components/Switch";
+import { ThemeToggle } from "../components/ThemeToggle";
+import {
+  applyTheme,
+  detectSystemTheme,
+  type ResolvedTheme,
+} from "../theme/theme";
 import { Mars, Venus } from "lucide-react";
+import styles from "./PreferencesPage.module.css";
 
 type BarGender = "male" | "female";
 
@@ -20,6 +27,12 @@ function inferGenderFromPrefs(p: UserPreferences): BarGender {
 function barValueFor(unit: Unit, gender: BarGender): number {
   if (unit === "lb") return gender === "male" ? 45 : 35;
   return gender === "male" ? 20 : 15;
+}
+
+function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
+  // back-compat si existe data vieja con "system"
+  if ((p as any).theme === "system") return detectSystemTheme();
+  return p.theme === "dark" ? "dark" : "light";
 }
 
 export function PreferencesPage() {
@@ -37,6 +50,11 @@ export function PreferencesPage() {
     return prefs?.defaultUnit ?? "kg";
   }, [prefs?.defaultUnit]);
 
+  const resolvedTheme = useMemo<ResolvedTheme>(() => {
+    if (!prefs) return "light";
+    return resolvePrefsTheme(prefs);
+  }, [prefs]);
+
   if (!prefs) return <p>{t.home.loading}</p>;
 
   function save(next: UserPreferences) {
@@ -44,25 +62,37 @@ export function PreferencesPage() {
     repo.setPreferences(next);
   }
 
+  async function toggleTheme() {
+    if (!prefs) return;
+
+    const current = resolvePrefsTheme(prefs);
+    const nextTheme: ResolvedTheme = current === "dark" ? "light" : "dark";
+
+    const next: UserPreferences = { ...prefs, theme: nextTheme };
+    setPrefs(next);
+    await repo.setPreferences(next);
+    applyTheme(nextTheme);
+  }
+
   function applyPreset(preset: UserPreferences) {
-    // ✅ keep current gender, apply preset, and ensure we return a full UserPreferences
     const unit: Unit = preset.defaultUnit;
 
     const next: UserPreferences = {
       ...preset,
-      defaultUnit: unit, // (explicitly non-optional for TS)
+      defaultUnit: unit,
       bar: {
         ...preset.bar,
         unit,
         value: barValueFor(unit, barGender),
       },
+      // Mantener theme actual al aplicar presets (si prefieres que el preset lo cambie, lo sacamos)
+      theme: prefs.theme,
     };
 
     save(next);
   }
 
   function setGender(nextGender: BarGender) {
-    // Guard to satisfy TS + future-proof (even though UI won't call this while prefs=null)
     if (!prefs) return;
 
     setBarGender(nextGender);
@@ -82,97 +112,125 @@ export function PreferencesPage() {
   const isFemale = barGender === "female";
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
+    <div className={styles.page}>
+      {/* THEME */}
+      <section className={styles.section}>
+        <div className={styles.sectionTitle}>{t.prefs.theme.title}</div>
+
+        <div className={styles.card}>
+          <button
+            type="button"
+            className={styles.rowButton}
+            onClick={toggleTheme}
+            aria-label={t.prefs.theme.toggleRowAria}
+          >
+            <div className={styles.rowLabel}>
+              <div className={styles.rowTitle}>{t.prefs.theme.title}</div>
+              <div className={styles.rowHint}>
+                {t.prefs.theme.current}:{" "}
+                <span className={styles.mono}>{resolvedTheme}</span>
+              </div>
+            </div>
+
+            <div
+              className={styles.rowControl}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ThemeToggle value={resolvedTheme} onToggle={toggleTheme} />
+            </div>
+          </button>
+        </div>
+      </section>
+
       {/* BAR */}
-      <section style={{ display: "grid", gap: 10 }}>
-        <div style={{ fontWeight: 600 }}>Bar ({barUnit.toUpperCase()})</div>
+      <section className={styles.section}>
+        <div className={styles.sectionTitle}>
+          {t.prefs.bar.title} ({barUnit.toUpperCase()})
+        </div>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span
-              aria-hidden="true"
-              title="Male"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 34,
-                height: 34,
-                borderRadius: 999,
-                border: "1px solid var(--border)",
-                background: !isFemale
-                  ? "var(--nav-active-bg)"
-                  : "var(--card-bg)",
-                flex: "0 0 auto",
-              }}
-            >
-              <Mars size={18} />
-            </span>
+        <div className={styles.card}>
+          <div className={styles.row}>
+            <div className={styles.rowLabel}>
+              <div className={styles.rowTitle}>{t.prefs.bar.genderTitle}</div>
+              <div className={styles.rowHint}>{t.prefs.bar.genderHint}</div>
+            </div>
 
-            <Switch
-              checked={isFemale}
-              onCheckedChange={(next) => setGender(next ? "female" : "male")}
-              ariaLabel="Toggle bar gender"
-            />
+            <div className={styles.rowControl}>
+              <span
+                aria-hidden="true"
+                title={t.prefs.bar.male}
+                className={styles.genderPill}
+                data-active={!isFemale}
+              >
+                <Mars size={18} />
+              </span>
 
-            <span
-              aria-hidden="true"
-              title="Female"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 34,
-                height: 34,
-                borderRadius: 999,
-                border: "1px solid var(--border)",
-                background: isFemale
-                  ? "var(--nav-active-bg)"
-                  : "var(--card-bg)",
-                flex: "0 0 auto",
-              }}
-            >
-              <Venus size={18} />
-            </span>
+              <Switch
+                checked={isFemale}
+                onCheckedChange={(next) => setGender(next ? "female" : "male")}
+                ariaLabel={t.prefs.bar.genderToggleAria}
+              />
+
+              <span
+                aria-hidden="true"
+                title={t.prefs.bar.female}
+                className={styles.genderPill}
+                data-active={isFemale}
+              >
+                <Venus size={18} />
+              </span>
+            </div>
           </div>
 
-          <div
-            style={{
-              opacity: 0.85,
-              fontVariantNumeric: "tabular-nums",
-              whiteSpace: "nowrap",
-              flex: "0 0 auto",
-            }}
-            aria-label="Current bar weight"
-          >
-            {barValueFor(barUnit, barGender)}
-            {barUnit}
+          <div className={styles.row}>
+            <div className={styles.rowLabel}>
+              <div className={styles.rowTitle}>{t.prefs.bar.currentTitle}</div>
+              <div className={styles.rowHint}>{t.prefs.bar.currentHint}</div>
+            </div>
+
+            <div className={styles.rowControl}>
+              <span className={styles.valuePill}>
+                <span className={styles.mono}>
+                  {barValueFor(barUnit, barGender)}
+                </span>
+                <span className={styles.valueUnit}>{barUnit}</span>
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* PRESETS */}
-      <section style={{ display: "grid", gap: 10 }}>
-        <div style={{ fontWeight: 600 }}>{t.prefs.presets.title}</div>
+      {/* PLATE PRESETS */}
+      <section className={styles.section}>
+        <div className={styles.sectionTitle}>{t.prefs.presets.title}</div>
 
-        <button type="button" onClick={() => applyPreset(DEFAULT_PREFS)}>
-          {t.prefs.presets.olympicKg}
-        </button>
+        <div className={styles.card}>
+          <button
+            type="button"
+            className={styles.actionRow}
+            onClick={() => applyPreset(DEFAULT_PREFS)}
+          >
+            <div className={styles.actionTitle}>
+              {t.prefs.presets.olympicKg}
+            </div>
+            <div className={styles.actionChevron} aria-hidden="true">
+              →
+            </div>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => applyPreset(CROSSFIT_LB_WITH_KG_CHANGES)}
-        >
-          {t.prefs.presets.crossfitLb}
-        </button>
+          <button
+            type="button"
+            className={styles.actionRow}
+            onClick={() => applyPreset(CROSSFIT_LB_WITH_KG_CHANGES)}
+          >
+            <div className={styles.actionTitle}>
+              {t.prefs.presets.crossfitLb}
+            </div>
+            <div className={styles.actionChevron} aria-hidden="true">
+              →
+            </div>
+          </button>
+        </div>
       </section>
     </div>
   );

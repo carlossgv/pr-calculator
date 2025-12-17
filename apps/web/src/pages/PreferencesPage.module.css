@@ -1,0 +1,168 @@
+/* apps/web/src/pages/PreferencesPage.module.css */
+
+.page {
+  display: grid;
+  gap: 22px;
+}
+
+.section {
+  display: grid;
+  gap: 10px;
+}
+
+.sectionTitle {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  opacity: 0.9;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.row + .row {
+  border-top: 1px solid var(--border);
+}
+
+/* Row as a full-width tappable control (Theme) */
+.rowButton {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  width: 100%;
+  text-align: left;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.rowButton:active {
+  transform: translateY(1px);
+}
+
+.rowLabel {
+  display: grid;
+  gap: 4px;
+}
+
+.rowTitle {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.rowHint {
+  font-size: 12px;
+  opacity: 0.72;
+  line-height: 1.25;
+}
+
+.rowControl {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bar gender pills */
+.genderPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--muted);
+}
+
+.genderPill[data-active="true"] {
+  background: var(--nav-active-bg);
+  color: var(--fg);
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+}
+
+/* Value pill (bar weight) */
+.valuePill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card-bg) 90%, var(--bg));
+
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.valueUnit {
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 800;
+}
+
+/* Presets as action rows */
+.actionRow {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  width: 100%;
+  text-align: left;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.actionRow + .actionRow {
+  border-top: 1px solid var(--border);
+}
+
+.actionRow:hover {
+  background: color-mix(in oklab, var(--accent) 6%, transparent);
+}
+
+.actionRow:active {
+  transform: translateY(1px);
+}
+
+.actionTitle {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.actionChevron {
+  opacity: 0.55;
+  font-weight: 900;
+}

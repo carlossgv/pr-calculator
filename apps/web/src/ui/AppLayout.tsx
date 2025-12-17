@@ -1,11 +1,10 @@
 // apps/web/src/ui/AppLayout.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import type { UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
-import { applyTheme, detectSystemTheme, type ResolvedTheme } from "../theme/theme";
-import { ThemeToggle } from "../components/ThemeToggle";
+import { applyTheme, detectSystemTheme } from "../theme/theme";
 import { Home, Dumbbell, Settings } from "lucide-react";
 
 function topIconClassName({ isActive }: { isActive: boolean }) {
@@ -44,10 +43,11 @@ function BottomNav() {
 }
 
 export function AppLayout() {
-  const [prefs, setPrefs] = useState<UserPreferences | null>(null);
+  const [, setPrefs] = useState<UserPreferences | null>(null);
 
   useEffect(() => {
     repo.getPreferences().then(async (p) => {
+      // Back-compat: si alguien todavía tiene "system", lo resolvemos y persistimos.
       if (p.theme === "system") {
         const resolved = detectSystemTheme();
         const next: UserPreferences = { ...p, theme: resolved };
@@ -61,20 +61,6 @@ export function AppLayout() {
       applyTheme(p.theme);
     });
   }, []);
-
-  const resolvedTheme: ResolvedTheme = useMemo(() => {
-    if (!prefs) return "light";
-    return prefs.theme === "dark" ? "dark" : "light";
-  }, [prefs]);
-
-  async function toggleTheme() {
-    if (!prefs) return;
-    const nextTheme: ResolvedTheme = resolvedTheme === "dark" ? "light" : "dark";
-    const next: UserPreferences = { ...prefs, theme: nextTheme };
-    setPrefs(next);
-    await repo.setPreferences(next);
-    applyTheme(nextTheme);
-  }
 
   return (
     <div className="appShell">
@@ -107,8 +93,6 @@ export function AppLayout() {
               <Settings size={18} />
             </NavLink>
           </nav>
-
-          <ThemeToggle value={resolvedTheme} onToggle={toggleTheme} />
         </div>
       </header>
 
