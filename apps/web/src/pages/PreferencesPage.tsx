@@ -30,9 +30,41 @@ function barValueFor(unit: Unit, gender: BarGender): number {
 }
 
 function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
-  // back-compat si existe data vieja con "system"
+  // back-compat si existiera data vieja con "system"
   if ((p as any).theme === "system") return detectSystemTheme();
   return p.theme === "dark" ? "dark" : "light";
+}
+
+/**
+ * Fuerza invariantes de UserPreferences para TS y para evitar estados “a medias”.
+ * - defaultUnit siempre existe
+ * - bar.unit siempre coincide con defaultUnit
+ * - bar.value siempre existe (si no, pone uno razonable)
+ */
+function ensurePrefs(
+  p: Partial<UserPreferences> & { defaultUnit?: Unit; bar?: any },
+  fallback: UserPreferences,
+): UserPreferences {
+  const unit: Unit = p.defaultUnit ?? fallback.defaultUnit;
+
+  const barValue =
+    typeof p.bar?.value === "number"
+      ? p.bar.value
+      : typeof fallback.bar?.value === "number"
+        ? fallback.bar.value
+        : barValueFor(unit, "male");
+
+  return {
+    ...(fallback as UserPreferences),
+    ...(p as UserPreferences),
+    defaultUnit: unit,
+    bar: {
+      ...(fallback.bar ?? {}),
+      ...(p.bar ?? {}),
+      unit,
+      value: barValue,
+    },
+  };
 }
 
 function onRowKeyDown(e: React.KeyboardEvent, onActivate: () => void) {
@@ -53,14 +85,14 @@ export function PreferencesPage() {
     });
   }, []);
 
-  const barUnit = useMemo<Unit>(() => {
-    return prefs?.defaultUnit ?? "kg";
-  }, [prefs?.defaultUnit]);
-
   const resolvedTheme = useMemo<ResolvedTheme>(() => {
     if (!prefs) return "light";
     return resolvePrefsTheme(prefs);
   }, [prefs]);
+
+  const barUnit = useMemo<Unit>(() => {
+    return prefs?.defaultUnit ?? "kg";
+  }, [prefs?.defaultUnit]);
 
   if (!prefs) return <p>{t.home.loading}</p>;
 
@@ -70,43 +102,60 @@ export function PreferencesPage() {
   }
 
   async function toggleTheme() {
+    // ✅ guard para TS (y runtime)
+    if (!prefs) return;
+
     const current = resolvePrefsTheme(prefs);
     const nextTheme: ResolvedTheme = current === "dark" ? "light" : "dark";
 
-    const next: UserPreferences = { ...prefs, theme: nextTheme };
+    const next = ensurePrefs({ ...prefs, theme: nextTheme }, prefs);
+
     setPrefs(next);
     await repo.setPreferences(next);
     applyTheme(nextTheme);
   }
 
   function applyPreset(preset: UserPreferences) {
+    // ✅ guard para TS
+    if (!prefs) return;
+
+    // Mantener gender actual, aplicar preset pero con invariantes (defaultUnit requerido)
     const unit: Unit = preset.defaultUnit;
 
-    const next: UserPreferences = {
-      ...preset,
-      defaultUnit: unit,
-      bar: {
-        ...preset.bar,
-        unit,
-        value: barValueFor(unit, barGender),
+    const next = ensurePrefs(
+      {
+        ...preset,
+        // consistente: conservar theme actual
+        theme: prefs.theme,
+        defaultUnit: unit,
+        bar: {
+          ...preset.bar,
+          unit,
+          value: barValueFor(unit, barGender),
+        },
       },
-      theme: prefs.theme, // consistente
-    };
+      prefs,
+    );
 
     save(next);
   }
 
   function setGender(nextGender: BarGender) {
+    if (!prefs) return;
+
     setBarGender(nextGender);
 
-    const next: UserPreferences = {
-      ...prefs,
-      bar: {
-        ...prefs.bar,
-        unit: barUnit,
-        value: barValueFor(barUnit, nextGender),
+    const next = ensurePrefs(
+      {
+        ...prefs,
+        bar: {
+          ...prefs.bar,
+          unit: barUnit,
+          value: barValueFor(barUnit, nextGender),
+        },
       },
-    };
+      prefs,
+    );
 
     save(next);
   }
@@ -142,11 +191,9 @@ export function PreferencesPage() {
             </div>
 
             <div className={styles.rowRight}>
-              {/* IMPORTANTE: parar propagación para que no toggle 2 veces */}
               <span
                 className={styles.iconWrap}
                 onClick={(e) => e.stopPropagation()}
-                onKeyDown={(e) => e.stopPropagation()}
               >
                 <ThemeToggle value={resolvedTheme} onToggle={toggleTheme} />
               </span>
