@@ -1,40 +1,67 @@
 /* apps/web/src/global.css */
 
 /* =========================
-   Theme tokens
+   Theme tokens (more color ✨)
    ========================= */
 
 :root {
-  /* Light theme defaults */
-  --bg: #ffffff;
-  --fg: #111111;
-  --muted: rgba(17, 17, 17, 0.7);
+  /* Light */
+  --bg: #f8fafc; /* slate-50 */
+  --fg: #0f172a; /* slate-900 */
+  --muted: #475569; /* slate-600 */
 
-  --border: #dddddd;
-  --card-bg: #fafafa;
+  --border: #e2e8f0; /* slate-200 */
+  --card-bg: #ffffff;
 
-  --shadow: 0 1px 10px rgba(0, 0, 0, 0.08);
+  --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
 
-  --nav-bg: #ffffff;
-  --nav-active-bg: #f2f2f2;
+  --nav-bg: rgba(248, 250, 252, 0.78);
+  --nav-active-bg: rgba(37, 99, 235, 0.1);
 
   --input-bg: #ffffff;
+
+  /* Accents */
+  --accent: #2563eb; /* blue-600 */
+  --accent-2: #22c55e; /* green-500 */
+  --accent-contrast: #ffffff;
+
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #22c55e;
+
+  /* Fancy */
+  --ring: color-mix(in oklab, var(--accent) 65%, transparent);
+  --selection: color-mix(in oklab, var(--accent) 22%, transparent);
 }
 
 :root[data-theme="dark"] {
-  --bg: #0b0c0f;
-  --fg: #f5f5f5;
-  --muted: rgba(245, 245, 245, 0.7);
+  /* Dark */
+  --bg: #0b1220; /* deep navy */
+  --fg: #e5e7eb; /* gray-200 */
+  --muted: #94a3b8; /* slate-400 */
 
-  --border: rgba(245, 245, 245, 0.16);
-  --card-bg: rgba(245, 245, 245, 0.06);
+  --border: rgba(226, 232, 240, 0.14);
+  --card-bg: rgba(226, 232, 240, 0.06);
 
-  --shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
 
-  --nav-bg: #0b0c0f;
-  --nav-active-bg: rgba(245, 245, 245, 0.12);
+  --nav-bg: rgba(11, 18, 32, 0.72);
+  --nav-active-bg: rgba(96, 165, 250, 0.16);
 
-  --input-bg: rgba(245, 245, 245, 0.06);
+  --input-bg: rgba(15, 23, 42, 0.68);
+
+  /* Accents */
+  --accent: #60a5fa; /* blue-400 */
+  --accent-2: #34d399; /* emerald-400 */
+  --accent-contrast: #07121f;
+
+  --danger: #fb7185;
+  --warning: #fbbf24;
+  --success: #34d399;
+
+  /* Fancy */
+  --ring: color-mix(in oklab, var(--accent) 60%, transparent);
+  --selection: color-mix(in oklab, var(--accent) 18%, transparent);
 }
 
 /* =========================
@@ -63,11 +90,17 @@ body {
     Arial;
 }
 
-/* Links: no underline por defecto (nav/control lo maneja por clases) */
+/* Links: content links get accent, nav/control manage color via classes */
 a {
-  color: inherit;
+  color: var(--accent);
   text-decoration: none;
-  opacity: 0.85;
+  opacity: 0.95;
+}
+
+a:hover {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--accent) 60%, transparent);
+  text-underline-offset: 3px;
 }
 
 /* Underline solo dentro del contenido, no en nav */
@@ -94,12 +127,12 @@ button {
   cursor: pointer;
 }
 
-/* Focus accesible */
+/* Focus accesible (accent ring) */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid color-mix(in oklab, var(--fg) 35%, transparent);
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
@@ -166,7 +199,8 @@ select:focus-visible {
 }
 
 .iconButton:hover {
-  background: var(--nav-active-bg);
+  background: color-mix(in oklab, var(--accent) 10%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--accent) 30%, var(--border));
 }
 
 .iconButton:active {
@@ -194,12 +228,14 @@ select:focus-visible {
   transition:
     transform 120ms ease,
     background 120ms ease,
-    color 120ms ease;
+    color 120ms ease,
+    border-color 120ms ease;
 }
 
 .navIconLink:hover {
   color: var(--fg);
-  background: var(--nav-active-bg);
+  background: color-mix(in oklab, var(--accent) 10%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--accent) 30%, var(--border));
 }
 
 .navIconLink:active {
@@ -207,8 +243,9 @@ select:focus-visible {
 }
 
 .navIconLink.isActive {
-  color: var(--fg);
+  color: var(--accent);
   background: var(--nav-active-bg);
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
 }
 
 /* =========================
@@ -238,12 +275,13 @@ select:focus-visible {
   transition:
     background 120ms ease,
     color 120ms ease,
-    transform 120ms ease;
+    transform 120ms ease,
+    border-color 120ms ease;
 }
 
 .bottomNavLink:hover {
   color: var(--fg);
-  background: var(--nav-active-bg);
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
 }
 
 .bottomNavLink:active {
@@ -251,7 +289,7 @@ select:focus-visible {
 }
 
 .bottomNavLink.active {
-  color: var(--fg);
+  color: var(--accent);
   background: var(--nav-active-bg);
 }
 
@@ -286,6 +324,10 @@ select:focus-visible {
     justify-content: space-around;
     align-items: center;
     padding: 0 10px;
+
+    /* nicer iOS feel */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 }
 
@@ -324,7 +366,7 @@ a {
 
 /* Keep text selection usable, but softer */
 ::selection {
-  background: color-mix(in oklab, var(--fg) 18%, transparent);
+  background: var(--selection);
 }
 
 /* Subtle pressed feedback instead of blue flash */
@@ -372,7 +414,7 @@ a:active,
   height: 40px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--fg) 10%, var(--bg));
+  background: color-mix(in oklab, var(--accent) 10%, var(--bg));
   overflow: hidden;
 }
 
@@ -407,8 +449,8 @@ a:active,
   height: calc(100% - 6px);
   border-radius: 999px;
 
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card-bg) 86%, var(--accent) 14%);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, var(--accent));
   box-shadow: var(--shadow);
 
   z-index: 1;
@@ -427,27 +469,6 @@ a:active,
 
 .unitSwitch[aria-checked="true"] .unitSwitch__labels > :last-child {
   color: var(--fg);
-}
-
-/* Dark theme adjustments (your system) */
-:root[data-theme="dark"] .unitSwitch__track {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.16);
-}
-
-:root[data-theme="dark"] .unitSwitch__thumb {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
-}
-
-:root[data-theme="dark"] .unitSwitch__labels {
-  color: rgba(245, 245, 245, 0.7);
-}
-
-:root[data-theme="dark"] .unitSwitch[aria-checked="false"] .unitSwitch__labels > :first-child,
-:root[data-theme="dark"] .unitSwitch[aria-checked="true"] .unitSwitch__labels > :last-child {
-  color: rgba(245, 245, 245, 0.95);
 }
 
 /* Weight input: centered, fixed width, big numbers */
@@ -481,6 +502,12 @@ a:active,
   background: transparent;
   padding: 0;
   cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  line-height: 0; /* 🔑 mata el baseline ghost */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -491,40 +518,42 @@ a:active,
 
 .appSwitch__track {
   position: relative;
-  display: inline-block;
   width: 52px;
   height: 32px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--fg) 14%, var(--bg));
-  transition: background 150ms ease;
+  background: color-mix(in oklab, var(--accent) 12%, var(--bg));
+  transition:
+    background 150ms ease,
+    border-color 150ms ease;
+
+  /* tweak */
+  --switch-inset: 2px;
+  --switch-x: 0px;
 }
 
 .appSwitch__thumb {
   position: absolute;
-  top: 3px;
-  left: 3px;
+  left: var(--switch-inset);
+  top: 50%;
   width: 26px;
   height: 26px;
   border-radius: 999px;
-  background: var(--bg);
+  background: var(--card-bg);
   box-shadow: var(--shadow);
+
+  transform: translate(var(--switch-x), -50%);
   transition: transform 150ms ease;
 }
 
 .appSwitch[aria-checked="true"] .appSwitch__track {
-  background: color-mix(in oklab, var(--fg) 28%, var(--bg));
+  background: color-mix(in oklab, var(--accent) 28%, var(--bg));
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+
+  /* 52 - 26 - 2*2 = 22 */
+  --switch-x: 20px;
 }
 
-.appSwitch[aria-checked="true"] .appSwitch__thumb {
-  transform: translateX(20px);
-}
-
-:root[data-theme="dark"] .appSwitch__track {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(245, 245, 245, 0.16);
-}
-
-:root[data-theme="dark"] .appSwitch[aria-checked="true"] .appSwitch__track {
-  background: rgba(255, 255, 255, 0.22);
-}
+/* .appSwitch[aria-checked="true"] .appSwitch__thumb { */
+/*   transform: translateX(20px); */
+/* } */
