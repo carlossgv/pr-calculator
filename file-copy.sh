@@ -28,9 +28,7 @@ add_file () {
 
 echo "Writing dump to: $OUT"
 
-add_file "apps/web/src/utils/equipment.ts"
-add_file "packages/core/src/types.ts" 
-add_file "packages/core/src/index.ts" 
+add_file "apps/web/src/global.css"
 
 echo "DONE ✅  Open the file with:"
 echo "  less -R $OUT"
