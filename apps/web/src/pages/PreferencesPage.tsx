@@ -30,24 +30,15 @@ function barValueFor(unit: Unit, gender: BarGender): number {
 }
 
 function barLabelFor(unit: Unit, gender: BarGender): string {
-  // language-neutral label (evita i18n extra y siempre calza con el valor)
   const v = barValueFor(unit, gender);
   return `${v} ${unit} bar`;
 }
 
 function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
-  // back-compat si existiera data vieja con "system"
   if ((p as any).theme === "system") return detectSystemTheme();
   return p.theme === "dark" ? "dark" : "light";
 }
 
-/**
- * Fuerza invariantes de UserPreferences para TS y para evitar estados “a medias”.
- * - defaultUnit siempre existe
- * - bar.unit siempre coincide con defaultUnit
- * - bar.value siempre existe (si no, pone uno razonable)
- * - bar.label siempre calza con bar.value (evita “20kg bar” mostrando 15kg)
- */
 function ensurePrefs(
   p: Partial<UserPreferences> & { defaultUnit?: Unit; bar?: any },
   fallback: UserPreferences,
@@ -62,7 +53,13 @@ function ensurePrefs(
         : barValueFor(unit, "male");
 
   const nextGender: BarGender =
-    unit === "lb" ? (barValue === 35 ? "female" : "male") : barValue === 15 ? "female" : "male";
+    unit === "lb"
+      ? barValue === 35
+        ? "female"
+        : "male"
+      : barValue === 15
+        ? "female"
+        : "male";
 
   return {
     ...(fallback as UserPreferences),
@@ -91,7 +88,6 @@ export function PreferencesPage() {
 
   useEffect(() => {
     repo.getPreferences().then((p) => {
-      // normaliza para asegurar label consistente desde data vieja
       const safe = ensurePrefs(p, p);
       setPrefs(safe);
       setBarGender(inferGenderFromPrefs(safe));
@@ -131,7 +127,6 @@ export function PreferencesPage() {
   function applyPreset(preset: UserPreferences) {
     if (!prefs) return;
 
-    // Mantener gender actual, aplicar preset pero con invariantes
     const unit: Unit = preset.defaultUnit;
     const v = barValueFor(unit, barGender);
 
@@ -177,17 +172,12 @@ export function PreferencesPage() {
   }
 
   const isFemale = barGender === "female";
-
-  // Preset hints dinámicos (antes estaban hardcodeados a hombre)
   const olympicHint = `${barValueFor("kg", barGender)}kg bar, kg plates`;
   const crossfitHint = `${barValueFor("lb", barGender)}lb bar, lb plates + kg change`;
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <h2 className={styles.title}>{t.nav.preferences}</h2>
-        <div className={styles.subtitle}>{t.appName}</div>
-      </header>
+      {/* ✅ Header eliminado: ya existe en AppLayout */}
 
       {/* THEME */}
       <section className={styles.section} aria-label={t.prefs.theme.title}>

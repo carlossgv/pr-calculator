@@ -1,6 +1,6 @@
 // apps/web/src/ui/AppLayout.tsx
-import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import type { UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
@@ -43,13 +43,63 @@ function BottomNav() {
   );
 }
 
+function DevBadge({ isDev }: { isDev: boolean }) {
+  if (!isDev) return null;
+
+  return (
+    <span
+      style={{
+        marginLeft: 8,
+        fontSize: 11,
+        fontWeight: 800,
+        letterSpacing: 0.6,
+        padding: "3px 8px",
+        borderRadius: 999,
+        border: "1px solid var(--border)",
+        background: "rgba(124, 58, 237, 0.14)",
+      }}
+      aria-label="Development environment"
+      title="Development environment"
+    >
+      DEV
+    </span>
+  );
+}
+
 export function AppLayout() {
   const [, setPrefs] = useState<UserPreferences | null>(null);
+  const location = useLocation();
+
+  // ✅ Source of truth: build-time env (matches manifest/index.html)
+  const appEnv = import.meta.env.VITE_APP_ENV ?? "prod";
+  const isDev = appEnv === "dev";
+  const appTitle = import.meta.env.VITE_APP_TITLE || t.appName;
+
+  const routeTitle = useMemo(() => {
+    const p = location.pathname;
+
+    if (p === "/") return t.nav.home;
+    if (p.startsWith("/movements")) return t.nav.movements;
+    if (p.startsWith("/preferences")) return t.nav.preferences;
+    return appTitle;
+  }, [location.pathname, appTitle]);
+
+  useEffect(() => {
+    // ✅ Tab title / app switcher title
+    const suffix = isDev ? " (DEV)" : "";
+    // If routeTitle == appTitle, don't duplicate
+    const final =
+      routeTitle === appTitle
+        ? `${appTitle}${suffix}`
+        : `${routeTitle} · ${appTitle}${suffix}`;
+
+    document.title = final;
+  }, [routeTitle, appTitle, isDev]);
 
   useEffect(() => {
     repo.getPreferences().then(async (p) => {
       // Back-compat: si alguien todavía tiene "system", lo resolvemos y persistimos.
-      if (p.theme === "system") {
+      if ((p as any).theme === "system") {
         const resolved = detectSystemTheme();
         const next: UserPreferences = { ...p, theme: resolved };
         await repo.setPreferences(next);
@@ -67,7 +117,10 @@ export function AppLayout() {
     <div className="appShell">
       <header className="topHeader">
         <div className="topLeft">
-          <h1 className="appTitle">{t.appName}</h1>
+          <h1 className="appTitle">
+            {appTitle}
+            <DevBadge isDev={isDev} />
+          </h1>
         </div>
 
         <div className="topRight">
