@@ -183,19 +183,15 @@ export function PercentCards({
           const isSelected = pct === selectedPct;
           const is100 = pct === 100;
 
-          const className = [
-            styles.tile,
-            is100 ? styles.tileMax : "",
-            isSelected ? styles.tileSelected : "",
-          ]
-            .filter(Boolean)
-            .join(" ");
+const className = styles.tile;
 
           return (
             <button
               key={pct}
               type="button"
               className={className}
+              data-variant={is100 ? "max" : "base"}
+              data-state={isSelected ? "selected" : "idle"}
               onClick={() => selectPct(pct)}
               aria-pressed={isSelected}
             >

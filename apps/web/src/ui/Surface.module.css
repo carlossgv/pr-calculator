@@ -6,32 +6,35 @@
   min-width: 0;
 }
 
+/* FILE: apps/web/src/ui/Surface.module.css */
+
 .card {
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--card-bg) 92%, var(--bg)),
-    var(--card-bg)
-  );
+  background: var(--card-bg);
   overflow: hidden;
   box-shadow: var(--shadow);
 }
 
 .panel {
-  border: 2px solid color-mix(in oklab, var(--accent) 35%, var(--border));
+  border: 2px solid color-mix(in oklab, var(--accent) 28%, var(--border));
   border-radius: 18px;
   padding: 12px;
 
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--accent) 10%, var(--card-bg)) 0%,
-    var(--card-bg) 70%
-  );
+  background: var(--card-bg);
 
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
+}
+
+/* dark: si quieres un toque “premium”, que sea sutil y SOLO en dark */
+:global([data-theme="dark"]) .panel {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--fg) 6%, var(--card-bg)) 0%,
+    var(--card-bg) 75%
+  );
 }
 
 .flat {

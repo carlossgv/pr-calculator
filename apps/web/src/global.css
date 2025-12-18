@@ -1,87 +1,95 @@
 /* apps/web/src/global.css */
 
+/* FILE: apps/web/src/global.css */
+
 :root {
-  /* THEME: Neon Punch */
-  --bg: #f7f8ff;
-  --fg: #0b1020;
-  --muted: #44506a;
+  /* THEME: Modern Pulse */
 
-  --border: rgba(17, 24, 39, 0.1);
+  /* Light */
+  --bg: #f6f7fb;          /* near-neutral (menos lavanda) */
+  --fg: #0b1220;          /* ink */
+  --muted: #55627a;       /* slate-ish */
 
-  --nav-bg: rgba(247, 248, 255, 0.75);
-  --nav-active-bg: color-mix(in oklab, var(--accent) 18%, transparent);
+  --border: rgba(15, 23, 42, 0.14);
 
-  --input-bg: rgba(255, 255, 255, 0.92);
+  --nav-bg: rgba(246, 247, 251, 0.78);
+  --nav-active-bg: color-mix(in oklab, var(--accent) 14%, transparent);
 
-  --accent: #00d4ff; /* neon cyan */
-  --accent-2: #ff2fb2; /* hot pink */
-  --accent-3: #f97316; /* orange pop */
-  --accent-contrast: #06101a;
+  --input-bg: rgba(255, 255, 255, 0.96);
 
-  --danger: #ff3b5c;
-  --warning: #ffb020;
-  --success: #18e299;
+  /* Accents (menos neon, más “product”) */
+  --accent: #2563eb;      /* blue-600 */
+  --accent-2: #7c3aed;    /* violet-600 */
+  --accent-3: #f59e0b;    /* amber-500 */
+  --accent-contrast: #f8fafc;
+
+  /* Feedback */
+  --danger: #e11d48;      /* rose-600 */
+  --warning: #f59e0b;     /* amber-500 */
+  --success: #16a34a;     /* green-600 */
 
   --ink: color-mix(in oklab, var(--fg) 92%, black);
-  --paper: color-mix(in oklab, var(--bg) 88%, white);
+  --paper: color-mix(in oklab, var(--bg) 94%, white);
 
   /* Surfaces */
-  --card-bg: color-mix(in oklab, var(--paper) 80%, white);
-  --shadow: 0 16px 40px rgba(2, 6, 23, 0.14);
+  --card-bg: #ffffff;
+  --shadow: 0 12px 26px rgba(2, 6, 23, 0.10);
 
-  /* Fancy */
-  --ring: color-mix(in oklab, var(--accent) 75%, transparent);
-  --selection: color-mix(in oklab, var(--accent) 28%, transparent);
+  /* Fancy (ring/selection más “calm”) */
+  --ring: color-mix(in oklab, var(--accent) 52%, transparent);
+  --selection: color-mix(in oklab, var(--accent) 18%, transparent);
 
-  /* Utility bits */
-  --sticker-bg: color-mix(in oklab, var(--accent) 14%, var(--card-bg));
-  --sticker-border: color-mix(in oklab, var(--accent) 55%, var(--border));
-  --sticker-shadow: 0 10px 20px rgba(2, 6, 23, 0.12);
-  --hard-shadow: 0 10px 0 rgba(2, 6, 23, 0.12);
+  /* Utility bits (siguen funcionando con tus componentes) */
+  --sticker-bg: color-mix(in oklab, var(--accent) 10%, var(--card-bg));
+  --sticker-border: color-mix(in oklab, var(--accent) 35%, var(--border));
+  --sticker-shadow: 0 10px 20px rgba(2, 6, 23, 0.10);
+  --hard-shadow: 0 10px 0 rgba(2, 6, 23, 0.10);
 
   --barcode: repeating-linear-gradient(
     90deg,
-    color-mix(in oklab, var(--fg) 55%, transparent) 0 2px,
+    color-mix(in oklab, var(--fg) 46%, transparent) 0 2px,
     transparent 2px 5px
   );
 }
 
 :root[data-theme="dark"] {
-  --bg: #070913;
+  /* Dark (menos “neón retro”, más “dashboard moderno”) */
+  --bg: #0b1020;          /* deep navy */
   --fg: #eef2ff;
-  --muted: #a7b0c6;
+  --muted: #a3adc2;
 
   --border: rgba(255, 255, 255, 0.12);
 
-  --nav-bg: rgba(7, 9, 19, 0.74);
-  --nav-active-bg: color-mix(in oklab, var(--accent) 22%, transparent);
+  --nav-bg: rgba(11, 16, 32, 0.72);
+  --nav-active-bg: color-mix(in oklab, var(--accent) 18%, transparent);
 
   --input-bg: rgba(255, 255, 255, 0.06);
 
-  --accent: #00d4ff;
-  --accent-2: #ff2fb2;
-  --accent-3: #ff8a3d;
-  --accent-contrast: #041019;
+  /* Accents (mismos hues, ajustados para dark) */
+  --accent: #60a5fa;      /* blue-400 */
+  --accent-2: #a78bfa;    /* violet-400 */
+  --accent-3: #fbbf24;    /* amber-400 */
+  --accent-contrast: #0b1020;
 
-  --danger: #ff5a7a;
-  --warning: #ffd24a;
-  --success: #2ef2b3;
+  --danger: #fb7185;      /* rose-400 */
+  --warning: #fbbf24;     /* amber-400 */
+  --success: #4ade80;     /* green-400 */
 
   --paper: color-mix(in oklab, var(--bg) 92%, black);
-  --card-bg: color-mix(in oklab, var(--paper) 70%, white 10%);
-  --shadow: 0 18px 48px rgba(0, 0, 0, 0.62);
+  --card-bg: #111a33;     /* más neutro, menos “purple haze” */
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
 
-  --ring: color-mix(in oklab, var(--accent) 62%, transparent);
-  --selection: color-mix(in oklab, var(--accent) 20%, transparent);
+  --ring: color-mix(in oklab, var(--accent) 44%, transparent);
+  --selection: color-mix(in oklab, var(--accent) 14%, transparent);
 
-  --sticker-bg: color-mix(in oklab, var(--accent) 18%, var(--card-bg));
-  --sticker-border: color-mix(in oklab, var(--accent) 60%, var(--border));
+  --sticker-bg: color-mix(in oklab, var(--accent) 12%, var(--card-bg));
+  --sticker-border: color-mix(in oklab, var(--accent) 40%, var(--border));
   --sticker-shadow: 0 14px 30px rgba(0, 0, 0, 0.42);
   --hard-shadow: 0 10px 0 rgba(0, 0, 0, 0.35);
 
   --barcode: repeating-linear-gradient(
     90deg,
-    color-mix(in oklab, var(--fg) 45%, transparent) 0 2px,
+    color-mix(in oklab, var(--fg) 36%, transparent) 0 2px,
     transparent 2px 5px
   );
 }
