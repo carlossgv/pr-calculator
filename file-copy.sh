@@ -28,11 +28,14 @@ add_file () {
 
 echo "Writing dump to: $OUT"
 
+add_file "apps/web/index.html"
 add_file "apps/web/vite.config.ts"
-add_file "apps/web/package.json"
 add_file "apps/web/src/main.tsx"
-add_file "apps/web/src/ui/AppLayout.tsx"
 add_file "apps/web/src/global.css"
+add_file "apps/web/src/theme/theme.ts"
+add_file "apps/web/src/components/ThemeToggle.tsx"
+add_file "apps/web/src/components/ThemeSwitcher.tsx"
+add_file "apps/web/src/storage/repo.ts"
 
 echo "DONE ✅  Open the file with:"
 echo "  less -R $OUT"
