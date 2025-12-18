@@ -16,6 +16,8 @@ export const router = createBrowserRouter(
         { index: true, element: <HomePage /> },
         { path: "preferences", element: <PreferencesPage /> },
         { path: "movements", element: <MovementsPage /> },
+
+        // ✅ new explicit manage route (preferred)
         {
           path: "movements/:movementId/manage",
           element: <MovementDetailsPage />,
@@ -29,4 +31,9 @@ export const router = createBrowserRouter(
       ],
     },
   ],
+  // {
+  //   future: {
+  //     v7_startTransition: true,
+  //   },
+  // },
 );

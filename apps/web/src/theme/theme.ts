@@ -13,32 +13,6 @@ export function toResolvedTheme(pref: ThemePreference): ResolvedTheme {
   return detectSystemTheme();
 }
 
-function setMetaThemeColor(color: string) {
-  let meta = document.querySelector(
-    'meta[name="theme-color"]',
-  ) as HTMLMetaElement | null;
-
-  if (!meta) {
-    meta = document.createElement("meta");
-    meta.name = "theme-color";
-    document.head.appendChild(meta);
-  }
-
-  meta.content = color;
-}
-
-function syncThemeColorWithCssBg() {
-  // toma el token real ya aplicado por CSS (light/dark)
-  const bg = getComputedStyle(document.documentElement)
-    .getPropertyValue("--bg")
-    .trim();
-
-  if (bg) setMetaThemeColor(bg);
-}
-
 export function applyTheme(resolved: ResolvedTheme) {
   document.documentElement.dataset.theme = resolved;
-
-  // ✅ Android: pinta status bar/task switcher usando el mismo fondo de la app
-  syncThemeColorWithCssBg();
 }

@@ -7,6 +7,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // 👇 Queremos avisar y dejar que el usuario elija.
+      // "autoUpdate" se siente “mágico” y puede saltarse la UX que quieres.
       registerType: "prompt",
       includeAssets: ["favicon.ico", "apple-touch-icon.png"],
       manifest: {
@@ -15,19 +17,12 @@ export default defineConfig({
         description: "Calculadora de cargas y PRs para entrenamiento.",
         start_url: "/",
         display: "standalone",
-
-        background_color: "#0b1220",
-        theme_color: "#0b1220",
-
+        background_color: "#ffffff",
+        theme_color: "#ffffff",
         icons: [
           { src: "/pwa-192.png", sizes: "192x192", type: "image/png" },
           { src: "/pwa-512.png", sizes: "512x512", type: "image/png" },
-          {
-            src: "/pwa-512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any maskable",
-          },
+          { src: "/pwa-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
         ],
       },
     }),
