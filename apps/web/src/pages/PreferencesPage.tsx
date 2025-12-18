@@ -1,19 +1,23 @@
-// apps/web/src/pages/PreferencesPage.tsx
+/* apps/web/src/pages/PreferencesPage.tsx */
 import { useEffect, useMemo, useState } from "react";
-import type { Unit, UserPreferences } from "@repo/core";
+import type {
+  Plate,
+  Unit,
+  UnitContext,
+  UserPreferences,
+  Weight,
+} from "@repo/core";
 import { DEFAULT_PREFS, CROSSFIT_LB_WITH_KG_CHANGES } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { Switch } from "../components/Switch";
 import { ThemeToggle } from "../components/ThemeToggle";
-import {
-  applyTheme,
-  type ResolvedTheme,
-} from "../theme/theme";
-import { Mars, Venus, ChevronRight } from "lucide-react";
+import { applyTheme, type ResolvedTheme } from "../theme/theme";
+import { Mars, Venus, ChevronRight, Check } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
 
 type BarGender = "male" | "female";
+type PresetKey = "olympicKg" | "crossfitLb" | null;
 
 function inferGenderFromPrefs(p: UserPreferences): BarGender {
   const unit = p.defaultUnit;
@@ -80,6 +84,47 @@ function onRowKeyDown(e: React.KeyboardEvent, onActivate: () => void) {
   }
 }
 
+function eqWeight(a: Weight, b: Weight) {
+  return a.unit === b.unit && a.value === b.value;
+}
+
+function eqPlates(a: Plate[], b: Plate[]) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i].unit !== b[i].unit) return false;
+    if (a[i].value !== b[i].value) return false;
+  }
+  return true;
+}
+
+function eqContexts(
+  a: Record<Unit, UnitContext>,
+  b: Record<Unit, UnitContext>,
+) {
+  return a.kg === b.kg && a.lb === b.lb;
+}
+
+function inferSelectedPreset(p: UserPreferences): PresetKey {
+  // para “preset seleccionado” ignoramos theme y bar (bar cambia por gender)
+  const isOlympic =
+    p.defaultUnit === DEFAULT_PREFS.defaultUnit &&
+    eqContexts(p.contexts, DEFAULT_PREFS.contexts) &&
+    eqWeight(p.rounding, DEFAULT_PREFS.rounding) &&
+    eqPlates(p.plates, DEFAULT_PREFS.plates);
+
+  if (isOlympic) return "olympicKg";
+
+  const isCrossfit =
+    p.defaultUnit === CROSSFIT_LB_WITH_KG_CHANGES.defaultUnit &&
+    eqContexts(p.contexts, CROSSFIT_LB_WITH_KG_CHANGES.contexts) &&
+    eqWeight(p.rounding, CROSSFIT_LB_WITH_KG_CHANGES.rounding) &&
+    eqPlates(p.plates, CROSSFIT_LB_WITH_KG_CHANGES.plates);
+
+  if (isCrossfit) return "crossfitLb";
+
+  return null;
+}
+
 export function PreferencesPage() {
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [barGender, setBarGender] = useState<BarGender>("male");
@@ -101,6 +146,11 @@ export function PreferencesPage() {
   const barUnit = useMemo<Unit>(() => {
     return prefs?.defaultUnit ?? "kg";
   }, [prefs?.defaultUnit]);
+
+  const selectedPreset = useMemo<PresetKey>(() => {
+    if (!prefs) return null;
+    return inferSelectedPreset(prefs);
+  }, [prefs]);
 
   if (!prefs) return <p>{t.home.loading}</p>;
 
@@ -173,6 +223,9 @@ export function PreferencesPage() {
   const olympicHint = `${barValueFor("kg", barGender)}kg bar, kg plates`;
   const crossfitHint = `${barValueFor("lb", barGender)}lb bar, lb plates + kg change`;
 
+  const olympicActive = selectedPreset === "olympicKg";
+  const crossfitActive = selectedPreset === "crossfitLb";
+
   return (
     <div className={styles.page}>
       {/* ✅ Header eliminado: ya existe en AppLayout */}
@@ -217,36 +270,40 @@ export function PreferencesPage() {
         </div>
 
         <div className={styles.card}>
-          <div className={styles.row}>
+<div className={styles.row}>
             <div className={styles.rowLeft}>
               <div className={styles.rowTitle}>{t.prefs.bar.genderTitle}</div>
               <div className={styles.rowHint}>{t.prefs.bar.genderHint}</div>
             </div>
 
             <div className={styles.rowRight}>
-              <span
-                aria-hidden="true"
-                title={t.prefs.bar.male}
-                className={styles.genderPill}
-                data-active={!isFemale}
-              >
-                <Mars size={18} />
-              </span>
+              <div className={styles.genderCluster}>
+                <span
+                  aria-hidden="true"
+                  title={t.prefs.bar.male}
+                  className={styles.genderPill}
+                  data-active={!isFemale}
+                >
+                  <Mars size={18} />
+                </span>
 
-              <Switch
-                checked={isFemale}
-                onCheckedChange={(next) => setGender(next ? "female" : "male")}
-                ariaLabel={t.prefs.bar.genderToggleAria}
-              />
+                <span className={styles.switchWrap}>
+                  <Switch
+                    checked={isFemale}
+                    onCheckedChange={(next) => setGender(next ? "female" : "male")}
+                    ariaLabel={t.prefs.bar.genderToggleAria}
+                  />
+                </span>
 
-              <span
-                aria-hidden="true"
-                title={t.prefs.bar.female}
-                className={styles.genderPill}
-                data-active={isFemale}
-              >
-                <Venus size={18} />
-              </span>
+                <span
+                  aria-hidden="true"
+                  title={t.prefs.bar.female}
+                  className={styles.genderPill}
+                  data-active={isFemale}
+                >
+                  <Venus size={18} />
+                </span>
+              </div>
             </div>
           </div>
 
@@ -274,6 +331,8 @@ export function PreferencesPage() {
           <button
             type="button"
             className={styles.actionRow}
+            data-active={olympicActive}
+            aria-pressed={olympicActive}
             onClick={() => applyPreset(DEFAULT_PREFS)}
           >
             <div className={styles.actionLeft}>
@@ -282,16 +341,30 @@ export function PreferencesPage() {
               </div>
               <div className={styles.actionHint}>{olympicHint}</div>
             </div>
-            <ChevronRight
-              className={styles.chev}
-              size={18}
-              aria-hidden="true"
-            />
+
+            <div className={styles.actionRight}>
+              {olympicActive ? (
+                <span
+                  className={styles.selectedPill}
+                  aria-hidden="true"
+                  title="Selected"
+                >
+                  <Check size={16} />
+                </span>
+              ) : null}
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
+            </div>
           </button>
 
           <button
             type="button"
             className={styles.actionRow}
+            data-active={crossfitActive}
+            aria-pressed={crossfitActive}
             onClick={() => applyPreset(CROSSFIT_LB_WITH_KG_CHANGES)}
           >
             <div className={styles.actionLeft}>
@@ -300,11 +373,23 @@ export function PreferencesPage() {
               </div>
               <div className={styles.actionHint}>{crossfitHint}</div>
             </div>
-            <ChevronRight
-              className={styles.chev}
-              size={18}
-              aria-hidden="true"
-            />
+
+            <div className={styles.actionRight}>
+              {crossfitActive ? (
+                <span
+                  className={styles.selectedPill}
+                  aria-hidden="true"
+                  title="Selected"
+                >
+                  <Check size={16} />
+                </span>
+              ) : null}
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
+            </div>
           </button>
         </div>
       </section>

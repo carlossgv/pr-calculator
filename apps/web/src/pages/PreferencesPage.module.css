@@ -76,7 +76,9 @@
   cursor: pointer;
   user-select: none;
 
-  transition: background 120ms ease, transform 120ms ease;
+  transition:
+    background 120ms ease,
+    transform 120ms ease;
 }
 
 .rowPressable:hover {
@@ -188,7 +190,9 @@
   padding: 14px 16px;
   cursor: pointer;
 
-  transition: background 120ms ease, transform 120ms ease;
+  transition:
+    background 120ms ease,
+    transform 120ms ease;
 }
 
 .actionRow + .actionRow {
@@ -228,4 +232,70 @@
 
 .chev {
   opacity: 0.55;
+}
+
+.genderRight {
+  gap: 8px; /* antes 10px */
+}
+
+.genderRight .genderPill {
+  width: 34px;
+  height: 34px;
+}
+
+/* 2) PRESET selection feedback: “pressed”/selected sin matar el chevron */
+.actionRow[data-active="true"] {
+  background: color-mix(in oklab, var(--accent) 9%, transparent);
+}
+
+.actionRow[data-active="true"] .actionTitle {
+  color: color-mix(in oklab, var(--fg) 88%, var(--accent));
+}
+
+.actionRight {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.selectedPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--border));
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--fg);
+}
+
+/* apps/web/src/pages/PreferencesPage.module.css */
+/* agrega esto al final */
+
+/* Cluster fijo: icono / switch / icono */
+.genderCluster {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px; /* 👈 lo que querías */
+  width: max-content; /* 👈 no se estira */
+  flex: 0 0 auto;
+}
+
+/* fuerza al switch a NO crecer */
+.switchWrap {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 48px; /* ajusta si tu switch real es 42/48 */
+  justify-content: center;
+}
+
+/* opcional: un pelín más compactos */
+.genderPill {
+  width: 34px;
+  height: 34px;
 }
