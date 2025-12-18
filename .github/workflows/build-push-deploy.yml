@@ -150,4 +150,4 @@ jobs:
             -H "Tags: rocket,staging" \
             -H "Priority: default" \
             -d "Env: staging | Service: pr-calculator-web-dev | Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
-            https://ntfy.carlosgv.dev/pr-calculator >/dev/null 2>&1 || true
+            https://ntfy.carlosgv.dev/deployments >/dev/null 2>&1 || true
