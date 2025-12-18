@@ -8,13 +8,13 @@ export default defineConfig(() => {
   const isDev = appEnv === "dev";
 
   const appName = isDev ? "PR Calculator Dev" : "PR Calculator";
-  const appShort = isDev ? "PR Calc -dev" : "PR Calc";
+  const appShort = isDev ? "PR Calc - Dev" : "PR Calc";
 
   return {
     plugins: [
       react(),
       VitePWA({
-        registerType: "prompt",
+        registerType: "autoUpdate",
         manifest: {
           name: appName,
           short_name: appShort,
@@ -24,8 +24,6 @@ export default defineConfig(() => {
           display: "standalone",
           theme_color: isDev ? "#7c3aed" : "#2563eb",
           background_color: "#0b1220",
-
-          // ✅ mismos iconos para prod/dev (no tocamos nada por ahora)
           icons: [
             { src: "/pwa/icon-192.png", sizes: "192x192", type: "image/png" },
             { src: "/pwa/icon-512.png", sizes: "512x512", type: "image/png" },

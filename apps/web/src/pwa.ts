@@ -3,8 +3,18 @@ import { registerSW } from "virtual:pwa-register";
 
 export type PwaUpdateSnapshot = {
   offlineReady: boolean;
+
+  /**
+   * En autoUpdate normalmente NO lo necesitas, pero lo dejamos como fallback
+   * si el navegador deja un SW en waiting (puede pasar).
+   */
   needRefresh: boolean;
-  dismissed: boolean; // user hid the banner for this session
+
+  /**
+   * En autoUpdate el banner debería ser opcional. Lo dejamos por compatibilidad
+   * con tu UI actual.
+   */
+  dismissed: boolean;
 };
 
 type Listener = (s: PwaUpdateSnapshot) => void;
@@ -18,7 +28,9 @@ let snapshot: PwaUpdateSnapshot = {
 let listeners: Listener[] = [];
 let updateServiceWorkerFn: ((reloadPage?: boolean) => Promise<void>) | null =
   null;
+
 let initialized = false;
+let registrationRef: ServiceWorkerRegistration | null = null;
 
 function emit(next: Partial<PwaUpdateSnapshot>) {
   snapshot = { ...snapshot, ...next };
@@ -33,26 +45,49 @@ export function subscribePwa(listener: Listener) {
   };
 }
 
+function setupForegroundUpdateCheck() {
+  if (typeof document === "undefined") return;
+
+  // Cuando el usuario vuelve a la app, fuerza un check del SW.
+  const onVis = () => {
+    if (document.visibilityState !== "visible") return;
+    registrationRef?.update().catch(() => {});
+  };
+
+  document.addEventListener("visibilitychange", onVis, { passive: true });
+}
+
 export function initPwa() {
   if (initialized) return;
   initialized = true;
 
   updateServiceWorkerFn = registerSW({
     immediate: true,
+
     onOfflineReady() {
       emit({ offlineReady: true });
     },
+
+    // En autoUpdate esto puede disparar rara vez; lo dejamos por si acaso.
     onNeedRefresh() {
-      // reset dismiss when a real update arrives
       emit({ needRefresh: true, dismissed: false });
     },
-    onRegisteredSW(
-      _swUrl: string,
-      _registration: ServiceWorkerRegistration | undefined,
-    ) {
-      // no-op
+
+    onRegisteredSW(_swUrl, registration) {
+      registrationRef = registration ?? null;
+
+      // Check inmediato al registrar.
+      registrationRef?.update().catch(() => {});
+
+      // Check cada cierto tiempo mientras la app está abierta (opcional).
+      setInterval(() => {
+        registrationRef?.update().catch(() => {});
+      }, 30 * 60 * 1000); // 30 min
+
+      setupForegroundUpdateCheck();
     },
-    onRegisterError(_error: unknown) {
+
+    onRegisterError(_error) {
       // no-op
     },
   });
@@ -60,7 +95,8 @@ export function initPwa() {
 
 /**
  * Reiniciar ahora:
- * - Activa el SW nuevo (skipWaiting) y recarga la app.
+ * - Fuerza el SW nuevo (si hay) y recarga.
+ * - Útil como botón “por si acaso”.
  */
 export async function pwaRestartNow() {
   if (!updateServiceWorkerFn) return;
@@ -68,17 +104,20 @@ export async function pwaRestartNow() {
 }
 
 /**
- * Actualizar al reabrir:
- * - Activa el SW nuevo pero NO recarga.
- * - La nueva versión se verá al cerrar y abrir la app.
+ * En autoUpdate, “update on reopen” es menos relevante porque el SW se activa solo,
+ * pero lo dejamos por compatibilidad: intenta activar sin recargar.
  */
 export async function pwaUpdateOnReopen() {
   if (!updateServiceWorkerFn) return;
   await updateServiceWorkerFn(false);
-  // Ocultamos banner por esta sesión para que no moleste.
   emit({ dismissed: true });
 }
 
 export function pwaDismiss() {
   emit({ dismissed: true });
+}
+
+/** Por si tu UI quiere limpiar el estado tras mostrar un toast/modal */
+export function pwaResetFlags() {
+  emit({ offlineReady: false, needRefresh: false });
 }

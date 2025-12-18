@@ -1,7 +1,7 @@
-// apps/web/src/components/PwaUpdateBanner.tsx
+/* apps/web/src/components/PwaUpdateBanner.tsx */
 import { useEffect, useState } from "react";
 import type { PwaUpdateSnapshot } from "../pwa";
-import { pwaDismiss, pwaRestartNow, pwaUpdateOnReopen, subscribePwa } from "../pwa";
+import { pwaDismiss, pwaRestartNow, subscribePwa } from "../pwa";
 
 export function PwaUpdateBanner() {
   const [s, setS] = useState<PwaUpdateSnapshot>({
@@ -10,53 +10,42 @@ export function PwaUpdateBanner() {
     dismissed: false,
   });
 
-  const [busy, setBusy] = useState<"now" | "later" | null>(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => subscribePwa(setS), []);
 
-  // Solo mostramos cuando hay update y el usuario no lo cerró.
+  /**
+   * Con registerType: "autoUpdate":
+   * - La app intentará actualizar sola.
+   * - Este banner queda como fallback cuando el navegador deja un SW esperando.
+   * - La forma coherente de "aplicar" es: reiniciar (reload).
+   */
   if (!s.needRefresh || s.dismissed) return null;
 
   return (
     <div className="pwaToast" role="status" aria-live="polite">
       <div className="pwaToast__content">
-        <div className="pwaToast__title">Nueva versión disponible</div>
+        <div className="pwaToast__title">Actualización lista</div>
         <div className="pwaToast__subtitle">
-          Puedes reiniciar ahora o actualizar cuando vuelvas a abrir.
+          Para aplicar los cambios, reinicia la app.
         </div>
       </div>
 
       <div className="pwaToast__actions">
         <button
           type="button"
-          className="pwaToast__btn pwaToast__btn--ghost"
-          disabled={busy !== null}
-          onClick={async () => {
-            try {
-              setBusy("later");
-              await pwaUpdateOnReopen();
-            } finally {
-              setBusy(null);
-            }
-          }}
-        >
-          {busy === "later" ? "Preparando…" : "Al reabrir"}
-        </button>
-
-        <button
-          type="button"
           className="pwaToast__btn pwaToast__btn--primary"
-          disabled={busy !== null}
+          disabled={busy}
           onClick={async () => {
             try {
-              setBusy("now");
+              setBusy(true);
               await pwaRestartNow();
             } finally {
-              setBusy(null);
+              setBusy(false);
             }
           }}
         >
-          {busy === "now" ? "Reiniciando…" : "Reiniciar"}
+          {busy ? "Reiniciando…" : "Reiniciar"}
         </button>
 
         <button
@@ -64,7 +53,7 @@ export function PwaUpdateBanner() {
           className="pwaToast__btn pwaToast__btn--icon"
           aria-label="Cerrar"
           title="Cerrar"
-          disabled={busy !== null}
+          disabled={busy}
           onClick={() => pwaDismiss()}
         >
           ✕
