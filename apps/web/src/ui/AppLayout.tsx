@@ -74,46 +74,17 @@ function DevBadge({ isDev }: { isDev: boolean }) {
 
 export function AppLayout() {
   const [, setPrefs] = useState<UserPreferences | null>(null);
-  const location = useLocation();
 
-  // ✅ Source of truth: build-time env (matches manifest/index.html)
   const appEnv = import.meta.env.VITE_APP_ENV ?? "prod";
   const isDev = appEnv === "dev";
-  const appTitle = import.meta.env.VITE_APP_TITLE || t.appName;
-
-  const routeTitle = useMemo(() => {
-    const p = location.pathname;
-
-    if (p === "/") return t.nav.home;
-    if (p.startsWith("/movements")) return t.nav.movements;
-    if (p.startsWith("/preferences")) return t.nav.preferences;
-    return appTitle;
-  }, [location.pathname, appTitle]);
+  const appTitle = t.appName;
 
   useEffect(() => {
-    // ✅ Tab title / app switcher title
-    const suffix = isDev ? " (DEV)" : "";
-    // If routeTitle == appTitle, don't duplicate
-    const final =
-      routeTitle === appTitle
-        ? `${appTitle}${suffix}`
-        : `${routeTitle} · ${appTitle}${suffix}`;
-
-    document.title = final;
-  }, [routeTitle, appTitle, isDev]);
+    document.title = isDev ? `${appTitle} (DEV)` : appTitle;
+  }, [appTitle, isDev]);
 
   useEffect(() => {
     repo.getPreferences().then(async (p) => {
-      // Back-compat: si alguien todavía tiene "system", lo resolvemos y persistimos.
-      if ((p as any).theme === "system") {
-        const resolved = detectSystemTheme();
-        const next: UserPreferences = { ...p, theme: resolved };
-        await repo.setPreferences(next);
-        setPrefs(next);
-        applyTheme(resolved);
-        return;
-      }
-
       setPrefs(p);
       applyTheme(p.theme);
     });
