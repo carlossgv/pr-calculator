@@ -1,4 +1,4 @@
-/* apps/web/src/pages/MovementDetailsPage.module.css */
+/* FILE: apps/web/src/pages/MovementDetailsPage.module.css */
 
 .page {
   display: grid;
@@ -22,22 +22,6 @@
 .title {
   margin: 0;
   font-size: 18px;
-}
-
-.card {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px;
-  display: grid;
-  gap: 12px;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow: hidden; /* por si algún hijo se pasa */
-}
-
-.cardTitle {
-  margin: 0;
 }
 
 .form {
@@ -68,7 +52,6 @@
   color-scheme: light dark;
 }
 
-/* icono calendario en dark */
 :global(:root[data-theme="dark"]) .dateInput::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(1.1);
   opacity: 0.9;
@@ -90,13 +73,6 @@
   overflow-wrap: anywhere;
 }
 
-.primaryBtn {
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  font-weight: 900;
-}
-
 /* -------- Weight × Reps row -------- */
 
 .setRow {
@@ -111,7 +87,6 @@
   min-width: 0;
 }
 
-/* 🔑 esto evita overflow en grids/flex */
 .field :global(input) {
   width: 100%;
   min-width: 0;
@@ -140,7 +115,6 @@
   line-height: 1;
 }
 
-/* en pantallas MUY chicas, baja a 2 filas */
 @media (max-width: 360px) {
   .setRow {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -201,8 +175,6 @@
 }
 
 .item {
-  border: 1px solid var(--border);
-  border-radius: 12px;
   padding: 12px;
   display: grid;
   gap: 10px;
@@ -255,37 +227,4 @@
 .editGrid {
   display: grid;
   gap: 10px;
-}
-
-.actionBtn {
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-}
-
-.actionBtnStrong {
-  font-weight: 900;
-}
-
-.iconBtn {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  color: var(--fg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.iconBtn:active {
-  transform: translateY(1px);
-}
-
-.iconBtnDanger {
-  border-color: color-mix(in oklab, var(--danger) 45%, var(--border));
-  background: color-mix(in oklab, var(--danger) 10%, var(--card-bg));
-  color: var(--danger);
 }

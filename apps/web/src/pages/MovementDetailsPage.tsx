@@ -1,4 +1,4 @@
-// apps/web/src/pages/MovementDetailsPage.tsx
+// FILE: apps/web/src/pages/MovementDetailsPage.tsx
 import { Calculator, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -8,6 +8,14 @@ import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { UnitPill } from "../components/UnitPill";
 import { NumberInput } from "../components/NumberInput";
+import {
+  ActionButton,
+  Chip,
+  IconButton,
+  Sticker,
+  Surface,
+  SurfaceHeader,
+} from "../ui/Surface";
 import styles from "./MovementDetailsPage.module.css";
 
 function uid() {
@@ -110,14 +118,10 @@ export function MovementDetailsPage() {
   }, [id]);
 
   const sorted = useMemo(() => {
-    // repo ya viene ordenado, esto es solo "seguro" por si cambias backend
     return [...entries].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }, [entries]);
 
-  function normalizeToDefaultUnit(input: {
-    value: number;
-    unit: Unit;
-  }): number {
+  function normalizeToDefaultUnit(input: { value: number; unit: Unit }): number {
     const def = prefs?.defaultUnit ?? "kg";
     if (input.unit === def) return input.value;
     return round1(convertWeightValue(input.value, input.unit, def));
@@ -211,6 +215,15 @@ export function MovementDetailsPage() {
     }
   }
 
+  async function deleteEntry(e: PrEntry) {
+    const ok = window.confirm(
+      `Delete PR ${toDateInputValue(e.date)} · ${e.weight} × ${e.reps}?`,
+    );
+    if (!ok) return;
+    await repo.deletePrEntry(e.id);
+    await reload();
+  }
+
   function goCalc(targetWeight: number) {
     const unit: Unit = (prefs?.defaultUnit ?? "kg") as Unit;
     navigate(`/movements/${id}/calc/${unit}/${targetWeight}`);
@@ -218,12 +231,14 @@ export function MovementDetailsPage() {
 
   if (loading) return <p>{t.movement.loading}</p>;
 
+  const unit = prefs?.defaultUnit ?? "kg";
+
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
         <Link to="/movements">{t.movement.back}</Link>
         <Link
-          to={`/movements/${id}/calc/${prefs?.defaultUnit ?? "kg"}/100`}
+          to={`/movements/${id}/calc/${unit}/100`}
           className={styles.topLink}
         >
           Calculator
@@ -232,8 +247,12 @@ export function MovementDetailsPage() {
 
       <h2 className={styles.title}>{movement?.name ?? t.movement.title}</h2>
 
-      <section className={styles.card}>
-        <h3 className={styles.cardTitle}>{t.movement.prs}</h3>
+      <Surface variant="panel" aria-label={t.movement.prs}>
+        <SurfaceHeader
+          leftLabel={<Sticker stamp={<span>MANAGE</span>}>PR CALC</Sticker>}
+          rightChip={<Chip tone="accent3">{unit}</Chip>}
+          showBarcode
+        />
 
         <div className={styles.form}>
           <label className={styles.label}>
@@ -275,22 +294,18 @@ export function MovementDetailsPage() {
               </div>
             </div>
 
-{prefs ? (
-  <div className={styles.hint}>
-    {t.movement.savedIn} {prefs.defaultUnit}
-  </div>
-) : null}
+            {prefs ? (
+              <div className={styles.hint}>
+                {t.movement.savedIn} {prefs.defaultUnit}
+              </div>
+            ) : null}
           </label>
 
           {error ? <div className={styles.error}>{error}</div> : null}
 
-          <button
-            type="button"
-            onClick={addEntry}
-            className={styles.primaryBtn}
-          >
+          <ActionButton variant="primary" fullWidth onClick={addEntry}>
             {t.movement.add}
-          </button>
+          </ActionButton>
         </div>
 
         <div className={styles.divider}>
@@ -303,7 +318,7 @@ export function MovementDetailsPage() {
             const isEditing = editingEntryId === e.id;
 
             return (
-              <div key={e.id} className={styles.item}>
+              <Surface key={e.id} variant="card" className={styles.item}>
                 {isEditing ? (
                   <>
                     <input
@@ -348,20 +363,12 @@ export function MovementDetailsPage() {
                     </div>
 
                     <div className={styles.actions}>
-                      <button
-                        type="button"
-                        onClick={saveEditEntry}
-                        className={`${styles.actionBtn} ${styles.actionBtnStrong}`}
-                      >
+                      <ActionButton variant="primary" onClick={saveEditEntry}>
                         Save
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setEditingEntryId(null)}
-                        className={styles.actionBtn}
-                      >
+                      </ActionButton>
+                      <ActionButton onClick={() => setEditingEntryId(null)}>
                         Cancel
-                      </button>
+                      </ActionButton>
                     </div>
                   </>
                 ) : (
@@ -370,50 +377,43 @@ export function MovementDetailsPage() {
                       <b>{toDateInputValue(e.date)}</b>
                       <span className={styles.itemMetaText}>
                         {e.weight} × {e.reps}{" "}
-                        <span className={styles.unitHint}>
-                          {prefs?.defaultUnit}
-                        </span>
+                        <span className={styles.unitHint}>{unit}</span>
                       </span>
                     </div>
 
                     <div className={styles.actions}>
-                      <button
-                        type="button"
-                        onClick={() => goCalc(e.weight)}
-                        className={styles.iconBtn}
-                        aria-label="Calculator"
+                      <IconButton
+                        ariaLabel="Calculator"
                         title="Calculator"
+                        onClick={() => goCalc(e.weight)}
                       >
                         <Calculator size={18} />
-                      </button>
+                      </IconButton>
 
-                      <button
-                        type="button"
-                        onClick={() => startEditEntry(e)}
-                        className={styles.iconBtn}
-                        aria-label="Edit"
+                      <IconButton
+                        ariaLabel="Edit"
                         title="Edit"
+                        onClick={() => startEditEntry(e)}
                       >
                         <Pencil size={18} />
-                      </button>
+                      </IconButton>
 
-                      <button
-                        type="button"
-                        onClick={() => repo.deletePrEntry(e.id).then(reload)}
-                        className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
-                        aria-label="Delete"
+                      <IconButton
+                        variant="danger"
+                        ariaLabel="Delete"
                         title="Delete"
+                        onClick={() => deleteEntry(e)}
                       >
                         <Trash2 size={18} />
-                      </button>
+                      </IconButton>
                     </div>
                   </div>
                 )}
-              </div>
+              </Surface>
             );
           })}
         </div>
-      </section>
+      </Surface>
     </div>
   );
 }
