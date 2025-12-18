@@ -1,67 +1,89 @@
 /* apps/web/src/global.css */
 
-/* =========================
-   Theme tokens (more color ✨)
-   ========================= */
-
 :root {
-  /* Light */
-  --bg: #f8fafc; /* slate-50 */
-  --fg: #0f172a; /* slate-900 */
-  --muted: #475569; /* slate-600 */
+  /* THEME: Neon Punch */
+  --bg: #f7f8ff;
+  --fg: #0b1020;
+  --muted: #44506a;
 
-  --border: #e2e8f0; /* slate-200 */
-  --card-bg: #ffffff;
+  --border: rgba(17, 24, 39, 0.1);
 
-  --shadow: 0 10px 24px rgba(2, 6, 23, 0.08);
+  --nav-bg: rgba(247, 248, 255, 0.75);
+  --nav-active-bg: color-mix(in oklab, var(--accent) 18%, transparent);
 
-  --nav-bg: rgba(248, 250, 252, 0.78);
-  --nav-active-bg: rgba(37, 99, 235, 0.1);
+  --input-bg: rgba(255, 255, 255, 0.92);
 
-  --input-bg: #ffffff;
+  --accent: #00d4ff; /* neon cyan */
+  --accent-2: #ff2fb2; /* hot pink */
+  --accent-3: #f97316; /* orange pop */
+  --accent-contrast: #06101a;
 
-  /* Accents */
-  --accent: #2563eb; /* blue-600 */
-  --accent-2: #22c55e; /* green-500 */
-  --accent-contrast: #ffffff;
+  --danger: #ff3b5c;
+  --warning: #ffb020;
+  --success: #18e299;
 
-  --danger: #ef4444;
-  --warning: #f59e0b;
-  --success: #22c55e;
+  --ink: color-mix(in oklab, var(--fg) 92%, black);
+  --paper: color-mix(in oklab, var(--bg) 88%, white);
+
+  /* Surfaces */
+  --card-bg: color-mix(in oklab, var(--paper) 80%, white);
+  --shadow: 0 16px 40px rgba(2, 6, 23, 0.14);
 
   /* Fancy */
-  --ring: color-mix(in oklab, var(--accent) 65%, transparent);
-  --selection: color-mix(in oklab, var(--accent) 22%, transparent);
+  --ring: color-mix(in oklab, var(--accent) 75%, transparent);
+  --selection: color-mix(in oklab, var(--accent) 28%, transparent);
+
+  /* Utility bits */
+  --sticker-bg: color-mix(in oklab, var(--accent) 14%, var(--card-bg));
+  --sticker-border: color-mix(in oklab, var(--accent) 55%, var(--border));
+  --sticker-shadow: 0 10px 20px rgba(2, 6, 23, 0.12);
+  --hard-shadow: 0 10px 0 rgba(2, 6, 23, 0.12);
+
+  --barcode: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--fg) 55%, transparent) 0 2px,
+    transparent 2px 5px
+  );
 }
 
 :root[data-theme="dark"] {
-  /* Dark */
-  --bg: #0b1220; /* deep navy */
-  --fg: #e5e7eb; /* gray-200 */
-  --muted: #94a3b8; /* slate-400 */
+  --bg: #070913;
+  --fg: #eef2ff;
+  --muted: #a7b0c6;
 
-  --border: rgba(226, 232, 240, 0.14);
-  --card-bg: rgba(226, 232, 240, 0.06);
+  --border: rgba(255, 255, 255, 0.12);
 
-  --shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+  --nav-bg: rgba(7, 9, 19, 0.74);
+  --nav-active-bg: color-mix(in oklab, var(--accent) 22%, transparent);
 
-  --nav-bg: rgba(11, 18, 32, 0.72);
-  --nav-active-bg: rgba(96, 165, 250, 0.16);
+  --input-bg: rgba(255, 255, 255, 0.06);
 
-  --input-bg: rgba(15, 23, 42, 0.68);
+  --accent: #00d4ff;
+  --accent-2: #ff2fb2;
+  --accent-3: #ff8a3d;
+  --accent-contrast: #041019;
 
-  /* Accents */
-  --accent: #60a5fa; /* blue-400 */
-  --accent-2: #34d399; /* emerald-400 */
-  --accent-contrast: #07121f;
+  --danger: #ff5a7a;
+  --warning: #ffd24a;
+  --success: #2ef2b3;
 
-  --danger: #fb7185;
-  --warning: #fbbf24;
-  --success: #34d399;
+  --paper: color-mix(in oklab, var(--bg) 92%, black);
+  --card-bg: color-mix(in oklab, var(--paper) 70%, white 10%);
+  --shadow: 0 18px 48px rgba(0, 0, 0, 0.62);
 
-  /* Fancy */
-  --ring: color-mix(in oklab, var(--accent) 60%, transparent);
-  --selection: color-mix(in oklab, var(--accent) 18%, transparent);
+  --ring: color-mix(in oklab, var(--accent) 62%, transparent);
+  --selection: color-mix(in oklab, var(--accent) 20%, transparent);
+
+  --sticker-bg: color-mix(in oklab, var(--accent) 18%, var(--card-bg));
+  --sticker-border: color-mix(in oklab, var(--accent) 60%, var(--border));
+  --sticker-shadow: 0 14px 30px rgba(0, 0, 0, 0.42);
+  --hard-shadow: 0 10px 0 rgba(0, 0, 0, 0.35);
+
+  --barcode: repeating-linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--fg) 45%, transparent) 0 2px,
+    transparent 2px 5px
+  );
 }
 
 /* =========================
@@ -75,7 +97,7 @@
 html,
 body {
   height: 100%;
-  overflow-x: hidden; /* ✅ evita “salirse” horizontal en mobile */
+  overflow-x: hidden;
 }
 
 body {
@@ -91,7 +113,7 @@ body {
     Arial;
 }
 
-/* Links: content links get accent, nav/control manage color via classes */
+/* Links: content links get accent */
 a {
   color: var(--accent);
   text-decoration: none;
@@ -110,7 +132,7 @@ a:hover {
 }
 
 /* =========================
-   Form controls
+   Form controls (base)
    ========================= */
 
 input,
@@ -128,7 +150,7 @@ button {
   cursor: pointer;
 }
 
-/* Focus accesible (accent ring) */
+/* Focus accesible */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -165,11 +187,6 @@ select:focus-visible {
   display: flex;
   gap: 10px;
   white-space: nowrap;
-}
-
-.topControls {
-  display: flex;
-  align-items: center;
 }
 
 .appTitle {
@@ -225,7 +242,7 @@ select:focus-visible {
   background: var(--card-bg);
   color: var(--muted);
 
-  opacity: 1; /* override del <a> global */
+  opacity: 1;
   transition:
     transform 120ms ease,
     background 120ms ease,
@@ -257,7 +274,6 @@ select:focus-visible {
   display: none;
 }
 
-/* Mobile bottom nav: item con icon + label */
 .bottomNavLink {
   display: flex;
   flex-direction: column;
@@ -272,7 +288,7 @@ select:focus-visible {
   border-radius: 14px;
   color: var(--muted);
 
-  opacity: 1; /* override del <a> global */
+  opacity: 1;
   transition:
     background 120ms ease,
     color 120ms ease,
@@ -328,22 +344,8 @@ select:focus-visible {
     align-items: center;
     padding: 0 10px;
 
-    /* nicer iOS feel */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-  }
-}
-
-.form-grid-2 {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 1fr 1fr;
-}
-
-/* Mobile phones (realistic): avoid 2-column forms */
-@media (max-width: 520px) {
-  .form-grid-2 {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -351,7 +353,6 @@ select:focus-visible {
    Native-app tap feel
    ========================= */
 
-/* Remove blue tap highlight ONLY on interactive elements */
 button,
 a,
 [role="button"],
@@ -361,18 +362,15 @@ a,
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Prevent iOS long-press callout on buttons/links */
 button,
 a {
   -webkit-touch-callout: none;
 }
 
-/* Keep text selection usable, but softer */
 ::selection {
   background: var(--selection);
 }
 
-/* Subtle pressed feedback instead of blue flash */
 button:active,
 a:active,
 .navIconLink:active,
@@ -381,13 +379,8 @@ a:active,
   transform: translateY(1px);
 }
 
-.cardButton {
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
-}
-
 /* =========================
-   Custom controls
+   Custom controls (shared)
    ========================= */
 
 /* Ensure custom button-like components don't inherit global button/input styling */
@@ -396,7 +389,7 @@ a:active,
   border: 0 !important;
   background: transparent !important;
   padding: 0 !important;
-  min-width: 168px; /* reserve space in flex rows */
+  min-width: 168px;
 }
 
 /* ---- Unit switch (KG/LB) ---- */
@@ -414,7 +407,7 @@ a:active,
 .unitSwitch__track {
   position: relative;
   display: inline-block;
-  width: min(168px, 100%); /* ✅ no overflow en móvil */
+  width: min(168px, 100%);
   height: 40px;
   border-radius: 999px;
   border: 1px solid var(--border);
@@ -475,60 +468,7 @@ a:active,
   color: var(--fg);
 }
 
-/* ✅ Fallback if color-mix is not supported (or buggy on mobile Chromium builds) */
-@supports not (background: color-mix(in oklab, white 10%, black)) {
-  .unitSwitch__track {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-  }
-
-  :root:not([data-theme="dark"]) .unitSwitch__track {
-    background: rgba(2, 6, 23, 0.04);
-    border: 1px solid rgba(2, 6, 23, 0.12);
-  }
-
-  .unitSwitch__thumb {
-    background: var(--card-bg);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: var(--shadow);
-  }
-
-  .unitSwitch__labels {
-    color: var(--muted);
-  }
-
-  .unitSwitch[aria-checked="false"] .unitSwitch__labels > :first-child,
-  .unitSwitch[aria-checked="true"] .unitSwitch__labels > :last-child {
-    color: var(--fg);
-  }
-}
-
-/* Weight input: centered, fixed width, big numbers */
-.weightInput {
-  width: min(240px, 100%);
-  text-align: center;
-  font-size: 28px;
-  font-weight: 900;
-  letter-spacing: 0.5px;
-  padding: 14px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--input-bg);
-  color: var(--fg);
-}
-
-/* Remove spinners (optional, looks more app-like) */
-.weightInput::-webkit-outer-spin-button,
-.weightInput::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.weightInput[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* iOS-like switch */
+/* ---- iOS-like switch ---- */
 .appSwitch {
   border: 0;
   background: transparent;
@@ -539,7 +479,7 @@ a:active,
   align-items: center;
   justify-content: center;
 
-  line-height: 0; /* 🔑 mata el baseline ghost */
+  line-height: 0;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -581,23 +521,18 @@ a:active,
 .appSwitch[aria-checked="true"] .appSwitch__track {
   background: color-mix(in oklab, var(--accent) 28%, var(--bg));
   border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
-
-  /* visual > matemático */
   --switch-x: 20px;
 }
 
-
-/* apps/web/src/global.css */
-
 /* =========================
-   PWA Update Toast (pro)
+   PWA Update Toast
    ========================= */
 
 .pwaToast {
   position: fixed;
   left: 12px;
   right: 12px;
-  bottom: 74px; /* arriba del bottom nav */
+  bottom: 74px;
   z-index: 9999;
 
   display: flex;
@@ -673,7 +608,6 @@ a:active,
   justify-content: center;
 }
 
-/* Desktop/tablet: abajo-derecha y sin tapar contenido */
 @media (min-width: 720px) {
   .pwaToast {
     left: auto;

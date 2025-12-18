@@ -1,4 +1,5 @@
 // apps/web/src/components/WeightCalculatorPanel.tsx
+// FILE: apps/web/src/components/WeightCalculatorPanel.tsx
 import { useEffect, useMemo, useState } from "react";
 import type { Unit, UserPreferences } from "@repo/core";
 import { convertWeightValue } from "@repo/core";
@@ -6,10 +7,8 @@ import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { PercentCards } from "../components/PercentCards";
 import { prefsForUnit } from "../utils/equipment";
-import { ContextBadge } from "../components/ContextBadge";
-import { nearestLoadableTotalUnlimited } from "../utils/nearest-loadable";
 import { UnitSwitch } from "./UnitSwitch";
-import { Switch } from "./Switch";
+import styles from "./WeightCalculatorPanel.module.css";
 
 function round1(n: number) {
   return Math.round(n * 10) / 10;
@@ -31,6 +30,24 @@ type Props = {
   onChange?: (payload: ChangePayload) => void;
 };
 
+function contextChipWord(ctx: unknown): string {
+  const id =
+    typeof ctx === "string"
+      ? ctx
+      : typeof ctx === "object" && ctx
+        ? (ctx as any).id ?? (ctx as any).kind ?? (ctx as any).name
+        : "";
+
+  const s = String(id ?? "").toLowerCase();
+
+  if (s.includes("cross")) return "crossfit";
+  if (s.includes("olym")) return "olympics";
+  if (s === "olympic") return "olympics";
+  if (s === "crossfit") return "crossfit";
+
+  return "context";
+}
+
 export function WeightCalculatorPanel({
   mode,
   title,
@@ -44,7 +61,6 @@ export function WeightCalculatorPanel({
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [rawWeight, setRawWeight] = useState<number>(initialWeight ?? 100);
-  const [roundToPlates, setRoundToPlates] = useState(false);
 
   useEffect(() => {
     if (initialUnit) setUnit(initialUnit);
@@ -66,21 +82,6 @@ export function WeightCalculatorPanel({
     return prefsForUnit(prefs, unit);
   }, [prefs, unit]);
 
-  const rounding = useMemo(() => {
-    if (!effectivePrefs) return null;
-    return nearestLoadableTotalUnlimited({
-      targetTotal: rawWeight,
-      unit,
-      bar: effectivePrefs.bar,
-      plates: effectivePrefs.plates,
-    });
-  }, [effectivePrefs, rawWeight, unit]);
-
-  const displayWeight =
-    roundToPlates && rounding && Number.isFinite(rounding.total)
-      ? rounding.total
-      : rawWeight;
-
   function emit(nextUnit: Unit, nextWeight: number) {
     onChange?.({ unit: nextUnit, weight: nextWeight });
   }
@@ -93,128 +94,61 @@ export function WeightCalculatorPanel({
   }
 
   useEffect(() => {
-    emit(unit, displayWeight);
+    emit(unit, rawWeight);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unit, displayWeight]);
+  }, [unit, rawWeight]);
 
   if (!prefs || !effectivePrefs) return <p>{t.home.loading}</p>;
 
+  const contextWord = contextChipWord(prefs.contexts?.[unit]);
+
   return (
-    <div style={{ display: "grid", gap: 12 }}>
+    <div className={styles.root}>
       {title ? <h2 style={{ margin: 0 }}>{title}</h2> : null}
 
-      <section
-        style={{
-          border: "1px solid var(--border)",
-          borderRadius: 14,
-          padding: 12,
-          display: "grid",
-          gap: 12,
-        }}
-      >
-        {/* Row 1: unit + context */}
-        <div
-          style={{
-            display: "flex",
-            gap: 10,
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-          }}
-        >
-          <UnitSwitch value={unit} onChange={switchUnit} />
+      <section className={styles.panel}>
+        <div className={styles.header}>
+          <span className={styles.utilLabel}>
+            PR CALC <span className={styles.stamp}>LIVE</span>
+          </span>
 
-          <ContextBadge context={prefs.contexts[unit]} />
+          <span className={styles.contextChip}>{contextWord}</span>
         </div>
 
-        {/* Weight */}
-        {mode === "editable" ? (
-          <div style={{ display: "grid", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 700 }}>
-                Max
-              </span>
-              <span style={{ fontSize: 12, opacity: 0.6 }}>
-                100%
-              </span>
-            </div>
+        <div className={styles.barcodeRule} />
 
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <input
-                className="weightInput"
-                type="number"
-                inputMode="decimal"
-                value={rawWeight}
-                onChange={(e) => setRawWeight(Number(e.target.value))}
-              />
-            </div>
+        <div className={styles.topRow}>
+          <UnitSwitch value={unit} onChange={switchUnit} />
+        </div>
+
+        {mode === "editable" ? (
+          <div className={styles.weightInputWrap}>
+            <input
+              className={styles.weightInput}
+              type="number"
+              inputMode="decimal"
+              value={rawWeight}
+              onChange={(e) => setRawWeight(Number(e.target.value))}
+              aria-label={t.home.maxWeight}
+            />
+            <span className={styles.weightInputUnit} aria-hidden="true">
+              {unit}
+            </span>
           </div>
         ) : (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "baseline",
-              gap: 12,
-            }}
-          >
-            <div style={{ display: "grid", gap: 4 }}>
-              <span style={{ fontSize: 13, opacity: 0.8 }}>
-                Max · 100%
-              </span>
-              <div style={{ fontSize: 26, fontWeight: 900 }}>
-                {displayWeight}{" "}
-                <span style={{ fontSize: 14, opacity: 0.7 }}>{unit}</span>
-              </div>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ fontSize: 34, fontWeight: 950 }}>
+              {rawWeight} <span style={{ fontSize: 14, opacity: 0.9 }}>{unit}</span>
             </div>
-
-            {roundToPlates && rounding ? (
-              <div style={{ textAlign: "right", fontSize: 12, opacity: 0.75 }}>
-                <div>nearest loadable</div>
-                <div>
-                  Δ {round1(rounding.delta)} {unit}
-                </div>
-              </div>
-            ) : null}
           </div>
         )}
 
-        {/* Round row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-          }}
-        >
-          <div style={{ display: "grid", gap: 2 }}>
-            <span style={{ fontSize: 13, fontWeight: 700 }}>
-              Round to nearest plates
-            </span>
-            {roundToPlates &&
-            rounding &&
-            Number.isFinite(rounding.stepTotal) ? (
-              <span style={{ fontSize: 12, opacity: 0.75 }}>
-                step {round1(rounding.stepTotal)} {unit} total
-              </span>
-            ) : (
-              <span style={{ fontSize: 12, opacity: 0.75 }}>
-                match your available plates
-              </span>
-            )}
-          </div>
-
-          <Switch
-            checked={roundToPlates}
-            onCheckedChange={setRoundToPlates}
-            ariaLabel="Round to nearest plates"
-          />
-        </div>
+        {/* TODO: Reintroduce "Snap to plates" as an Advanced option or Preferences setting.
+            It adds cognitive load on the Home flow; keep the quick calc clean. */}
       </section>
 
       <PercentCards
-        maxWeight={displayWeight}
+        maxWeight={rawWeight}
         unit={unit}
         prefs={effectivePrefs}
         fromPct={fromPct}

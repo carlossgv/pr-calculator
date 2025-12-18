@@ -1,10 +1,10 @@
 // apps/web/src/ui/AppLayout.tsx
-import { useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, Outlet } from "react-router-dom";
 import type { UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
-import { applyTheme, detectSystemTheme } from "../theme/theme";
+import { applyTheme, toResolvedTheme } from "../theme/theme";
 import { Home, Dumbbell, Settings } from "lucide-react";
 import { PwaUpdateBanner } from "../components/PwaUpdateBanner";
 
@@ -84,9 +84,9 @@ export function AppLayout() {
   }, [appTitle, isDev]);
 
   useEffect(() => {
-    repo.getPreferences().then(async (p) => {
+    repo.getPreferences().then((p) => {
       setPrefs(p);
-      applyTheme(p.theme);
+      applyTheme(toResolvedTheme(p.theme));
     });
   }, []);
 
@@ -138,8 +138,6 @@ export function AppLayout() {
       </main>
 
       <BottomNav />
-
-      {/* 👇 Overlay global para update pro */}
       <PwaUpdateBanner />
     </div>
   );

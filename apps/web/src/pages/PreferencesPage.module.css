@@ -1,26 +1,9 @@
-/* apps/web/src/pages/PreferencesPage.module.css */
+/* FILE: apps/web/src/pages/PreferencesPage.module.css */
 
 .page {
   display: grid;
   gap: 18px;
   padding-bottom: 6px;
-}
-
-.header {
-  display: grid;
-  gap: 2px;
-}
-
-.title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: 0.2px;
-}
-
-.subtitle {
-  font-size: 12px;
-  opacity: 0.7;
 }
 
 .section {
@@ -37,6 +20,8 @@
   padding-left: 2px;
 }
 
+/* ===== Card ===== */
+
 .card {
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -46,8 +31,10 @@
     var(--card-bg)
   );
   overflow: hidden;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--shadow);
 }
+
+/* ===== Rows ===== */
 
 .row,
 .rowPressable {
@@ -66,7 +53,6 @@
   border-top: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
 }
 
-/* Full-width tappable row (no <button>) */
 .rowPressable {
   display: flex;
   align-items: center;
@@ -94,11 +80,21 @@
   outline-offset: 2px;
 }
 
+/* ===== Row layout ===== */
+
 .rowLeft {
   min-width: 0;
   flex: 1 1 auto;
   display: grid;
   gap: 4px;
+}
+
+.rowRight {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .rowTitle {
@@ -118,14 +114,6 @@
   overflow: hidden;
 }
 
-.rowRight {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
 .iconWrap {
   display: inline-flex;
 }
@@ -134,13 +122,24 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ===== Gender selector ===== */
+
+.genderCluster {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  width: max-content;
+  flex: 0 0 auto;
+}
+
 .genderPill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
 
   border-radius: 999px;
   border: 1px solid var(--border);
@@ -153,6 +152,15 @@
   color: var(--fg);
   border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
 }
+
+.switchWrap {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 48px;
+  justify-content: center;
+}
+
+/* ===== Value pill ===== */
 
 .valuePill {
   display: inline-flex;
@@ -173,6 +181,8 @@
   opacity: 0.75;
   font-weight: 900;
 }
+
+/* ===== Presets ===== */
 
 .actionRow {
   appearance: none;
@@ -207,6 +217,14 @@
   transform: translateY(1px);
 }
 
+.actionRow[data-active="true"] {
+  background: color-mix(in oklab, var(--accent) 9%, transparent);
+}
+
+.actionRow[data-active="true"] .actionTitle {
+  color: color-mix(in oklab, var(--fg) 88%, var(--accent));
+}
+
 .actionLeft {
   min-width: 0;
   display: grid;
@@ -230,33 +248,15 @@
   overflow: hidden;
 }
 
-.chev {
-  opacity: 0.55;
-}
-
-.genderRight {
-  gap: 8px; /* antes 10px */
-}
-
-.genderRight .genderPill {
-  width: 34px;
-  height: 34px;
-}
-
-/* 2) PRESET selection feedback: “pressed”/selected sin matar el chevron */
-.actionRow[data-active="true"] {
-  background: color-mix(in oklab, var(--accent) 9%, transparent);
-}
-
-.actionRow[data-active="true"] .actionTitle {
-  color: color-mix(in oklab, var(--fg) 88%, var(--accent));
-}
-
 .actionRight {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 10px;
+}
+
+.chev {
+  opacity: 0.55;
 }
 
 .selectedPill {
@@ -271,31 +271,4 @@
   border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--border));
   background: color-mix(in oklab, var(--accent) 14%, transparent);
   color: var(--fg);
-}
-
-/* apps/web/src/pages/PreferencesPage.module.css */
-/* agrega esto al final */
-
-/* Cluster fijo: icono / switch / icono */
-.genderCluster {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 5px; /* 👈 lo que querías */
-  width: max-content; /* 👈 no se estira */
-  flex: 0 0 auto;
-}
-
-/* fuerza al switch a NO crecer */
-.switchWrap {
-  display: inline-flex;
-  flex: 0 0 auto;
-  width: 48px; /* ajusta si tu switch real es 42/48 */
-  justify-content: center;
-}
-
-/* opcional: un pelín más compactos */
-.genderPill {
-  width: 34px;
-  height: 34px;
 }

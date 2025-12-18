@@ -1,4 +1,5 @@
 // apps/web/src/i18n/strings.en.ts
+// FILE: apps/web/src/i18n/strings.en.ts
 export const en = {
   appName: "PR Calculator",
   nav: {
@@ -18,6 +19,13 @@ export const en = {
     perSideTotal: "Per side total",
     bar: "Bar",
     achieved: "Achieved",
+
+    // NEW: snap / rounding
+    snapTitle: "Snap to plates",
+    snapAria: "Toggle snap to plates",
+    snapHintOff: "Keeps results loadable",
+    snapDelta: "Δ",
+    snapStep: "step",
   },
   prefs: {
     unit: "Unit",

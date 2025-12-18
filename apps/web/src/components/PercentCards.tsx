@@ -1,4 +1,5 @@
-/* apps/web/src/components/PercentCards.tsx */
+// apps/web/src/components/PercentCards.tsx
+// FILE: apps/web/src/components/PercentCards.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { calculateLoad, type Unit, type UserPreferences } from "@repo/core";
 import { t } from "../i18n/strings";
@@ -34,10 +35,7 @@ function formatPickLabel(
     : `${round1(valueInUnit)} ${unit}`;
 }
 
-function platesPerSideLabel(
-  load: ReturnType<typeof calculateLoad>,
-  unit: Unit,
-) {
+function platesPerSideLabel(load: ReturnType<typeof calculateLoad>, unit: Unit) {
   if (load.platesPerSide.length === 0) return "—";
   return load.platesPerSide
     .map((p) =>
@@ -56,14 +54,15 @@ export function PercentCards({
 }: Props) {
   const [selectedPct, setSelectedPct] = useState<number | null>(null);
 
-  // mobile-only: reserve bottom space for the fixed detail
   const detailRef = useRef<HTMLElement | null>(null);
-  const [detailSpacePx, setDetailSpacePx] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 520px)");
-    const update = () => setIsMobile(mq.matches);
+
+    const update = (ev?: MediaQueryListEvent) => {
+      setIsMobile(ev ? ev.matches : mq.matches);
+    };
 
     update();
 
@@ -72,8 +71,8 @@ export function PercentCards({
       return () => mq.removeEventListener("change", update);
     }
 
-    mq.addListener(update);
-    return () => mq.removeListener(update);
+    (mq as any).addListener(update);
+    return () => (mq as any).removeListener(update);
   }, []);
 
   const cards = useMemo(() => {
@@ -103,75 +102,82 @@ export function PercentCards({
     setSelectedPct((prev) => (prev === pct ? null : pct));
   }
 
+  function close() {
+    setSelectedPct(null);
+  }
+
   useEffect(() => {
-    if (!isMobile || !selected) {
-      setDetailSpacePx(0);
-      return;
-    }
+    if (!selected) return;
 
-    const el = detailRef.current;
-    if (!el) return;
-
-    const EXTRA = 12;
-    const measure = () => {
-      const h = el.getBoundingClientRect().height;
-      setDetailSpacePx(Math.ceil(h + EXTRA));
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
     };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selected]);
 
-    measure();
+  const detailContent = selected ? (
+    <>
+      <div className={styles.detailTitle}>
+        {selected.pct}% · {round1(selected.target)}
+        {unit}
+      </div>
 
-    const ro = new ResizeObserver(() => measure());
-    ro.observe(el);
+      <div className={styles.detailKpi}>
+        <div className={styles.detailKpiLabel}>{t.home.platesPerSide}</div>
+        <div className={[styles.detailKpiValue, styles.detailClamp].join(" ")}>
+          {platesPerSideLabel(selected.load, unit)}
+        </div>
+      </div>
 
-    return () => ro.disconnect();
-  }, [selected, isMobile]);
+      <div className={styles.detailKpi}>
+        <div className={styles.detailKpiLabel}>{t.home.perSideTotal}</div>
+        <div className={styles.detailKpiValue}>
+          {round1(selected.load.perSide)}
+          {unit}
+        </div>
+      </div>
+
+      <div className={styles.detailRow}>
+        <b>{t.home.bar}:</b>{" "}
+        {formatPickLabel(
+          selected.load.bar.plate.label,
+          selected.load.bar.plate.unit,
+          selected.load.bar.valueInUnit,
+          unit,
+        )}
+      </div>
+
+      <div className={styles.detailAchieved}>
+        {t.home.achieved}: {round1(selected.load.achievedTotal)}
+        {unit} (Δ {round1(selected.load.delta)}
+        {unit})
+      </div>
+    </>
+  ) : null;
 
   return (
-    <div
-      className={styles.root}
-      style={
-        {
-          ["--percent-detail-space" as any]: `${detailSpacePx}px`,
-        } as React.CSSProperties
-      }
-    >
-      {/* DETAIL (desktop inline; mobile fixed via CSS) */}
+    <div className={styles.root}>
       {selected ? (
         <section ref={detailRef as any} className={styles.detail}>
-          <div className={styles.detailTitle}>
-            {selected.pct}% · {round1(selected.target)}
-            {unit}
-          </div>
-
-          <div className={styles.detailRow}>
-            <b>{t.home.bar}:</b>{" "}
-            {formatPickLabel(
-              selected.load.bar.plate.label,
-              selected.load.bar.plate.unit,
-              selected.load.bar.valueInUnit,
-              unit,
-            )}
-          </div>
-
-          <div className={[styles.detailRow, styles.detailClamp].join(" ")}>
-            <b>{t.home.platesPerSide}:</b>{" "}
-            {platesPerSideLabel(selected.load, unit)}
-          </div>
-
-          <div className={styles.detailRow}>
-            <b>{t.home.perSideTotal}:</b> {round1(selected.load.perSide)}
-            {unit}
-          </div>
-
-          <div className={styles.detailAchieved}>
-            {t.home.achieved}: {round1(selected.load.achievedTotal)}
-            {unit} (Δ {round1(selected.load.delta)}
-            {unit})
-          </div>
+          {detailContent}
         </section>
       ) : null}
 
-      {/* GRID */}
+      {isMobile && selected ? (
+        <div
+          className={styles.overlay}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Percent detail"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) close();
+          }}
+        >
+          <section className={styles.modal}>{detailContent}</section>
+        </div>
+      ) : null}
+
       <div className={styles.grid}>
         {cards.map(({ pct, target, load }) => {
           const isSelected = pct === selectedPct;

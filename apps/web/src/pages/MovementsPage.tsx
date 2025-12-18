@@ -1,12 +1,19 @@
-/* apps/web/src/pages/MovementsPage.tsx */
+// FILE: apps/web/src/pages/MovementsPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import type { Movement, PrEntry, UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { useNavigate } from "react-router-dom";
+import {
+  ActionButton,
+  Chip,
+  Sticker,
+  Surface,
+  SurfaceHeader,
+} from "../ui/Surface";
+import styles from "./MovementsPage.module.css";
 
 function uid() {
-  // ✅ iOS/Safari fallback (randomUUID can be missing or restricted)
   try {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
       return crypto.randomUUID();
@@ -15,17 +22,14 @@ function uid() {
     // ignore
   }
 
-  // Fallback: UUID v4-ish using getRandomValues when possible
   try {
     const bytes = new Uint8Array(16);
     crypto.getRandomValues(bytes);
-    // RFC4122-ish
     bytes[6] = (bytes[6] & 0x0f) | 0x40;
     bytes[8] = (bytes[8] & 0x3f) | 0x80;
     const hex = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   } catch {
-    // last resort
     return `m_${Date.now()}_${Math.random().toString(16).slice(2)}`;
   }
 }
@@ -77,21 +81,17 @@ export function MovementsPage() {
   }, []);
 
   async function add() {
-    try {
-      const trimmed = name.trim();
-      if (!trimmed) return;
+    const trimmed = name.trim();
+    if (!trimmed) return;
 
-      await repo.upsertMovement({
-        id: uid(),
-        name: trimmed,
-        createdAt: new Date().toISOString(),
-      });
+    await repo.upsertMovement({
+      id: uid(),
+      name: trimmed,
+      createdAt: new Date().toISOString(),
+    });
 
-      setName("");
-      await reload();
-    } catch (err) {
-      console.error("Failed to add movement:", err);
-    }
+    setName("");
+    await reload();
   }
 
   async function remove(id: string) {
@@ -111,126 +111,89 @@ export function MovementsPage() {
   }
 
   const cards = useMemo(() => {
-    return items.map((m) => {
-      const best = bestMap[m.id]?.entry ?? null;
-      return { m, best };
-    });
+    return items.map((m) => ({ m, best: bestMap[m.id]?.entry ?? null }));
   }, [items, bestMap]);
 
-  return (
-    <div style={{ display: "grid", gap: 12 }}>
-      <section
-        style={{
-          border: "1px solid var(--border)",
-          borderRadius: 14,
-          padding: 12,
-          display: "grid",
-          gap: 10,
-          background: "var(--card-bg)",
-        }}
-      >
-        <div style={{ fontWeight: 900 }}>Movements</div>
+  const unit = prefs?.defaultUnit ?? "kg";
 
-        <div style={{ display: "flex", gap: 8 }}>
+  return (
+    <div className={styles.page}>
+      <Surface variant="panel" aria-label="Movements panel">
+        <SurfaceHeader
+          leftLabel={<Sticker stamp={<span>LIST</span>}>PR CALC</Sticker>}
+          rightChip={<Chip tone="accent3">{unit}</Chip>}
+          showBarcode
+        />
+
+        <div className={styles.addRow}>
           <input
+            className={styles.input}
             placeholder={t.movements.placeholder}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            style={{ flex: 1, minWidth: 0 }}
           />
-          <button onClick={add} style={{ fontWeight: 800 }}>
-            {t.movements.add}
-          </button>
-        </div>
-      </section>
-
-      <div style={{ display: "grid", gap: 10 }}>
-        {cards.map(({ m, best }) => (
-          <div
-            key={m.id}
-            style={{
-              border: "1px solid var(--border)",
-              borderRadius: 14,
-              padding: 12,
-              background: "var(--card-bg)",
-              display: "grid",
-              gap: 10,
-            }}
+          <ActionButton
+            variant="primary"
+            onClick={add}
+            ariaLabel={t.movements.add}
+            title={t.movements.add}
           >
-            <div
-              style={{
-                display: "flex",
-                gap: 10,
-                alignItems: "baseline",
-                justifyContent: "space-between",
-              }}
-            >
-              <div style={{ minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 950,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+            {t.movements.add}
+          </ActionButton>
+        </div>
+
+        <div className={styles.hint}>
+          {cards.length === 0 ? (
+            <span className={styles.muted}>No movements yet. Add your first one 👇</span>
+          ) : (
+            <span className={styles.muted}>
+              Tap <b>Open calculator</b> to start from your best lift.
+            </span>
+          )}
+        </div>
+      </Surface>
+
+      <div className={styles.list}>
+        {cards.map(({ m, best }) => (
+          <Surface key={m.id} variant="card" className={styles.item}>
+            <div className={styles.itemTop}>
+              <div className={styles.meta}>
+                <div className={styles.name} title={m.name}>
                   {m.name}
                 </div>
 
                 {best ? (
-                  <div style={{ fontSize: 12, opacity: 0.78 }}>
+                  <div className={styles.sub}>
                     {toDateLabel(best.date)} · <b>{best.weight}</b> × {best.reps}{" "}
-                    <span style={{ opacity: 0.75 }}>{prefs?.defaultUnit ?? ""}</span>
+                    <span className={styles.unitHint}>{unit}</span>
                   </div>
                 ) : (
-                  <div style={{ fontSize: 12, opacity: 0.7 }}>
-                    No PR yet — tap Manage to add one
+                  <div className={styles.subMuted}>
+                    No PR yet — tap Manage PRs to add one
                   </div>
                 )}
               </div>
 
-              <button
+              <ActionButton
+                variant="danger"
                 onClick={() => remove(m.id)}
-                style={{
-                  borderRadius: 12,
-                  border: "1px solid var(--border)",
-                  padding: "8px 10px",
-                  opacity: 0.9,
-                }}
+                ariaLabel={t.movements.delete}
+                title={t.movements.delete}
               >
                 {t.movements.delete}
-              </button>
+              </ActionButton>
             </div>
 
-            <button
-              onClick={() => goCalc(m.id)}
-              style={{
-                width: "100%",
-                borderRadius: 14,
-                border: "1px solid var(--border)",
-                padding: "12px 14px",
-                fontWeight: 900,
-                background:
-                  "color-mix(in oklab, var(--accent) 10%, var(--card-bg))",
-              }}
-            >
-              Open calculator
-            </button>
+            <div className={styles.actions}>
+              <ActionButton variant="primary" fullWidth onClick={() => goCalc(m.id)}>
+                Open calculator
+              </ActionButton>
 
-            <button
-              onClick={() => goManage(m.id)}
-              style={{
-                width: "100%",
-                borderRadius: 14,
-                border: "1px solid var(--border)",
-                padding: "10px 12px",
-                fontWeight: 800,
-              }}
-            >
-              Manage PRs
-            </button>
-          </div>
+              <ActionButton variant="ghost" fullWidth onClick={() => goManage(m.id)}>
+                Manage PRs
+              </ActionButton>
+            </div>
+          </Surface>
         ))}
       </div>
     </div>

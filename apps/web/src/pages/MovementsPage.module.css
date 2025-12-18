@@ -1,0 +1,78 @@
+/* FILE: apps/web/src/pages/MovementsPage.module.css */
+
+.page {
+  display: grid;
+  gap: 12px;
+}
+
+.addRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+}
+
+.hint {
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.muted {
+  opacity: 0.75;
+  color: var(--muted);
+}
+
+.list {
+  display: grid;
+  gap: 10px;
+}
+
+.item {
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.itemTop {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.meta {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  font-size: 12px;
+  opacity: 0.86;
+}
+
+.subMuted {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.unitHint {
+  opacity: 0.75;
+}
+
+.actions {
+  display: grid;
+  gap: 10px;
+}

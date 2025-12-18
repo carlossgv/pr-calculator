@@ -28,15 +28,24 @@ add_file () {
 
 echo "Writing dump to: $OUT"
 
-add_file "apps/web/vite.config.ts"
-add_file "apps/web/index.html"
-add_file "apps/web/package.json"
-add_file "apps/web/src/main.tsx"
-add_file "apps/web/src/ui/AppLayout.tsx"
-
+add_file "apps/web/src/pages/MovementsPage.tsx"
+add_file "apps/web/src/pages/MovementDetailsPage.tsx"
+add_file "apps/web/src/pages/MovementDetailsPage.module.css"
+add_file "apps/web/src/storage/repo.ts"
 add_file "apps/web/src/router.tsx"
 add_file "apps/web/src/i18n/strings.ts"
 add_file "apps/web/src/i18n/strings.en.ts"
+add_file "apps/web/src/ui/AppLayout.tsx"
+
+add_file "apps/web/src/pages/PreferencesPage.tsx"
+add_file "apps/web/src/pages/PreferencesPage.module.css"
+add_file "apps/web/src/components/Switch.tsx"
+add_file "apps/web/src/components/ThemeToggle.tsx"
+add_file "apps/web/src/components/ThemeSwitcher.tsx"
+add_file "apps/web/src/theme/theme.ts"
+
+add_file "apps/web/src/global.css"
+add_file "apps/web/src/components/WeightCalculatorPanel.module.css"
 
 echo "DONE ✅  Open the file with:"
 echo "  less -R $OUT"
