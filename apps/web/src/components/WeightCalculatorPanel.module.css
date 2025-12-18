@@ -224,3 +224,121 @@
   border-color: rgba(255, 255, 255, 0.14);
   color: color-mix(in oklab, var(--fg) 80%, white);
 }
+
+/* =========================
+   Custom % (ephemeral)
+   ========================= */
+
+.customPct {
+  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  border-radius: 18px;
+  padding: 12px;
+
+  background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
+}
+
+:global([data-theme="dark"]) .customPct {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: color-mix(in oklab, var(--fg) 6%, var(--card-bg));
+}
+
+.customPctTop {
+  display: grid;
+  gap: 10px;
+}
+
+.customPctTitle {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.customPctInputRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.customPctInput {
+  height: 44px;
+  border-radius: 14px;
+  padding: 0 12px;
+
+  border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
+  background: var(--input-bg);
+  color: var(--fg);
+  outline: none;
+}
+
+.customPctInput:focus {
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+  box-shadow: 0 0 0 6px var(--ring);
+}
+
+.customPctAddBtn {
+  height: 44px;
+  width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  border-radius: 14px;
+
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 12px;
+
+  background: color-mix(in oklab, var(--accent) 14%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent) 45%, var(--border));
+  color: var(--fg);
+
+  cursor: pointer;
+}
+
+.customPctAddBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+.customPctChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.customPctChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 10px;
+  border-radius: 999px;
+
+  border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
+  background: color-mix(in oklab, var(--fg) 4%, var(--card-bg));
+  color: var(--fg);
+
+  font-weight: 900;
+  font-size: 12px;
+
+  cursor: pointer;
+}
+
+.customPctChipX {
+  opacity: 0.7;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.customPctHint {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}

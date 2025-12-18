@@ -8,6 +8,7 @@ import { t } from "../i18n/strings";
 import { PercentCards } from "../components/PercentCards";
 import { prefsForUnit } from "../utils/equipment";
 import { UnitSwitch } from "./UnitSwitch";
+import { Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
 
 function round1(n: number) {
@@ -48,6 +49,13 @@ function contextChipWord(ctx: unknown): string {
   return "context";
 }
 
+function parsePctInput(s: string): number | null {
+  const v = Number(String(s).replace("%", "").trim());
+  if (!Number.isFinite(v)) return null;
+  if (v <= 0 || v > 300) return null;
+  return Math.round(v * 10) / 10;
+}
+
 export function WeightCalculatorPanel({
   mode,
   title,
@@ -61,6 +69,9 @@ export function WeightCalculatorPanel({
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [rawWeight, setRawWeight] = useState<number>(initialWeight ?? 100);
+
+  const [customPctInput, setCustomPctInput] = useState<string>("");
+  const [customPcts, setCustomPcts] = useState<number[]>([]);
 
   useEffect(() => {
     if (initialUnit) setUnit(initialUnit);
@@ -97,6 +108,25 @@ export function WeightCalculatorPanel({
     emit(unit, rawWeight);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unit, rawWeight]);
+
+  function addCustomPct() {
+    const v = parsePctInput(customPctInput);
+    if (v == null) return;
+
+    setCustomPcts((prev) => {
+      if (prev.some((x) => Math.abs(x - v) < 0.0001)) return prev;
+      const next = [...prev, v].sort((a, b) => b - a);
+      return next.slice(0, 8);
+    });
+
+    setCustomPctInput("");
+  }
+
+  function removeCustomPct(v: number) {
+    setCustomPcts((prev) => prev.filter((x) => Math.abs(x - v) > 0.0001));
+  }
+
+  const canAdd = parsePctInput(customPctInput) != null;
 
   if (!prefs || !effectivePrefs) return <p>{t.home.loading}</p>;
 
@@ -142,9 +172,60 @@ export function WeightCalculatorPanel({
             </div>
           </div>
         )}
+      </section>
 
-        {/* TODO: Reintroduce "Snap to plates" as an Advanced option or Preferences setting.
-            It adds cognitive load on the Home flow; keep the quick calc clean. */}
+      <section className={styles.customPct} aria-label={t.home.customPercent}>
+        <div className={styles.customPctTop}>
+          <div className={styles.customPctTitle}>{t.home.customPercent}</div>
+
+          <div className={styles.customPctInputRow}>
+            <input
+              className={styles.customPctInput}
+              type="number"
+              inputMode="decimal"
+              placeholder={t.home.customPercentPlaceholder}
+              value={customPctInput}
+              onChange={(e) => setCustomPctInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") addCustomPct();
+              }}
+              aria-label={t.home.customPercent}
+            />
+
+            <button
+              type="button"
+              className={styles.customPctAddBtn}
+              onClick={addCustomPct}
+              disabled={!canAdd}
+              aria-label={t.home.customPercentAddAria}
+              title={t.home.customPercentAdd}
+            >
+              <Plus size={18} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        {customPcts.length ? (
+          <div className={styles.customPctChips} aria-label={t.home.customPercentAdded}>
+            {customPcts.map((p) => (
+              <button
+                key={p}
+                type="button"
+                className={styles.customPctChip}
+                onClick={() => removeCustomPct(p)}
+                title={t.home.customPercentRemove}
+                aria-label={`${t.home.customPercentRemove} ${p}%`}
+              >
+                <span>{p}%</span>
+                <span className={styles.customPctChipX} aria-hidden="true">
+                  ×
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className={styles.customPctHint}>{t.home.customPercentHint}</div>
+        )}
       </section>
 
       <PercentCards
@@ -154,6 +235,7 @@ export function WeightCalculatorPanel({
         fromPct={fromPct}
         toPct={toPct}
         stepPct={stepPct}
+        extraPcts={customPcts}
       />
     </div>
   );

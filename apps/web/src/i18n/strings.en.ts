@@ -20,6 +20,15 @@ export const en = {
     bar: "Bar",
     achieved: "Achieved",
 
+    // NEW: custom %
+    customPercent: "Custom %",
+    customPercentPlaceholder: "e.g. 87.5",
+    customPercentAdd: "Add",
+    customPercentAddAria: "Add custom percent",
+    customPercentAdded: "Added custom percents",
+    customPercentRemove: "Remove",
+    customPercentHint: "Add a one-off % for this session. Tap a chip to remove.",
+
     // NEW: snap / rounding
     snapTitle: "Snap to plates",
     snapAria: "Toggle snap to plates",

@@ -12,6 +12,9 @@ type Props = {
   fromPct?: number;
   toPct?: number;
   stepPct?: number;
+
+  /** Extra %s (ephemeral) injected by the parent (not persisted). */
+  extraPcts?: number[];
 };
 
 function round1(n: number) {
@@ -44,6 +47,23 @@ function platesPerSideLabel(load: ReturnType<typeof calculateLoad>, unit: Unit) 
     .join(" + ");
 }
 
+function normalizeExtraPcts(extraPcts: number[] | undefined) {
+  if (!extraPcts?.length) return [];
+  // basic guardrails + normalize to 0.1
+  const cleaned = extraPcts
+    .map((x) => Math.round(Number(x) * 10) / 10)
+    .filter((x) => Number.isFinite(x) && x > 0 && x <= 300);
+
+  // de-dupe
+  const out: number[] = [];
+  for (const p of cleaned) {
+    if (!out.some((v) => Math.abs(v - p) < 0.0001)) out.push(p);
+  }
+
+  // keep it sane for UI
+  return out.slice(0, 8).sort((a, b) => b - a);
+}
+
 export function PercentCards({
   maxWeight,
   unit,
@@ -51,6 +71,7 @@ export function PercentCards({
   fromPct = 125,
   toPct = 40,
   stepPct = 5,
+  extraPcts,
 }: Props) {
   const [selectedPct, setSelectedPct] = useState<number | null>(null);
 
@@ -84,22 +105,42 @@ export function PercentCards({
 
     if (stepPct <= 0) return out;
 
-    for (let p = fromPct; p >= toPct; p -= stepPct) {
+    const extras = normalizeExtraPcts(extraPcts);
+
+    // Build base percent list
+    const basePcts: number[] = [];
+    for (let p = fromPct; p >= toPct; p -= stepPct) basePcts.push(p);
+
+    // Merge (extras first), de-dupe, keep descending
+    const merged: number[] = [];
+    const pushUnique = (p: number) => {
+      if (!merged.some((x) => Math.abs(x - p) < 0.0001)) merged.push(p);
+    };
+
+    for (const p of extras) pushUnique(p);
+    for (const p of basePcts) pushUnique(p);
+
+    // Sort desc so extras integrate nicely (and don’t appear randomly)
+    merged.sort((a, b) => b - a);
+
+    for (const p of merged) {
       const target = (maxWeight * p) / 100;
       const load = calculateLoad(target, unit, prefs);
       out.push({ pct: p, target, load });
     }
 
     return out;
-  }, [fromPct, toPct, stepPct, maxWeight, unit, prefs]);
+  }, [fromPct, toPct, stepPct, maxWeight, unit, prefs, extraPcts]);
 
   const selected = useMemo(() => {
     if (selectedPct == null) return null;
-    return cards.find((c) => c.pct === selectedPct) ?? null;
+    return cards.find((c) => Math.abs(c.pct - selectedPct) < 0.0001) ?? null;
   }, [cards, selectedPct]);
 
   function selectPct(pct: number) {
-    setSelectedPct((prev) => (prev === pct ? null : pct));
+    setSelectedPct((prev) =>
+      prev != null && Math.abs(prev - pct) < 0.0001 ? null : pct,
+    );
   }
 
   function close() {
@@ -180,18 +221,23 @@ export function PercentCards({
 
       <div className={styles.grid}>
         {cards.map(({ pct, target, load }) => {
-          const isSelected = pct === selectedPct;
-          const is100 = pct === 100;
+          const isSelected = selectedPct != null && Math.abs(pct - selectedPct) < 0.0001;
+          const is100 = Math.abs(pct - 100) < 0.0001;
 
-const className = styles.tile;
+          // FIX: actually apply the styles that exist in CSS
+          const className = [
+            styles.tile,
+            is100 ? styles.tileMax : "",
+            isSelected ? styles.tileSelected : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
 
           return (
             <button
               key={pct}
               type="button"
               className={className}
-              data-variant={is100 ? "max" : "base"}
-              data-state={isSelected ? "selected" : "idle"}
               onClick={() => selectPct(pct)}
               aria-pressed={isSelected}
             >
