@@ -71,8 +71,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            TURBO_SCOPE=@repo/web
-            PNPM_FILTER=@repo/web
+                   TURBO_SCOPE=@repo/web
+                   PNPM_FILTER=@repo/web
+                   VITE_APP_ENV=${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+                   VITE_APP_TITLE=${{ github.ref_name == 'main' && 'PR Calculator' || 'PR Calculator Dev' }}
 
   deploy_main:
     needs: build_and_push

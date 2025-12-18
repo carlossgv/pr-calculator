@@ -1,3 +1,4 @@
+# Dockerfile
 # =========================
 # Base with pnpm + turbo
 # =========================
@@ -34,6 +35,15 @@ COPY --from=pruner /app/out/full/ ./
 # =========================
 FROM installer AS builder
 ARG PNPM_FILTER=@repo/web
+
+# ✅ these args come from GitHub Actions build-args
+ARG VITE_APP_ENV=prod
+ARG VITE_APP_TITLE="PR Calculator"
+
+# ✅ ensure Vite sees them at build time
+ENV VITE_APP_ENV=$VITE_APP_ENV
+ENV VITE_APP_TITLE=$VITE_APP_TITLE
+
 RUN pnpm --filter ${PNPM_FILTER} build
 
 # =========================
