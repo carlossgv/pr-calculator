@@ -30,7 +30,7 @@ export type PrEntry = {
 
 export type UnitContext = "olympic" | "crossfit" | "custom";
 
-export type ThemePreference = "system" | "light" | "dark";
+export type ThemePreference = "light" | "dark";
 
 export type UserPreferences = {
   defaultUnit: Unit;

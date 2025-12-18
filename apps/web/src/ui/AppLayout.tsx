@@ -15,7 +15,13 @@ function topIconClassName({ isActive }: { isActive: boolean }) {
 function BottomNav() {
   return (
     <nav className="bottomNav" aria-label="Bottom navigation">
-      <NavLink to="/" end className="bottomNavLink" aria-label={t.nav.home} title={t.nav.home}>
+      <NavLink
+        to="/"
+        end
+        className="bottomNavLink"
+        aria-label={t.nav.home}
+        title={t.nav.home}
+      >
         <Home size={20} />
         <span className="bottomNavLabel">{t.nav.home}</span>
       </NavLink>
@@ -125,7 +131,13 @@ export function AppLayout() {
 
         <div className="topRight">
           <nav className="topNav" aria-label="Top navigation">
-            <NavLink to="/" end className={topIconClassName} aria-label={t.nav.home} title={t.nav.home}>
+            <NavLink
+              to="/"
+              end
+              className={topIconClassName}
+              aria-label={t.nav.home}
+              title={t.nav.home}
+            >
               <Home size={18} />
             </NavLink>
 

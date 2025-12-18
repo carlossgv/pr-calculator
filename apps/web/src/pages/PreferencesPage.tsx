@@ -8,7 +8,6 @@ import { Switch } from "../components/Switch";
 import { ThemeToggle } from "../components/ThemeToggle";
 import {
   applyTheme,
-  detectSystemTheme,
   type ResolvedTheme,
 } from "../theme/theme";
 import { Mars, Venus, ChevronRight } from "lucide-react";
@@ -35,7 +34,6 @@ function barLabelFor(unit: Unit, gender: BarGender): string {
 }
 
 function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
-  if ((p as any).theme === "system") return detectSystemTheme();
   return p.theme === "dark" ? "dark" : "light";
 }
 
@@ -284,7 +282,11 @@ export function PreferencesPage() {
               </div>
               <div className={styles.actionHint}>{olympicHint}</div>
             </div>
-            <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
+            <ChevronRight
+              className={styles.chev}
+              size={18}
+              aria-hidden="true"
+            />
           </button>
 
           <button
@@ -298,7 +300,11 @@ export function PreferencesPage() {
               </div>
               <div className={styles.actionHint}>{crossfitHint}</div>
             </div>
-            <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
+            <ChevronRight
+              className={styles.chev}
+              size={18}
+              aria-hidden="true"
+            />
           </button>
         </div>
       </section>

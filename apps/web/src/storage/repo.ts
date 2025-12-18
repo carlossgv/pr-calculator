@@ -28,7 +28,7 @@ export const repo = {
 
     if (isNewPrefsShape(value)) {
       const contexts = value.contexts ?? { kg: "olympic", lb: "crossfit" };
-      const theme = value.theme ?? "system";
+      const theme = value.theme ?? 'dark'
 
       if (!value.contexts || !value.theme) {
         const next: UserPreferences = { ...value, contexts, theme };
