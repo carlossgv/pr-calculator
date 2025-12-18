@@ -7,11 +7,13 @@ import { useNavigate } from "react-router-dom";
 import {
   ActionButton,
   Chip,
+  IconButton,
   Sticker,
   Surface,
   SurfaceHeader,
 } from "../ui/Surface";
 import styles from "./MovementsPage.module.css";
+import { Trash2 } from "lucide-react";
 
 function uid() {
   try {
@@ -94,8 +96,10 @@ export function MovementsPage() {
     await reload();
   }
 
-  async function remove(id: string) {
-    await repo.deleteMovement(id);
+  async function removeMovement(m: Movement) {
+    const ok = window.confirm(`Delete "${m.name}"? This will remove its PRs too.`);
+    if (!ok) return;
+    await repo.deleteMovement(m.id);
     await reload();
   }
 
@@ -174,22 +178,26 @@ export function MovementsPage() {
                 )}
               </div>
 
-              <ActionButton
+              <IconButton
                 variant="danger"
-                onClick={() => remove(m.id)}
                 ariaLabel={t.movements.delete}
                 title={t.movements.delete}
+                onClick={() => removeMovement(m)}
               >
-                {t.movements.delete}
-              </ActionButton>
+                <Trash2 size={18} />
+              </IconButton>
             </div>
 
             <div className={styles.actions}>
-              <ActionButton variant="primary" fullWidth onClick={() => goCalc(m.id)}>
+              <ActionButton
+                variant="primary"
+                fullWidth
+                onClick={() => goCalc(m.id)}
+              >
                 Open calculator
               </ActionButton>
 
-              <ActionButton variant="ghost" fullWidth onClick={() => goManage(m.id)}>
+              <ActionButton fullWidth onClick={() => goManage(m.id)}>
                 Manage PRs
               </ActionButton>
             </div>

@@ -140,3 +140,35 @@ export function ActionButton({
     </button>
   );
 }
+
+type IconButtonProps = {
+  children: ReactNode;
+  onClick?: () => void;
+  variant?: "neutral" | "danger";
+  disabled?: boolean;
+  ariaLabel: string;
+  title?: string;
+};
+
+export function IconButton({
+  children,
+  onClick,
+  variant = "neutral",
+  disabled,
+  ariaLabel,
+  title,
+}: IconButtonProps) {
+  const v = variant === "danger" ? styles.iconBtnDanger : styles.iconBtn;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      title={title}
+      className={[styles.iconBtnBase, v].join(" ")}
+    >
+      {children}
+    </button>
+  );
+}
