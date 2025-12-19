@@ -66,10 +66,10 @@ WORKDIR /app
 # Prisma engines on alpine often need openssl (safe to include)
 RUN apk add --no-cache dumb-init openssl
 
-COPY --from=builder /app/deploy/api /app/apps/api
 
 EXPOSE 3001
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+COPY --from=builder /app/deploy/api /app
 CMD ["node", "/app/apps/api/dist/main.js"]
 
 # =========================
