@@ -5,8 +5,8 @@
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
-import { prisma } from "../prisma.js";
-import { sha256Base64Url } from "../crypto.js";
+import { prisma } from "../prisma";
+import { sha256Base64Url } from "../crypto";
 
 export type AuthedRequest = Request & { accountId?: string; deviceId?: string };
 

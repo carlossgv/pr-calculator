@@ -1,27 +1,7 @@
-/* FILE: apps/api/tsconfig.json */
 {
+  "extends": "@repo/typescript-config/nestjs.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
-
-    "target": "ES2022",
-    "lib": ["ES2022"],
-
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-
-    "types": ["node"],
-
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-
-    "strict": true,
-    "noImplicitAny": true,
-    "skipLibCheck": true
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]
+    "baseUrl": "./",
+    "outDir": "./dist"
+  }
 }

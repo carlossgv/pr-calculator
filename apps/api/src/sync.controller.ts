@@ -13,8 +13,8 @@ import type {
   SyncPushRequest,
   SyncPushResponse,
 } from "@repo/api-contracts";
-import { prisma } from "./prisma.js";
-import { DeviceAuthGuard } from "./auth/device-auth.guard.js";
+import { prisma } from "./prisma";
+import { DeviceAuthGuard } from "./auth/device-auth.guard";
 
 function msToDate(ms: number) {
   return new Date(ms);

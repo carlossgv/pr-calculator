@@ -4,47 +4,56 @@ set -euo pipefail
 OUT="/tmp/boxflow_dump.txt"
 : > "$OUT"
 
-add_file () {
-  local path="$1"
+# ✅ Enable recursive globbing (**) and sane glob behavior
+shopt -s globstar nullglob
 
-  if [[ ! -f "$path" ]]; then
-    echo "[MISSING FILE] $path" >&2
+add_file () {
+  local pattern="$1"
+  local matches=()
+
+  # Expand glob patterns safely into an array.
+  # With nullglob, non-matching globs expand to nothing (not the raw pattern).
+  matches=( $pattern )
+
+  # If it's a literal path (no glob chars) and doesn't exist, keep it as-is so we print MISSING.
+  if [[ ${#matches[@]} -eq 0 ]]; then
+    matches=( "$pattern" )
   fi
 
-  {
-    echo
-    echo "============================================================"
-    echo "FILE: $path"
-    echo "============================================================"
-    echo
-    if [[ -f "$path" ]]; then
-      cat "$path"
-    else
-      echo "[MISSING FILE] $path"
+  # De-duplicate while keeping order
+  local seen=" "
+  local path
+  for path in "${matches[@]}"; do
+    if [[ "$seen" == *" $path "* ]]; then
+      continue
     fi
-    echo
-  } >> "$OUT"
+    seen+=" $path "
+
+    if [[ ! -f "$path" ]]; then
+      echo "[MISSING FILE] $path" >&2
+    fi
+
+    {
+      echo
+      echo "============================================================"
+      echo "FILE: $path"
+      echo "============================================================"
+      echo
+      if [[ -f "$path" ]]; then
+        cat "$path"
+      else
+        echo "[MISSING FILE] $path"
+      fi
+      echo
+    } >> "$OUT"
+  done
 }
 
 echo "Writing dump to: $OUT"
 
-add_file "apps/web/src/storage/db.ts"
-add_file "apps/web/src/storage/repo.ts"
-add_file "apps/web/src/storage/changes.ts"
-add_file "apps/web/src/storage/backup.ts"
-add_file "apps/web/src/sync/api.ts"
-add_file "apps/web/src/sync/sync.ts"
-add_file "apps/web/src/sync/identity.ts"
-add_file "apps/web/src/main.tsx"
-add_file "apps/web/vite.config.ts"
-add_file "apps/api/src/auth/device-auth.guard.ts"
-add_file "apps/api/src/bootstrap.controller.ts"
-add_file "apps/api/src/sync.controller.ts"
-add_file "apps/api/src/prisma.ts"
-add_file "apps/api/prisma/schema.prisma"
-add_file "apps/api/package.json"
-add_file "apps/web/package.json"
-add_file "turbo.json"
+add_file "apps/api/src/main.ts"
+add_file "apps/api/src/**/*.ts"
+add_file "Dockerfile"
 
 echo "DONE ✅  Open the file with:"
 echo "  less -R $OUT"

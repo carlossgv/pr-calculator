@@ -1,8 +1,8 @@
 /* FILE: apps/api/src/bootstrap.controller.ts */
 import { BadRequestException, Body, Controller, Post } from "@nestjs/common";
 import type { BootstrapRequest, BootstrapResponse } from "@repo/api-contracts";
-import { sha256Base64Url } from "./crypto.js";
-import { prisma } from "./prisma.js";
+import { sha256Base64Url } from "./crypto";
+import { prisma } from "./prisma";
 
 @Controller("/v1")
 export class BootstrapController {
