@@ -54,16 +54,6 @@ RUN pnpm --filter @repo/api prisma:generate
 RUN pnpm --filter @repo/api build
 RUN pnpm --filter @repo/web build
 
-# ✅ Make runtime-relative import work:
-# dist/src/prisma.js requires ../generated/prisma/index.js
-RUN rm -rf /app/apps/api/dist/generated \
- && mkdir -p /app/apps/api/dist/generated \
- && cp -R /app/apps/api/generated/* /app/apps/api/dist/generated/
-
-# Asserts
-RUN test -f /app/apps/api/dist/src/main.js
-RUN test -f /app/apps/api/dist/generated/prisma/index.js
-
 # ✅ Create self-contained prod bundle
 RUN pnpm --filter @repo/api deploy --prod /app/deploy/api
 
