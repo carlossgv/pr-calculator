@@ -26,7 +26,7 @@ export const en = {
     customPercentAddAria: "Add custom percent",
     customPercentAdded: "Added custom percents",
     customPercentRemove: "Remove",
-    customPercentHint: "Add a one-off % for this session. Tap a chip to remove.",
+    customPercentHint: "Add a one-off % for this session.",
 
     // NEW: snap / rounding
     snapTitle: "Snap to plates",
@@ -68,10 +68,10 @@ export const en = {
     bar: {
       title: "Bar",
       genderTitle: "Bar type",
-      genderHint: "Male / female bar",
-      genderToggleAria: "Toggle bar gender",
-      male: "Male",
-      female: "Female",
+      genderHint: "Select the bar used for calculations",
+      genderToggleAria: "Select bar type",
+      male: "Men’s bar",
+      female: "Women’s bar",
       currentTitle: "Current",
       currentHint: "Current bar weight",
     },

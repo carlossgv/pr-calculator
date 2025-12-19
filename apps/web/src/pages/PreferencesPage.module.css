@@ -116,48 +116,83 @@
 
 .iconWrap {
   display: inline-flex;
+  transform: scale(1.08); /* 👈 theme icon un toque más grande */
+  transform-origin: center;
 }
 
 .mono {
   font-variant-numeric: tabular-nums;
 }
 
-/* ===== Gender selector ===== */
-
-.genderCluster {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 5px;
-  width: max-content;
-  flex: 0 0 auto;
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.genderPill {
+/* ===== Bar control (icons + value pill, one line) ===== */
+
+.barControl {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+}
 
-  width: 34px;
-  height: 34px;
+/* ===== Gender selector (icons only) ===== */
 
+.genderSegIcons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 4px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--card-bg) 92%, var(--bg));
+  background: color-mix(in oklab, var(--card-bg) 86%, var(--bg));
+}
+
+.genderIconBtn {
+  appearance: none;
+  border: 0;
+  background: transparent;
   color: var(--muted);
-}
 
-.genderPill[data-active="true"] {
-  background: var(--nav-active-bg);
-  color: var(--fg);
-  border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
-}
+  width: 40px; /* 👈 más grande */
+  height: 40px;
+  border-radius: 999px;
 
-.switchWrap {
   display: inline-flex;
-  flex: 0 0 auto;
-  width: 48px;
+  align-items: center;
   justify-content: center;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    background 120ms ease,
+    transform 120ms ease,
+    color 120ms ease;
+}
+
+.genderIconBtn:active {
+  transform: translateY(1px);
+}
+
+.genderIconBtn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.genderIconBtn[data-active="true"] {
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--fg);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.18);
 }
 
 /* ===== Value pill ===== */
@@ -203,6 +238,17 @@
   transition:
     background 120ms ease,
     transform 120ms ease;
+  border-radius: 0; /* 👈 evita los radios por fila y elimina el “gap” visual */
+}
+
+.actionRow:first-child {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.actionRow:last-child {
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
 }
 
 .actionRow + .actionRow {

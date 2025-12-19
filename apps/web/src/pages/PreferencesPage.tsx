@@ -1,4 +1,4 @@
-/* apps/web/src/pages/PreferencesPage.tsx */
+// FILE: apps/web/src/pages/PreferencesPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import type {
   Plate,
@@ -10,7 +10,6 @@ import type {
 import { DEFAULT_PREFS, CROSSFIT_LB_WITH_KG_CHANGES } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
-import { Switch } from "../components/Switch";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
 import { Mars, Venus, ChevronRight, Check } from "lucide-react";
@@ -228,8 +227,6 @@ export function PreferencesPage() {
 
   return (
     <div className={styles.page}>
-      {/* ✅ Header eliminado: ya existe en AppLayout */}
-
       {/* THEME */}
       <section className={styles.section} aria-label={t.prefs.theme.title}>
         <div className={styles.sectionTitle}>{t.prefs.theme.title}</div>
@@ -245,10 +242,10 @@ export function PreferencesPage() {
           >
             <div className={styles.rowLeft}>
               <div className={styles.rowTitle}>{t.prefs.theme.title}</div>
-              <div className={styles.rowHint}>
-                {t.prefs.theme.current}:{" "}
-                <span className={styles.mono}>{resolvedTheme}</span>
-              </div>
+              {/* Minimal: no “Current: dark”. Lo dejamos accesible igual */}
+              <span className={styles.srOnly}>
+                {t.prefs.theme.current}: {resolvedTheme}
+              </span>
             </div>
 
             <div className={styles.rowRight}>
@@ -270,54 +267,50 @@ export function PreferencesPage() {
         </div>
 
         <div className={styles.card}>
-<div className={styles.row}>
+          <div className={styles.row}>
             <div className={styles.rowLeft}>
               <div className={styles.rowTitle}>{t.prefs.bar.genderTitle}</div>
               <div className={styles.rowHint}>{t.prefs.bar.genderHint}</div>
             </div>
 
             <div className={styles.rowRight}>
-              <div className={styles.genderCluster}>
-                <span
-                  aria-hidden="true"
-                  title={t.prefs.bar.male}
-                  className={styles.genderPill}
-                  data-active={!isFemale}
+              <div className={styles.barControl}>
+                <div
+                  className={styles.genderSegIcons}
+                  role="radiogroup"
+                  aria-label={t.prefs.bar.genderToggleAria}
                 >
-                  <Mars size={18} />
-                </span>
+                  <button
+                    type="button"
+                    className={styles.genderIconBtn}
+                    data-active={!isFemale}
+                    role="radio"
+                    aria-checked={!isFemale}
+                    aria-label={t.prefs.bar.male}
+                    onClick={() => setGender("male")}
+                  >
+                    <Mars size={20} />
+                  </button>
 
-                <span className={styles.switchWrap}>
-                  <Switch
-                    checked={isFemale}
-                    onCheckedChange={(next) => setGender(next ? "female" : "male")}
-                    ariaLabel={t.prefs.bar.genderToggleAria}
-                  />
-                </span>
+                  <button
+                    type="button"
+                    className={styles.genderIconBtn}
+                    data-active={isFemale}
+                    role="radio"
+                    aria-checked={isFemale}
+                    aria-label={t.prefs.bar.female}
+                    onClick={() => setGender("female")}
+                  >
+                    <Venus size={20} />
+                  </button>
+                </div>
 
-                <span
-                  aria-hidden="true"
-                  title={t.prefs.bar.female}
-                  className={styles.genderPill}
-                  data-active={isFemale}
-                >
-                  <Venus size={18} />
+                {/* ✅ Peso único acá (sin duplicar “Current”) */}
+                <span className={styles.valuePill} aria-label={t.prefs.bar.currentHint}>
+                  <span className={styles.mono}>{prefs.bar.value}</span>
+                  <span className={styles.valueUnit}>{barUnit}</span>
                 </span>
               </div>
-            </div>
-          </div>
-
-          <div className={styles.row}>
-            <div className={styles.rowLeft}>
-              <div className={styles.rowTitle}>{t.prefs.bar.currentTitle}</div>
-              <div className={styles.rowHint}>{t.prefs.bar.currentHint}</div>
-            </div>
-
-            <div className={styles.rowRight}>
-              <span className={styles.valuePill}>
-                <span className={styles.mono}>{prefs.bar.value}</span>
-                <span className={styles.valueUnit}>{barUnit}</span>
-              </span>
             </div>
           </div>
         </div>
@@ -336,27 +329,17 @@ export function PreferencesPage() {
             onClick={() => applyPreset(DEFAULT_PREFS)}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>
-                {t.prefs.presets.olympicKg}
-              </div>
+              <div className={styles.actionTitle}>{t.prefs.presets.olympicKg}</div>
               <div className={styles.actionHint}>{olympicHint}</div>
             </div>
 
             <div className={styles.actionRight}>
               {olympicActive ? (
-                <span
-                  className={styles.selectedPill}
-                  aria-hidden="true"
-                  title="Selected"
-                >
+                <span className={styles.selectedPill} aria-hidden="true" title="Selected">
                   <Check size={16} />
                 </span>
               ) : null}
-              <ChevronRight
-                className={styles.chev}
-                size={18}
-                aria-hidden="true"
-              />
+              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
             </div>
           </button>
 
@@ -368,27 +351,17 @@ export function PreferencesPage() {
             onClick={() => applyPreset(CROSSFIT_LB_WITH_KG_CHANGES)}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>
-                {t.prefs.presets.crossfitLb}
-              </div>
+              <div className={styles.actionTitle}>{t.prefs.presets.crossfitLb}</div>
               <div className={styles.actionHint}>{crossfitHint}</div>
             </div>
 
             <div className={styles.actionRight}>
               {crossfitActive ? (
-                <span
-                  className={styles.selectedPill}
-                  aria-hidden="true"
-                  title="Selected"
-                >
+                <span className={styles.selectedPill} aria-hidden="true" title="Selected">
                   <Check size={16} />
                 </span>
               ) : null}
-              <ChevronRight
-                className={styles.chev}
-                size={18}
-                aria-hidden="true"
-              />
+              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
             </div>
           </button>
         </div>

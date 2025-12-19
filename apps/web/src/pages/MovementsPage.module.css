@@ -66,19 +66,19 @@
   gap: 10px;
 }
 
-/* --- Controls (filter + sort + add) --- */
+/* --- Controls (single row, anti-text) --- */
 
 .controlsRow {
   display: flex;
   gap: 10px;
   align-items: center;
   margin-top: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* 👈 clave: 1 fila */
 }
 
 .searchWrap {
   position: relative;
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
@@ -114,28 +114,40 @@
   border-radius: 10px;
 }
 
-/* Sort pill */
+/* Sort pill (icon-only) */
 .sortPill {
+  position: relative;
+  width: 40px;
   height: 40px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--card-bg);
   color: var(--fg);
-  padding: 0 12px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   flex: 0 0 auto;
 }
 
-.sortPillText {
-  font-size: 13px;
-  font-weight: 650;
-  opacity: 0.9;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Dot indicator: aparece solo cuando sort != default */
+.sortDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  border: 2px solid var(--card-bg);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.sortPill[data-dirty="true"] .sortDot {
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* Add button */
@@ -236,7 +248,7 @@
   opacity: 0.92;
 }
 
-/* Tablet: bottom sheet pero centrado */
+/* Tablet */
 @media (min-width: 700px) and (max-width: 1023px) {
   .sheetOverlay {
     justify-items: center;
@@ -250,7 +262,7 @@
   }
 }
 
-/* Desktop: popover anclado al botón */
+/* Desktop */
 @media (min-width: 1024px) {
   .sheetOverlay {
     background: rgba(2, 6, 23, 0.18);

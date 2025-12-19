@@ -78,7 +78,7 @@ function isDesktop() {
 
 export function MovementsPage() {
   const navigate = useNavigate();
-  const location = useLocation(); // ✅
+  const location = useLocation();
 
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [items, setItems] = useState<Movement[]>([]);
@@ -129,7 +129,6 @@ export function MovementsPage() {
     setStatsMap(next);
   }
 
-  // ✅ IMPORTANT: reload on navigation (when coming back from Manage/Calc/etc.)
   useEffect(() => {
     reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -161,7 +160,6 @@ export function MovementsPage() {
       setNewName("");
       setAddOpen(false);
 
-      // ✅ go directly to manage
       navigate(`/movements/${id}/manage`);
     } finally {
       setAddBusy(false);
@@ -189,6 +187,7 @@ export function MovementsPage() {
   }
 
   const unit = prefs?.defaultUnit ?? "kg";
+  const sortIsDefault = sortKey === "activity_desc";
 
   const cards = useMemo(() => {
     const raw = items.map((m) => {
@@ -364,14 +363,13 @@ export function MovementsPage() {
             ref={sortBtnRef}
             type="button"
             className={styles.sortPill}
+            data-dirty={!sortIsDefault}
             onClick={openSort}
             aria-label={t.movements.sort.aria}
             title={t.movements.sort.aria}
           >
-            <ArrowUpDown size={16} />
-            <span className={styles.sortPillText}>
-              {sortOptions.find((x) => x.key === sortKey)?.label ?? "Sort"}
-            </span>
+            <ArrowUpDown size={18} />
+            <span className={styles.sortDot} aria-hidden="true" />
           </button>
 
           <button
@@ -394,8 +392,7 @@ export function MovementsPage() {
             </span>
           ) : (
             <span className={styles.muted}>
-              {t.movements.showing} <b>{shown}</b> {t.movements.of}{" "}
-              <b>{total}</b>. {t.movements.tapHint}
+              {t.movements.showing} <b>{shown}</b> / <b>{total}</b>
             </span>
           )}
         </div>
@@ -412,8 +409,8 @@ export function MovementsPage() {
 
                 {best ? (
                   <div className={styles.sub}>
-                    {toDateLabel(best.date)} · <b>{best.weight}</b> ×{" "}
-                    {best.reps} <span className={styles.unitHint}>{unit}</span>
+                    {toDateLabel(best.date)} · <b>{best.weight}</b> × {best.reps}{" "}
+                    <span className={styles.unitHint}>{unit}</span>
                   </div>
                 ) : (
                   <div className={styles.subMuted}>{t.movements.noPrYet}</div>
