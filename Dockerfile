@@ -5,19 +5,18 @@
 FROM node:20-alpine AS base
 ENV PNPM_HOME="/pnpm" CI=1
 ENV PATH="$PNPM_HOME:$PATH"
-RUN apk add --no-cache bash git dumb-init && \
+RUN apk add --no-cache bash git && \
     corepack enable && corepack prepare pnpm@9.12.0 --activate && \
     npm i -g turbo
 WORKDIR /app
 
 # =========================
-# Prune for web + api
+# Prune for api + web
 # =========================
 FROM base AS pruner
 COPY turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages ./packages
 COPY apps ./apps
-# prunear ambos para un solo build context eficiente
 RUN turbo prune --scope=@repo/web --scope=@repo/api --docker
 
 # =========================
@@ -31,52 +30,44 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 COPY --from=pruner /app/out/full/ ./
 
 # =========================
-# Builder WEB (Vite)
+# Builder (build both)
 # =========================
-FROM installer AS builder_web
-ARG PNPM_FILTER=@repo/web
+FROM installer AS builder
 
+# WEB build args (Vite)
 ARG VITE_APP_ENV=prod
 ARG VITE_APP_TITLE="PR Calculator"
-ARG VITE_API_BASE="https://prcalc-api.carlosgv.dev"
+ARG VITE_API_BASE="/api"
 
 ENV VITE_APP_ENV=$VITE_APP_ENV
 ENV VITE_APP_TITLE=$VITE_APP_TITLE
 ENV VITE_API_BASE=$VITE_API_BASE
 
-RUN pnpm --filter ${PNPM_FILTER} build
+# build api + web (turbo/tsc will cache)
+RUN pnpm --filter @repo/api build
+RUN pnpm --filter @repo/web build
 
 # =========================
-# Builder API (Nest)
-# =========================
-FROM installer AS builder_api
-ARG PNPM_FILTER=@repo/api
-RUN pnpm --filter ${PNPM_FILTER} build
-
-# =========================
-# Runtime API image
+# Runtime API image (Nest)
 # =========================
 FROM node:20-alpine AS api
 ENV NODE_ENV=production
 WORKDIR /app
-RUN apk add --no-cache dumb-init curl
 
-# copia solo lo necesario
-COPY --from=builder_api /app/apps/api/dist /app/apps/api/dist
-COPY --from=builder_api /app/apps/api/package.json /app/apps/api/package.json
-# si tu API necesita runtime deps fuera del dist, aquí es donde se complica.
-# En Nest normalmente dist + node_modules bastan.
-# Solución simple: copiar node_modules pruned (más pesado pero funciona):
-COPY --from=builder_api /app/node_modules /app/node_modules
+# If you need prisma client at runtime, you already bundle it in dist via @prisma/client.
+# Copy only built output + package.json + node_modules needed
+COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/apps/api/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages ./packages
 
 EXPOSE 3001
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
-CMD ["node", "/app/apps/api/dist/main.js"]
+CMD ["node", "dist/main.js"]
 
 # =========================
 # Runtime WEB image (Nginx static)
 # =========================
 FROM nginx:1.27-alpine AS web
 COPY ./apps/web/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder_web /app/apps/web/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 EXPOSE 80

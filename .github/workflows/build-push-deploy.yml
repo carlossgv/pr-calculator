@@ -1,4 +1,4 @@
-name: Build & Push (PWA) + Deploy (staging/main)
+name: Build & Push (API+WEB) + Deploy (staging/main)
 
 on:
   push:
@@ -11,7 +11,8 @@ permissions:
   packages: write
 
 env:
-  IMAGE_NAME_WEB: ghcr.io/${{ github.repository }}
+  IMAGE_NAME_API: ghcr.io/${{ github.repository }}-api
+  IMAGE_NAME_WEB: ghcr.io/${{ github.repository }}-web
 
 jobs:
   build_and_push:
@@ -45,6 +46,21 @@ jobs:
             echo "value=linux/amd64" >> $GITHUB_OUTPUT
           fi
 
+      # ──────────────────────────────────────────────
+      # Docker metadata – same tagging scheme for both
+      # ──────────────────────────────────────────────
+      - name: Docker meta (API)
+        id: meta_api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME_API }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
+            type=raw,value=staging,enable=${{ github.ref_name == 'staging' || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main') }}
+            type=ref,event=branch
+            type=sha,format=short,prefix=
+            type=ref,event=tag
+
       - name: Docker meta (WEB)
         id: meta_web
         uses: docker/metadata-action@v5
@@ -57,6 +73,26 @@ jobs:
             type=sha,format=short,prefix=
             type=ref,event=tag
 
+      # ──────────────────────────────────────────────
+      # Build & push API
+      # ──────────────────────────────────────────────
+      - name: Build & push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: api
+          platforms: ${{ steps.platforms.outputs.value }}
+          push: true
+          tags: ${{ steps.meta_api.outputs.tags }}
+          labels: ${{ steps.meta_api.outputs.labels }}
+          provenance: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ──────────────────────────────────────────────
+      # Build & push WEB (injects Vite env at build time)
+      # ──────────────────────────────────────────────
       - name: Build & push WEB image
         uses: docker/build-push-action@v6
         with:
@@ -95,11 +131,10 @@ jobs:
             set -euo pipefail
             cd /home/carlos/homelab/pr-calculator-web
 
-            # main => pr-calculator-web (latest)
-            docker compose pull pr-calculator-web
-            docker compose up -d pr-calculator-web
+            docker compose pull pr-calculator-api pr-calculator-web
+            docker compose up -d pr-calculator-db pr-calculator-api pr-calculator-web
 
-            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | (rg -n "pr-calculator-web(\s|$)" || true)
+            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | (rg -n "pr-calculator-(db|api|web)(\s|$)" || true)
 
       - name: Notify ntfy about deploy (production)
         env:
@@ -110,7 +145,7 @@ jobs:
             -H "Title: PR Calculator deployed (production)" \
             -H "Tags: rocket,production" \
             -H "Priority: default" \
-            -d "Env: production | Service: pr-calculator-web | Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
+            -d "Env: production | Services: pr-calculator-api, pr-calculator-web | Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
             https://ntfy.carlosgv.dev/pr-calculator >/dev/null 2>&1 || true
 
   deploy_staging:
@@ -133,11 +168,10 @@ jobs:
             set -euo pipefail
             cd /home/carlos/homelab/pr-calculator-web
 
-            # staging/other => pr-calculator-web-dev (:staging)
-            docker compose pull pr-calculator-web-dev
-            docker compose up -d pr-calculator-web-dev
+            docker compose pull pr-calculator-api-dev pr-calculator-web-dev
+            docker compose up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
 
-            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | (rg -n "pr-calculator-web-dev(\s|$)" || true)
+            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | (rg -n "pr-calculator-(db-dev|api-dev|web-dev)(\s|$)" || true)
 
       - name: Notify ntfy about deploy (staging)
         env:
@@ -148,5 +182,5 @@ jobs:
             -H "Title: PR Calculator deployed (staging)" \
             -H "Tags: rocket,staging" \
             -H "Priority: default" \
-            -d "Env: staging | Service: pr-calculator-web-dev | Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
+            -d "Env: staging | Services: pr-calculator-api-dev, pr-calculator-web-dev | Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
             https://ntfy.carlosgv.dev/deployments >/dev/null 2>&1 || true
