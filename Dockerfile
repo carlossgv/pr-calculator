@@ -47,13 +47,24 @@ ENV VITE_API_BASE=$VITE_API_BASE
 ENV VITE_APP_VERSION=$VITE_APP_VERSION
 
 # ✅ Prisma Client MUST be generated in CI (since we used --ignore-scripts)
+# ✅ Prisma Client MUST be generated
 RUN pnpm --filter @repo/api prisma:generate
 
 # Build API + WEB
 RUN pnpm --filter @repo/api build
 RUN pnpm --filter @repo/web build
 
-# ✅ Create a self-contained prod bundle for API (node_modules included)
+# ✅ Make runtime-relative import work:
+# dist/src/prisma.js requires ../generated/prisma/index.js
+RUN rm -rf /app/apps/api/dist/generated \
+ && mkdir -p /app/apps/api/dist/generated \
+ && cp -R /app/apps/api/generated/* /app/apps/api/dist/generated/
+
+# Asserts
+RUN test -f /app/apps/api/dist/src/main.js
+RUN test -f /app/apps/api/dist/generated/prisma/index.js
+
+# ✅ Create self-contained prod bundle
 RUN pnpm --filter @repo/api deploy --prod /app/deploy/api
 
 # =========================
@@ -70,7 +81,7 @@ RUN apk add --no-cache dumb-init openssl
 EXPOSE 3001
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 COPY --from=builder /app/deploy/api /app
-CMD ["node", "/app/apps/api/dist/main.js"]
+CMD ["node", "/app/dist/src/main.js"]
 
 # =========================
 # Runtime WEB image (Nginx static)

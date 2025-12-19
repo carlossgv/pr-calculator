@@ -51,9 +51,9 @@ add_file () {
 
 echo "Writing dump to: $OUT"
 
-add_file "apps/api/src/main.ts"
-add_file "apps/api/src/**/*.ts"
-add_file "Dockerfile"
+add_file "apps/api/prisma.config.ts"
+add_file "apps/api/prisma/schema.prisma"
+add_file "apps/api/src/prisma.ts"
 
 echo "DONE ✅  Open the file with:"
 echo "  less -R $OUT"
