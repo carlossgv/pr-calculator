@@ -5,7 +5,13 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "prisma:generate": "prisma generate --config ./prisma.config.ts",
+    "prisma:migrate": "prisma migrate dev --config ./prisma.config.ts",
+    "prisma:push": "prisma db push --config ./prisma.config.ts",
+    "prisma:studio": "prisma studio --config ./prisma.config.ts",
+    "prisma:reset": "prisma migrate reset --force --config ./prisma.config.ts && prisma generate --config ./prisma.config.ts",
+    "prisma:seed": "prisma db seed --config ./prisma.config.ts"
   },
   "devDependencies": {
     "turbo": "^2.0.0",

@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   output     = "../generated/prisma"
   engineType = "client"
 }
@@ -9,12 +9,12 @@ datasource db {
 }
 
 model Account {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  devices   Device[]
+  id          String       @id @default(uuid())
+  createdAt   DateTime     @default(now())
+  devices     Device[]
   preferences Preferences?
-  movements Movement[]
-  prEntries PrEntry[]
+  movements   Movement[]
+  prEntries   PrEntry[]
 }
 
 model Device {
@@ -31,16 +31,16 @@ model Device {
 }
 
 model Preferences {
-  accountId  String   @id
-  value      Json
-  updatedAt  DateTime
-  deletedAt  DateTime?
+  accountId String    @id
+  value     Json
+  updatedAt DateTime
+  deletedAt DateTime?
 
   account Account @relation(fields: [accountId], references: [id])
 }
 
 model Movement {
-  id        String   @id
+  id        String    @id
   accountId String
   value     Json
   updatedAt DateTime
@@ -52,12 +52,12 @@ model Movement {
 }
 
 model PrEntry {
-  id        String   @id
-  accountId String
+  id         String    @id
+  accountId  String
   movementId String?
-  value     Json
-  updatedAt DateTime
-  deletedAt DateTime?
+  value      Json
+  updatedAt  DateTime
+  deletedAt  DateTime?
 
   account Account @relation(fields: [accountId], references: [id])
 
