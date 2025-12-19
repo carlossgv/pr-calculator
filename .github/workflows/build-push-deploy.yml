@@ -74,7 +74,7 @@ jobs:
             type=ref,event=tag
 
       # ──────────────────────────────────────────────
-      # Build & push API
+      # Build & push 
       # ──────────────────────────────────────────────
       - name: Build & push API image
         uses: docker/build-push-action@v6
@@ -90,9 +90,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ──────────────────────────────────────────────
-      # Build & push WEB (injects Vite env at build time)
-      # ──────────────────────────────────────────────
       - name: Build & push WEB image
         uses: docker/build-push-action@v6
         with:
@@ -110,6 +107,7 @@ jobs:
             VITE_APP_ENV=${{ github.ref_name == 'main' && 'prod' || 'dev' }}
             VITE_APP_TITLE=${{ github.ref_name == 'main' && 'PR Calculator' || 'PR Calculator Dev' }}
             VITE_API_BASE=${{ github.ref_name == 'main' && 'https://prcalc-api.carlosgv.dev' || 'https://prcalc-api-dev.carlosgv.dev' }}
+            VITE_APP_VERSION=${{ github.sha }}
 
   deploy_main:
     needs: build_and_push

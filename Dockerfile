@@ -11,7 +11,7 @@ RUN apk add --no-cache bash git && \
 WORKDIR /app
 
 # =========================
-# Prune for api + web
+# Prune for web + api
 # =========================
 FROM base AS pruner
 COPY turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -30,39 +30,47 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 COPY --from=pruner /app/out/full/ ./
 
 # =========================
-# Builder (build both)
+# Builder (api + web)
 # =========================
 FROM installer AS builder
 
-# WEB build args (Vite)
+# ---- Vite build-time args (from GitHub Actions build-args)
 ARG VITE_APP_ENV=prod
 ARG VITE_APP_TITLE="PR Calculator"
 ARG VITE_API_BASE="/api"
+ARG VITE_APP_VERSION=""
 
+# ---- Ensure Vite sees them
 ENV VITE_APP_ENV=$VITE_APP_ENV
 ENV VITE_APP_TITLE=$VITE_APP_TITLE
 ENV VITE_API_BASE=$VITE_API_BASE
+ENV VITE_APP_VERSION=$VITE_APP_VERSION
 
-# build api + web (turbo/tsc will cache)
+# ✅ Prisma Client MUST be generated in CI (since we used --ignore-scripts)
+RUN pnpm --filter @repo/api prisma:generate
+
+# Build API + WEB
 RUN pnpm --filter @repo/api build
 RUN pnpm --filter @repo/web build
 
+# ✅ Create a self-contained prod bundle for API (node_modules included)
+RUN pnpm --filter @repo/api deploy --prod /app/deploy/api
+
 # =========================
-# Runtime API image (Nest)
+# Runtime API image
 # =========================
 FROM node:20-alpine AS api
 ENV NODE_ENV=production
 WORKDIR /app
 
-# If you need prisma client at runtime, you already bundle it in dist via @prisma/client.
-# Copy only built output + package.json + node_modules needed
-COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
+# Prisma engines on alpine often need openssl (safe to include)
+RUN apk add --no-cache dumb-init openssl
+
+COPY --from=builder /app/deploy/api /app/apps/api
 
 EXPOSE 3001
-CMD ["node", "dist/main.js"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+CMD ["node", "/app/apps/api/dist/main.js"]
 
 # =========================
 # Runtime WEB image (Nginx static)
