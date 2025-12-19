@@ -1,4 +1,4 @@
-// apps/web/src/storage/repo.ts
+/* FILE: apps/web/src/storage/repo.ts */
 import {
   DEFAULT_PREFS,
   type Movement,
@@ -7,6 +7,7 @@ import {
 } from "@repo/core";
 import Dexie from "dexie";
 import { db } from "./db";
+import { markDirty } from "./changes";
 
 function isNewPrefsShape(p: unknown): p is UserPreferences {
   const v = p as any;
@@ -21,6 +22,14 @@ function isNewPrefsShape(p: unknown): p is UserPreferences {
   );
 }
 
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function isDeleted(row: { deletedAt?: string | null } | null | undefined) {
+  return Boolean(row && row.deletedAt);
+}
+
 export const repo = {
   async getPreferences(): Promise<UserPreferences> {
     const row = await db.preferences.get("prefs");
@@ -28,11 +37,12 @@ export const repo = {
 
     if (isNewPrefsShape(value)) {
       const contexts = value.contexts ?? { kg: "olympic", lb: "crossfit" };
-      const theme = value.theme ?? 'dark'
+      const theme = value.theme ?? "dark";
 
       if (!value.contexts || !value.theme) {
         const next: UserPreferences = { ...value, contexts, theme };
         await db.preferences.put({ id: "prefs", value: next });
+        markDirty();
         return next;
       }
 
@@ -40,48 +50,100 @@ export const repo = {
     }
 
     await db.preferences.put({ id: "prefs", value: DEFAULT_PREFS });
+    markDirty();
     return DEFAULT_PREFS;
   },
 
   async setPreferences(prefs: UserPreferences): Promise<void> {
     await db.preferences.put({ id: "prefs", value: prefs });
+    markDirty();
   },
 
   async listMovements(): Promise<Movement[]> {
-    return db.movements.orderBy("createdAt").reverse().toArray();
+    const rows = await db.movements.orderBy("createdAt").reverse().toArray();
+    return rows.filter((m) => !isDeleted(m));
   },
 
   async getMovement(id: string): Promise<Movement | null> {
-    return (await db.movements.get(id)) ?? null;
+    const m = (await db.movements.get(id)) ?? null;
+    if (!m || isDeleted(m)) return null;
+    return m;
   },
 
   async upsertMovement(m: Movement): Promise<void> {
-    await db.movements.put(m);
+    const now = nowIso();
+
+    // backfill para callers viejos
+    const next: Movement = {
+      ...(m as any),
+      updatedAt: (m as any).updatedAt ?? now,
+      deletedAt: (m as any).deletedAt ?? null,
+    };
+
+    await db.movements.put(next);
+    markDirty();
   },
 
   async deleteMovement(id: string): Promise<void> {
-    await db.movements.delete(id);
-    await db.prEntries.where("movementId").equals(id).delete();
+    const now = nowIso();
+    const m = await db.movements.get(id);
+    if (!m) return;
+
+    // tombstone movimiento
+    await db.movements.put({ ...(m as any), deletedAt: now, updatedAt: now });
+
+    // tombstone PRs del movimiento
+    const prs = await db.prEntries.where("movementId").equals(id).toArray();
+    if (prs.length) {
+      await db.prEntries.bulkPut(
+        prs.map((e) => ({
+          ...(e as any),
+          deletedAt: now,
+          updatedAt: now,
+        })),
+      );
+    }
+
+    markDirty();
   },
 
   async listPrEntries(movementId: string): Promise<PrEntry[]> {
-    // ordered by movementId then updatedAt (asc), we reverse to get latest first
-    return db.prEntries
+    const rows = await db.prEntries
       .where("[movementId+updatedAt]")
       .between([movementId, Dexie.minKey], [movementId, Dexie.maxKey])
       .reverse()
       .toArray();
+
+    return rows.filter((e) => !isDeleted(e));
   },
 
   async addPrEntry(e: PrEntry): Promise<void> {
-    await db.prEntries.put(e);
+    const now = nowIso();
+    const next: PrEntry = {
+      ...(e as any),
+      updatedAt: (e as any).updatedAt ?? now,
+      deletedAt: (e as any).deletedAt ?? null,
+    };
+    await db.prEntries.put(next);
+    markDirty();
   },
 
   async upsertPrEntry(e: PrEntry): Promise<void> {
-    await db.prEntries.put(e);
+    const now = nowIso();
+    const next: PrEntry = {
+      ...(e as any),
+      updatedAt: (e as any).updatedAt ?? now,
+      deletedAt: (e as any).deletedAt ?? null,
+    };
+    await db.prEntries.put(next);
+    markDirty();
   },
 
   async deletePrEntry(id: string): Promise<void> {
-    await db.prEntries.delete(id);
+    const now = nowIso();
+    const e = await db.prEntries.get(id);
+    if (!e) return;
+    await db.prEntries.put({ ...(e as any), deletedAt: now, updatedAt: now });
+    markDirty();
   },
 };

@@ -1,4 +1,4 @@
-// apps/web/vite.config.ts
+/* FILE: apps/web/vite.config.ts */
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
@@ -31,5 +31,16 @@ export default defineConfig(() => {
         },
       }),
     ],
+
+    // 👇 clave
+    server: {
+      proxy: {
+        "/api": {
+          target: "http://localhost:3001",
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
   };
 });

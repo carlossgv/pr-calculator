@@ -1,5 +1,5 @@
 // FILE: apps/web/src/pages/PreferencesPage.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   Plate,
   Unit,
@@ -14,6 +14,8 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
 import { Mars, Venus, ChevronRight, Check } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
+import { downloadJson, exportBackup, importBackup } from "../storage/backup";
+import { getOrCreateIdentity, getSupportId } from "../sync/identity";
 
 type BarGender = "male" | "female";
 type PresetKey = "olympicKg" | "crossfitLb" | null;
@@ -128,6 +130,13 @@ export function PreferencesPage() {
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [barGender, setBarGender] = useState<BarGender>("male");
 
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const [backupErr, setBackupErr] = useState<string | null>(null);
+  const [backupBusy, setBackupBusy] = useState<"export" | "import" | null>(
+    null,
+  );
+  const [supportId, setSupportId] = useState<string>("…");
+
   useEffect(() => {
     repo.getPreferences().then((p) => {
       const safe = ensurePrefs(p, p);
@@ -136,6 +145,54 @@ export function PreferencesPage() {
       repo.setPreferences(safe);
     });
   }, []);
+
+
+useEffect(() => {
+  getOrCreateIdentity()
+    .then((id) => setSupportId(id.deviceId || "unknown"))
+    .catch(() => setSupportId("unknown"));
+}, []);
+
+  async function doExport() {
+    try {
+      setBackupErr(null);
+      setBackupBusy("export");
+      const b = await exportBackup();
+      const stamp = b.exportedAt.slice(0, 10);
+      downloadJson(`pr-calc-backup-${stamp}.json`, b);
+    } catch (e) {
+      console.error(e);
+      setBackupErr("No se pudo exportar el backup");
+    } finally {
+      setBackupBusy(null);
+    }
+  }
+
+  async function onPickImportFile(file: File) {
+    try {
+      setBackupErr(null);
+      setBackupBusy("import");
+
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      await importBackup(parsed);
+
+      // recargar prefs en pantalla (y aplicar theme)
+      const nextPrefs = await repo.getPreferences();
+      setPrefs(nextPrefs);
+      applyTheme(resolvePrefsTheme(nextPrefs));
+    } catch (e) {
+      console.error(e);
+      setBackupErr("No se pudo importar el backup (archivo inválido?)");
+    } finally {
+      setBackupBusy(null);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function doImportClick() {
+    fileRef.current?.click();
+  }
 
   const resolvedTheme = useMemo<ResolvedTheme>(() => {
     if (!prefs) return "light";
@@ -306,7 +363,10 @@ export function PreferencesPage() {
                 </div>
 
                 {/* ✅ Peso único acá (sin duplicar “Current”) */}
-                <span className={styles.valuePill} aria-label={t.prefs.bar.currentHint}>
+                <span
+                  className={styles.valuePill}
+                  aria-label={t.prefs.bar.currentHint}
+                >
                   <span className={styles.mono}>{prefs.bar.value}</span>
                   <span className={styles.valueUnit}>{barUnit}</span>
                 </span>
@@ -329,17 +389,27 @@ export function PreferencesPage() {
             onClick={() => applyPreset(DEFAULT_PREFS)}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>{t.prefs.presets.olympicKg}</div>
+              <div className={styles.actionTitle}>
+                {t.prefs.presets.olympicKg}
+              </div>
               <div className={styles.actionHint}>{olympicHint}</div>
             </div>
 
             <div className={styles.actionRight}>
               {olympicActive ? (
-                <span className={styles.selectedPill} aria-hidden="true" title="Selected">
+                <span
+                  className={styles.selectedPill}
+                  aria-hidden="true"
+                  title="Selected"
+                >
                   <Check size={16} />
                 </span>
               ) : null}
-              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
             </div>
           </button>
 
@@ -351,19 +421,129 @@ export function PreferencesPage() {
             onClick={() => applyPreset(CROSSFIT_LB_WITH_KG_CHANGES)}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>{t.prefs.presets.crossfitLb}</div>
+              <div className={styles.actionTitle}>
+                {t.prefs.presets.crossfitLb}
+              </div>
               <div className={styles.actionHint}>{crossfitHint}</div>
             </div>
 
             <div className={styles.actionRight}>
               {crossfitActive ? (
-                <span className={styles.selectedPill} aria-hidden="true" title="Selected">
+                <span
+                  className={styles.selectedPill}
+                  aria-hidden="true"
+                  title="Selected"
+                >
                   <Check size={16} />
                 </span>
               ) : null}
-              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
             </div>
           </button>
+        </div>
+      </section>
+      {/* BACKUP (manual) */}
+      <section className={styles.section} aria-label="Backup">
+        <div className={styles.sectionTitle}>Backup</div>
+
+        <div className={styles.card}>
+          <button
+            type="button"
+            className={styles.actionRow}
+            onClick={doExport}
+            disabled={backupBusy !== null}
+          >
+            <div className={styles.actionLeft}>
+              <div className={styles.actionTitle}>Exportar</div>
+              <div className={styles.actionHint}>
+                Guarda un JSON por si acaso.
+              </div>
+            </div>
+            <div className={styles.actionRight}>
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
+            </div>
+          </button>
+
+          <button
+            type="button"
+            className={styles.actionRow}
+            onClick={doImportClick}
+            disabled={backupBusy !== null}
+          >
+            <div className={styles.actionLeft}>
+              <div className={styles.actionTitle}>Importar</div>
+              <div className={styles.actionHint}>
+                Restaura desde un JSON exportado.
+              </div>
+            </div>
+            <div className={styles.actionRight}>
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
+            </div>
+          </button>
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="application/json"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onPickImportFile(f);
+            }}
+          />
+
+          {backupErr ? (
+            <div className={styles.rowHint} style={{ padding: "10px 14px" }}>
+              {backupErr}
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      {/* SUPPORT (abajo, escondido-ish) */}
+      <section className={styles.section} aria-label="Soporte">
+        <div className={styles.sectionTitle}>Soporte</div>
+
+        <div className={styles.card}>
+          <div className={styles.row}>
+            <div className={styles.rowLeft}>
+              <div className={styles.rowTitle}>ID</div>
+              <div className={styles.rowHint}>
+                Si pierdes datos, mándame este ID.
+              </div>
+            </div>
+
+            <div className={styles.rowRight}>
+<button
+  type="button"
+  className={styles.supportId}
+  onClick={async () => {
+    try {
+      await navigator.clipboard.writeText(supportId);
+    } catch {}
+  }}
+  title="Copiar ID completo"
+  aria-label="Copiar ID de soporte"
+>
+  <span className={styles.supportIdMono}>
+    {supportId === "unknown" ? "unknown" : supportId.slice(0, 8)}
+  </span>
+  <span className={styles.supportIdDots}>…</span>
+</button>
+            </div>
+          </div>
         </div>
       </section>
     </div>

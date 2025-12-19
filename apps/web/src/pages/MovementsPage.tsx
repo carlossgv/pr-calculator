@@ -151,10 +151,14 @@ export function MovementsPage() {
       setAddErr(null);
       setAddBusy(true);
 
+      const now = new Date().toISOString();
+
       await repo.upsertMovement({
         id,
         name: trimmed,
-        createdAt: new Date().toISOString(),
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
       });
 
       setNewName("");

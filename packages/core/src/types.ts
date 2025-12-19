@@ -15,17 +15,29 @@ export type Plate = {
 export type Movement = {
   id: string;
   name: string;
-  createdAt: string; // ISO
+
+  createdAt: string;
+
+  /** Para sync + orden y tombstones */
+  updatedAt: string;
+
+  /** Soft delete */
+  deletedAt?: string | null;
 };
 
 export type PrEntry = {
   id: string;
   movementId: string;
+
   weight: number;
   reps: number;
-  date: string; // ISO (fecha del PR)
-  createdAt: string; // ISO (cuando se creó el registro)
-  updatedAt: string; // ISO (última edición del registro)
+  date: string;
+
+  createdAt: string;
+  updatedAt: string;
+
+  /** Soft delete */
+  deletedAt?: string | null;
 };
 
 export type UnitContext = "olympic" | "crossfit" | "custom";

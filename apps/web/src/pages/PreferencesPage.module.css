@@ -318,3 +318,24 @@
   background: color-mix(in oklab, var(--accent) 14%, transparent);
   color: var(--fg);
 }
+
+.supportId {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+
+  border-radius: 999px;
+  background: var(--chip-bg, rgba(0, 0, 0, 0.06));
+
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.supportIdMono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.supportIdDots {
+  opacity: 0.5;
+}
