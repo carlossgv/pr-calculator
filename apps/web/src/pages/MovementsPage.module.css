@@ -5,20 +5,6 @@
   gap: 12px;
 }
 
-.addRow {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-
-  /* ⬅️ separa visualmente del “barcode” */
-  margin-top: 12px;
-}
-
-.input {
-  flex: 1;
-  min-width: 0;
-}
-
 .hint {
   margin-top: 4px;
   font-size: 12px;
@@ -76,6 +62,269 @@
 }
 
 .actions {
+  display: grid;
+  gap: 10px;
+}
+
+/* --- Controls (filter + sort + add) --- */
+
+.controlsRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.searchWrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.searchInput {
+  width: 100%;
+  height: 40px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--fg);
+  padding: 0 38px 0 12px;
+  outline: none;
+}
+
+.searchInput:focus {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+}
+
+.clearBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--muted);
+  border-radius: 10px;
+}
+
+/* Sort pill */
+.sortPill {
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--fg);
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.sortPillText {
+  font-size: 13px;
+  font-weight: 650;
+  opacity: 0.9;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Add button */
+.addPill {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--accent) 16%, var(--card-bg));
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.addPill:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+}
+
+/* --- Sheet default (mobile/tablet) --- */
+.sheetOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.45);
+  display: grid;
+  align-items: end;
+  justify-items: stretch;
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  z-index: 50;
+}
+
+.sheet {
+  background: var(--card-bg);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  padding: 12px;
+  max-height: min(70vh, 520px);
+  overflow: auto;
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+
+.sheetTitle {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.sheetClose {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sheetBody {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 4px;
+}
+
+.sheetOption {
+  width: 100%;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+.sheetOptionActive {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.sheetOptionLabel {
+  font-size: 13px;
+  font-weight: 650;
+  opacity: 0.92;
+}
+
+/* Tablet: bottom sheet pero centrado */
+@media (min-width: 700px) and (max-width: 1023px) {
+  .sheetOverlay {
+    justify-items: center;
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .sheet {
+    width: min(640px, calc(100vw - 28px));
+    border-radius: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+/* Desktop: popover anclado al botón */
+@media (min-width: 1024px) {
+  .sheetOverlay {
+    background: rgba(2, 6, 23, 0.18);
+    align-items: start;
+    justify-items: start;
+    padding: 0;
+  }
+
+  .sheetOverlayDesktop {
+    align-items: start;
+    justify-items: start;
+  }
+
+  .sheet {
+    border-radius: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sheetDesktop {
+    position: fixed;
+    width: 360px;
+    max-height: min(70vh, 520px);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 12px;
+    overflow: auto;
+    transform-origin: top right;
+  }
+
+  .sheetAbove {
+    transform-origin: bottom right;
+  }
+}
+
+/* --- Add modal form content (inside ui/Modal) --- */
+
+.modalLabel {
+  display: grid;
+  gap: 6px;
+}
+
+.modalLabelText {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.modalInput {
+  width: 100%;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--fg);
+  padding: 0 12px;
+  outline: none;
+}
+
+.modalInput:focus {
+  border-color: rgba(37, 99, 235, 0.45);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+}
+
+.modalError {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: color-mix(in oklab, var(--danger) 12%, var(--card-bg));
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.modalActions {
   display: grid;
   gap: 10px;
 }

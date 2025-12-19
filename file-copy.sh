@@ -28,9 +28,13 @@ add_file () {
 
 echo "Writing dump to: $OUT"
 
-add_file "apps/web/src/components/WeightCalculatorPanel.tsx"
-add_file "apps/web/src/components/WeightCalculatorPanel.module.css"
+add_file "apps/web/src/pages/MovementsPage.tsx"
+add_file "apps/web/src/pages/MovementsPage.module.css"
+add_file "apps/web/src/pages/MovementDetailsPage.tsx"
+add_file "apps/web/src/pages/MovementDetailsPage.module.css"
+add_file "apps/web/src/i18n/strings.ts"
 add_file "apps/web/src/i18n/strings.en.ts"
+add_file "apps/web/src/ui/Surface.tsx"
 
 echo "DONE ✅  Open the file with:"
 echo "  less -R $OUT"

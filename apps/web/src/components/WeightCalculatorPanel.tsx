@@ -15,6 +15,44 @@ function round1(n: number) {
   return Math.round(n * 10) / 10;
 }
 
+function formatWeight(n: number) {
+  // Evita "100.0" visual; mantiene decimales reales
+  return Number.isFinite(n) ? String(n) : "0";
+}
+
+function sanitizeWeightText(input: string) {
+  // Permite vacío para poder borrar completo
+  if (input === "") return "";
+
+  // Normaliza coma decimal
+  let s = input.replace(",", ".");
+
+  // Sólo dígitos y un punto
+  let out = "";
+  let sawDot = false;
+  for (const ch of s) {
+    if (ch >= "0" && ch <= "9") out += ch;
+    else if (ch === "." && !sawDot) {
+      out += ".";
+      sawDot = true;
+    }
+  }
+
+  // Si empieza con ".", lo convertimos en "0."
+  if (out.startsWith(".")) out = `0${out}`;
+
+  // Quita ceros a la izquierda sólo si hay más dígitos después y NO es "0.".
+  // Ej: "02" -> "2", "00012" -> "12", pero "0.5" se queda.
+  if (!out.startsWith("0.")) {
+    out = out.replace(/^0+(?=\d)/, "");
+  }
+
+  // Si quedó vacío por limpieza, dejamos "0"
+  if (out === "") out = "0";
+
+  return out;
+}
+
 type ChangePayload = { unit: Unit; weight: number };
 
 type Props = {
@@ -70,6 +108,9 @@ export function WeightCalculatorPanel({
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [rawWeight, setRawWeight] = useState<number>(initialWeight ?? 100);
 
+  // 👇 NUEVO: el input se controla como string (para permitir borrar todo)
+  const [weightText, setWeightText] = useState<string>(formatWeight(initialWeight ?? 100));
+
   const [customPctInput, setCustomPctInput] = useState<string>("");
   const [customPcts, setCustomPcts] = useState<number[]>([]);
 
@@ -77,6 +118,7 @@ export function WeightCalculatorPanel({
     if (initialUnit) setUnit(initialUnit);
     if (typeof initialWeight === "number" && Number.isFinite(initialWeight)) {
       setRawWeight(initialWeight);
+      setWeightText(formatWeight(initialWeight));
     }
   }, [initialUnit, initialWeight]);
 
@@ -102,6 +144,7 @@ export function WeightCalculatorPanel({
     const converted = round1(convertWeightValue(rawWeight, unit, next));
     setUnit(next);
     setRawWeight(converted);
+    setWeightText(formatWeight(converted)); // 👈 sincroniza el texto
   }
 
   useEffect(() => {
@@ -155,10 +198,34 @@ export function WeightCalculatorPanel({
           <div className={styles.weightInputWrap}>
             <input
               className={styles.weightInput}
-              type="number"
+              type="text"              // ✅ adiós spinners
               inputMode="decimal"
-              value={rawWeight}
-              onChange={(e) => setRawWeight(Number(e.target.value))}
+              value={weightText}
+              onChange={(e) => {
+                const nextText = sanitizeWeightText(e.target.value);
+                setWeightText(nextText);
+
+                // Si está vacío, no forzamos rawWeight a 0 (así puedes borrar completo)
+                if (nextText === "") return;
+
+                const n = Number(nextText);
+                if (Number.isFinite(n)) setRawWeight(n);
+              }}
+              onBlur={() => {
+                // Si lo dejas vacío al salir, lo llevamos a 0 (y evitamos estado raro)
+                if (weightText.trim() === "") {
+                  setWeightText("0");
+                  setRawWeight(0);
+                  return;
+                }
+
+                // Normaliza en blur para evitar "000" etc
+                const normalized = sanitizeWeightText(weightText);
+                setWeightText(normalized);
+
+                const n = Number(normalized);
+                if (Number.isFinite(n)) setRawWeight(n);
+              }}
               aria-label={t.home.maxWeight}
             />
             <span className={styles.weightInputUnit} aria-hidden="true">

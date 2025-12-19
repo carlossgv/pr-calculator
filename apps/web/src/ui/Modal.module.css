@@ -1,0 +1,98 @@
+/* FILE: apps/web/src/ui/Modal.module.css */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60; /* above page content */
+
+  display: grid;
+  align-items: end;
+  justify-items: stretch;
+
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+
+  /* ✅ blur + dim (PercentCards style) */
+  background: color-mix(in oklab, var(--fg) 12%, transparent);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+}
+
+.modal {
+  background: var(--card-bg);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  padding: 12px;
+
+  max-height: min(70vh, 560px);
+  overflow: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.close {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--muted);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.body {
+  display: grid;
+  gap: 10px;
+}
+
+/* Tablet: centrado */
+@media (min-width: 700px) and (max-width: 1023px) {
+  .overlay {
+    align-items: center;
+    justify-items: center;
+    padding: 14px;
+  }
+
+  .modal {
+    width: min(520px, calc(100vw - 28px));
+    border-radius: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+/* Desktop: centrado */
+@media (min-width: 1024px) {
+  .overlay {
+    align-items: center;
+    justify-items: center;
+    padding: 24px;
+
+    /* un poco más suave en desktop */
+    background: color-mix(in oklab, var(--fg) 10%, transparent);
+    backdrop-filter: blur(16px) saturate(1.15);
+    -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  }
+
+  .modal {
+    width: 520px;
+    max-height: min(70vh, 560px);
+    border-radius: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+}

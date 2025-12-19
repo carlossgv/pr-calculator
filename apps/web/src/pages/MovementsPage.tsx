@@ -1,9 +1,9 @@
 // FILE: apps/web/src/pages/MovementsPage.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Movement, PrEntry, UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   ActionButton,
   Chip,
@@ -12,8 +12,9 @@ import {
   Surface,
   SurfaceHeader,
 } from "../ui/Surface";
+import { Modal } from "../ui/Modal";
 import styles from "./MovementsPage.module.css";
-import { Trash2 } from "lucide-react";
+import { ArrowUpDown, Check, Plus, Trash2, X } from "lucide-react";
 
 function uid() {
   try {
@@ -36,26 +37,76 @@ function uid() {
   }
 }
 
-type Best = { entry: PrEntry | null; by: "weight" };
+type Stats = {
+  best: PrEntry | null; // by weight
+  latest: PrEntry | null; // by date
+};
 
-function pickBestByWeight(entries: PrEntry[]): Best {
-  if (entries.length === 0) return { entry: null, by: "weight" };
+function pickStats(entries: PrEntry[]): Stats {
+  if (entries.length === 0) return { best: null, latest: null };
+
   let best = entries[0];
-  for (const e of entries) if (e.weight > best.weight) best = e;
-  return { entry: best, by: "weight" };
+  let latest = entries[0];
+
+  for (const e of entries) {
+    if (e.weight > best.weight) best = e;
+    if (e.date > latest.date) latest = e; // ISO compare ok
+  }
+
+  return { best, latest };
 }
 
 function toDateLabel(iso: string) {
   return iso.slice(0, 10);
 }
 
+type SortKey =
+  | "activity_desc"
+  | "created_desc"
+  | "created_asc"
+  | "name_asc"
+  | "name_desc"
+  | "best_desc";
+
+type PopoverPlacement = "below" | "above";
+type PopoverPos = { top: number; left: number; placement: PopoverPlacement };
+
+function isDesktop() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(min-width: 1024px)").matches;
+}
+
 export function MovementsPage() {
   const navigate = useNavigate();
+  const location = useLocation(); // ✅
 
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [items, setItems] = useState<Movement[]>([]);
-  const [bestMap, setBestMap] = useState<Record<string, Best>>({});
-  const [name, setName] = useState("");
+  const [statsMap, setStatsMap] = useState<Record<string, Stats>>({});
+
+  // UI
+  const [q, setQ] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("activity_desc");
+  const [sortOpen, setSortOpen] = useState(false);
+
+  // Add modal
+  const [addOpen, setAddOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [addErr, setAddErr] = useState<string | null>(null);
+  const [addBusy, setAddBusy] = useState(false);
+  const addInputRef = useRef<HTMLInputElement | null>(null);
+
+  const sortBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [popoverPos, setPopoverPos] = useState<PopoverPos | null>(null);
+
+  const sortOptions: { key: SortKey; label: string }[] = [
+    { key: "activity_desc", label: t.movements.sort.recentActivity },
+    { key: "created_desc", label: t.movements.sort.createdNewest },
+    { key: "created_asc", label: t.movements.sort.createdOldest },
+    { key: "name_asc", label: t.movements.sort.nameAZ },
+    { key: "name_desc", label: t.movements.sort.nameZA },
+    { key: "best_desc", label: t.movements.sort.bestPrWeight },
+  ];
 
   async function reload() {
     const [p, movements] = await Promise.all([
@@ -69,35 +120,58 @@ export function MovementsPage() {
     const pairs = await Promise.all(
       movements.map(async (m) => {
         const entries = await repo.listPrEntries(m.id);
-        return [m.id, pickBestByWeight(entries)] as const;
+        return [m.id, pickStats(entries)] as const;
       }),
     );
 
-    const next: Record<string, Best> = {};
-    for (const [id, best] of pairs) next[id] = best;
-    setBestMap(next);
+    const next: Record<string, Stats> = {};
+    for (const [id, s] of pairs) next[id] = s;
+    setStatsMap(next);
   }
+
+  // ✅ IMPORTANT: reload on navigation (when coming back from Manage/Calc/etc.)
+  useEffect(() => {
+    reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
 
   useEffect(() => {
     reload();
   }, []);
 
-  async function add() {
-    const trimmed = name.trim();
-    if (!trimmed) return;
+  async function createMovementAndGoManage() {
+    const trimmed = newName.trim();
+    if (!trimmed) {
+      setAddErr(t.movements.create.errorEmpty);
+      return;
+    }
 
-    await repo.upsertMovement({
-      id: uid(),
-      name: trimmed,
-      createdAt: new Date().toISOString(),
-    });
+    const id = uid();
 
-    setName("");
-    await reload();
+    try {
+      setAddErr(null);
+      setAddBusy(true);
+
+      await repo.upsertMovement({
+        id,
+        name: trimmed,
+        createdAt: new Date().toISOString(),
+      });
+
+      setNewName("");
+      setAddOpen(false);
+
+      // ✅ go directly to manage
+      navigate(`/movements/${id}/manage`);
+    } finally {
+      setAddBusy(false);
+    }
   }
 
   async function removeMovement(m: Movement) {
-    const ok = window.confirm(`Delete "${m.name}"? This will remove its PRs too.`);
+    const ok = window.confirm(
+      `Delete "${m.name}"? This will remove its PRs too.`,
+    );
     if (!ok) return;
     await repo.deleteMovement(m.id);
     await reload();
@@ -105,7 +179,7 @@ export function MovementsPage() {
 
   function goCalc(movementId: string) {
     const unit = prefs?.defaultUnit ?? "kg";
-    const best = bestMap[movementId]?.entry;
+    const best = statsMap[movementId]?.best;
     const weight = best?.weight ?? 100;
     navigate(`/movements/${movementId}/calc/${unit}/${weight}`);
   }
@@ -114,11 +188,147 @@ export function MovementsPage() {
     navigate(`/movements/${movementId}/manage`);
   }
 
-  const cards = useMemo(() => {
-    return items.map((m) => ({ m, best: bestMap[m.id]?.entry ?? null }));
-  }, [items, bestMap]);
-
   const unit = prefs?.defaultUnit ?? "kg";
+
+  const cards = useMemo(() => {
+    const raw = items.map((m) => {
+      const s = statsMap[m.id] ?? { best: null, latest: null };
+      return { m, best: s.best, latest: s.latest };
+    });
+
+    const needle = q.trim().toLowerCase();
+    const filtered = needle
+      ? raw.filter(({ m }) => m.name.toLowerCase().includes(needle))
+      : raw;
+
+    const activityDate = (x: { m: Movement; latest: PrEntry | null }) =>
+      x.latest?.date ?? x.m.createdAt;
+
+    const cmp = (
+      a: (typeof filtered)[number],
+      b: (typeof filtered)[number],
+    ) => {
+      switch (sortKey) {
+        case "activity_desc": {
+          const da = activityDate(a);
+          const db = activityDate(b);
+          if (da === db) return a.m.name.localeCompare(b.m.name);
+          return db.localeCompare(da);
+        }
+        case "created_desc": {
+          if (a.m.createdAt === b.m.createdAt)
+            return a.m.name.localeCompare(b.m.name);
+          return b.m.createdAt.localeCompare(a.m.createdAt);
+        }
+        case "created_asc": {
+          if (a.m.createdAt === b.m.createdAt)
+            return a.m.name.localeCompare(b.m.name);
+          return a.m.createdAt.localeCompare(b.m.createdAt);
+        }
+        case "name_asc":
+          return a.m.name.localeCompare(b.m.name);
+        case "name_desc":
+          return b.m.name.localeCompare(a.m.name);
+        case "best_desc": {
+          const wa = a.best?.weight ?? -Infinity;
+          const wb = b.best?.weight ?? -Infinity;
+          if (wa === wb) return a.m.name.localeCompare(b.m.name);
+          return wb - wa;
+        }
+        default:
+          return 0;
+      }
+    };
+
+    return [...filtered].sort(cmp);
+  }, [items, statsMap, q, sortKey]);
+
+  const total = items.length;
+  const shown = cards.length;
+
+  function computePopover() {
+    if (!isDesktop()) {
+      setPopoverPos(null);
+      return;
+    }
+
+    const btn = sortBtnRef.current;
+    if (!btn) return;
+
+    const rect = btn.getBoundingClientRect();
+    const gutter = 12;
+    const gap = 10;
+
+    const width = 360;
+    const maxH = 520;
+
+    const left = Math.min(
+      Math.max(gutter, rect.right - width),
+      window.innerWidth - gutter - width,
+    );
+
+    const belowTop = rect.bottom + gap;
+    const wouldOverflowBottom = belowTop + maxH > window.innerHeight - gutter;
+
+    if (wouldOverflowBottom) {
+      const top = Math.max(gutter, rect.top - gap - maxH);
+      setPopoverPos({ top, left, placement: "above" });
+      return;
+    }
+
+    setPopoverPos({ top: belowTop, left, placement: "below" });
+  }
+
+  function openSort() {
+    setAddOpen(false);
+    setSortOpen(true);
+  }
+
+  function openAdd() {
+    setSortOpen(false);
+    setPopoverPos(null);
+    setAddErr(null);
+    setAddOpen(true);
+  }
+
+  useLayoutEffect(() => {
+    if (!sortOpen) return;
+    computePopover();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortOpen]);
+
+  useEffect(() => {
+    if (!addOpen) return;
+    const tmr = window.setTimeout(() => addInputRef.current?.focus(), 0);
+    return () => window.clearTimeout(tmr);
+  }, [addOpen]);
+
+  useEffect(() => {
+    if (!sortOpen && !addOpen) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSortOpen(false);
+        setAddOpen(false);
+      }
+    };
+
+    const onRecalc = () => computePopover();
+
+    window.addEventListener("keydown", onKey);
+
+    if (sortOpen) {
+      window.addEventListener("resize", onRecalc);
+      window.addEventListener("scroll", onRecalc, true);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onRecalc);
+      window.removeEventListener("scroll", onRecalc, true);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortOpen, addOpen]);
 
   return (
     <div className={styles.page}>
@@ -129,29 +339,63 @@ export function MovementsPage() {
           showBarcode
         />
 
-        <div className={styles.addRow}>
-          <input
-            className={styles.input}
-            placeholder={t.movements.placeholder}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <ActionButton
-            variant="primary"
-            onClick={add}
-            ariaLabel={t.movements.add}
-            title={t.movements.add}
+        <div className={styles.controlsRow}>
+          <div className={styles.searchWrap}>
+            <input
+              className={styles.searchInput}
+              placeholder={t.movements.filterPlaceholder}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+            {q.trim() ? (
+              <button
+                type="button"
+                className={styles.clearBtn}
+                aria-label={t.movements.clearFilterAria}
+                title={t.movements.clearFilterAria}
+                onClick={() => setQ("")}
+              >
+                <X size={16} />
+              </button>
+            ) : null}
+          </div>
+
+          <button
+            ref={sortBtnRef}
+            type="button"
+            className={styles.sortPill}
+            onClick={openSort}
+            aria-label={t.movements.sort.aria}
+            title={t.movements.sort.aria}
           >
-            {t.movements.add}
-          </ActionButton>
+            <ArrowUpDown size={16} />
+            <span className={styles.sortPillText}>
+              {sortOptions.find((x) => x.key === sortKey)?.label ?? "Sort"}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            className={styles.addPill}
+            onClick={openAdd}
+            aria-label={t.movements.create.aria}
+            title={t.movements.create.aria}
+          >
+            <Plus size={18} />
+          </button>
         </div>
 
         <div className={styles.hint}>
-          {cards.length === 0 ? (
-            <span className={styles.muted}>No movements yet. Add your first one 👇</span>
+          {total === 0 ? (
+            <span className={styles.muted}>{t.movements.emptyHint}</span>
+          ) : shown === 0 ? (
+            <span className={styles.muted}>
+              {t.movements.noMatches} “{q.trim()}”.
+            </span>
           ) : (
             <span className={styles.muted}>
-              Tap <b>Open calculator</b> to start from your best lift.
+              {t.movements.showing} <b>{shown}</b> {t.movements.of}{" "}
+              <b>{total}</b>. {t.movements.tapHint}
             </span>
           )}
         </div>
@@ -168,13 +412,11 @@ export function MovementsPage() {
 
                 {best ? (
                   <div className={styles.sub}>
-                    {toDateLabel(best.date)} · <b>{best.weight}</b> × {best.reps}{" "}
-                    <span className={styles.unitHint}>{unit}</span>
+                    {toDateLabel(best.date)} · <b>{best.weight}</b> ×{" "}
+                    {best.reps} <span className={styles.unitHint}>{unit}</span>
                   </div>
                 ) : (
-                  <div className={styles.subMuted}>
-                    No PR yet — tap Manage PRs to add one
-                  </div>
+                  <div className={styles.subMuted}>{t.movements.noPrYet}</div>
                 )}
               </div>
 
@@ -194,16 +436,127 @@ export function MovementsPage() {
                 fullWidth
                 onClick={() => goCalc(m.id)}
               >
-                Open calculator
+                {t.movements.openCalculator}
               </ActionButton>
 
               <ActionButton fullWidth onClick={() => goManage(m.id)}>
-                Manage PRs
+                {t.movements.managePrs}
               </ActionButton>
             </div>
           </Surface>
         ))}
       </div>
+
+      {/* SORT sheet/popover */}
+      {sortOpen ? (
+        <div
+          className={`${styles.sheetOverlay} ${
+            popoverPos ? styles.sheetOverlayDesktop : ""
+          }`}
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setSortOpen(false)}
+        >
+          <div
+            className={`${styles.sheet} ${popoverPos ? styles.sheetDesktop : ""} ${
+              popoverPos?.placement === "above" ? styles.sheetAbove : ""
+            }`}
+            style={
+              popoverPos
+                ? ({
+                    top: popoverPos.top,
+                    left: popoverPos.left,
+                  } as React.CSSProperties)
+                : undefined
+            }
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.sheetHeader}>
+              <div className={styles.sheetTitle}>{t.movements.sort.title}</div>
+              <button
+                type="button"
+                className={styles.sheetClose}
+                onClick={() => setSortOpen(false)}
+                aria-label={t.movements.closeAria}
+                title={t.movements.closeAria}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={styles.sheetBody}>
+              {sortOptions.map((opt) => {
+                const active = opt.key === sortKey;
+                return (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    className={`${styles.sheetOption} ${
+                      active ? styles.sheetOptionActive : ""
+                    }`}
+                    onClick={() => {
+                      setSortKey(opt.key);
+                      setSortOpen(false);
+                    }}
+                  >
+                    <span className={styles.sheetOptionLabel}>{opt.label}</span>
+                    {active ? <Check size={18} /> : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* ADD movement modal */}
+      {addOpen ? (
+        <Modal
+          title={t.movements.create.title}
+          ariaLabel={t.movements.create.title}
+          onClose={() => setAddOpen(false)}
+        >
+          <label className={styles.modalLabel}>
+            <span className={styles.modalLabelText}>
+              {t.movements.create.nameLabel}
+            </span>
+            <input
+              ref={addInputRef}
+              className={styles.modalInput}
+              placeholder={t.movements.placeholder}
+              value={newName}
+              onChange={(e) => {
+                setNewName(e.target.value);
+                if (addErr) setAddErr(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") createMovementAndGoManage();
+              }}
+            />
+          </label>
+
+          {addErr ? <div className={styles.modalError}>{addErr}</div> : null}
+
+          <div className={styles.modalActions}>
+            <ActionButton
+              variant="primary"
+              fullWidth
+              disabled={addBusy}
+              onClick={createMovementAndGoManage}
+            >
+              {t.movements.create.createCta}
+            </ActionButton>
+
+            <ActionButton
+              fullWidth
+              disabled={addBusy}
+              onClick={() => setAddOpen(false)}
+            >
+              {t.movements.create.cancelCta}
+            </ActionButton>
+          </div>
+        </Modal>
+      ) : null}
     </div>
   );
 }

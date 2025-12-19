@@ -123,22 +123,6 @@
   box-shadow: 0 0 0 6px var(--ring);
 }
 
-/* notch: keep it but make it calmer on light */
-.weightInputWrap::before {
-  content: "";
-  position: absolute;
-  left: 18px;
-  top: 22px;
-  transform: translateY(-50%);
-
-  width: 8px;
-  height: 8px;
-
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--accent-2) 70%, var(--card-bg));
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-2) 14%, transparent);
-  opacity: 0.9;
-}
 
 .weightInput {
   width: 100%;
@@ -157,6 +141,19 @@
 
   padding: 16px 70px 16px 18px;
   outline: none;
+  appearance: textfield;
+}
+
+/* Chrome/Safari/Edge */
+.weightInput::-webkit-outer-spin-button,
+.weightInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.weightInput[type="number"] {
+  -moz-appearance: textfield;
 }
 
 @media (max-width: 380px) {
@@ -304,7 +301,6 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 
 .customPctChips {
   display: flex;

@@ -1,4 +1,3 @@
-// apps/web/src/i18n/strings.en.ts
 // FILE: apps/web/src/i18n/strings.en.ts
 export const en = {
   appName: "PR Calculator",
@@ -79,8 +78,41 @@ export const en = {
   },
   movements: {
     placeholder: "e.g. Back Squat",
-    add: "Add",
+    filterPlaceholder: "Filter movements…",
+    clearFilterAria: "Clear filter",
+    closeAria: "Close",
+
+    emptyHint: "No movements yet. Add your first one 👇",
+    noMatches: "No matches for",
+    showing: "Showing",
+    of: "of",
+    tapHint: "Tap Open calculator to start from your best lift.",
+    noPrYet: "No PR yet — tap Manage PRs to add one",
+
+    openCalculator: "Open calculator",
+    managePrs: "Manage PRs",
+
     delete: "delete",
+
+    sort: {
+      title: "Sort",
+      aria: "Sort movements",
+      recentActivity: "Recent activity",
+      createdNewest: "Created (newest)",
+      createdOldest: "Created (oldest)",
+      nameAZ: "Name (A–Z)",
+      nameZA: "Name (Z–A)",
+      bestPrWeight: "Best PR (weight)",
+    },
+
+    create: {
+      aria: "Add movement",
+      title: "New movement",
+      nameLabel: "Name",
+      createCta: "Create",
+      cancelCta: "Cancel",
+      errorEmpty: "Please enter a name",
+    },
   },
   movement: {
     title: "Movement",

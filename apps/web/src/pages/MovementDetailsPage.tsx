@@ -237,10 +237,7 @@ export function MovementDetailsPage() {
     <div className={styles.page}>
       <div className={styles.topBar}>
         <Link to="/movements">{t.movement.back}</Link>
-        <Link
-          to={`/movements/${id}/calc/${unit}/100`}
-          className={styles.topLink}
-        >
+        <Link to={`/movements/${id}/calc/${unit}/100`} className={styles.topLink}>
           Calculator
         </Link>
       </div>
@@ -330,9 +327,7 @@ export function MovementDetailsPage() {
 
                     <div className={styles.editGrid}>
                       <label className={styles.label}>
-                        <span className={styles.labelText}>
-                          {t.movement.weight}
-                        </span>
+                        <span className={styles.labelText}>{t.movement.weight}</span>
                         <div className={styles.row}>
                           <div className={styles.grow}>
                             <NumberInput
@@ -351,9 +346,7 @@ export function MovementDetailsPage() {
                       </label>
 
                       <label className={styles.label}>
-                        <span className={styles.labelText}>
-                          {t.movement.reps}
-                        </span>
+                        <span className={styles.labelText}>{t.movement.reps}</span>
                         <NumberInput
                           value={editRepsText}
                           onChange={setEditRepsText}
