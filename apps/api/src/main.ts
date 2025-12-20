@@ -5,9 +5,10 @@ import { Logger } from "@nestjs/common";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix("api");
 
-  // MVP: permitir web
+  // ✅ como el API ya está en su propio subdominio, NO agregamos /api
+  // app.setGlobalPrefix("api");
+
   app.enableCors({
     origin: true,
     credentials: true,
