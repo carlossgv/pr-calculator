@@ -51,8 +51,7 @@ add_file () {
 
 echo "Writing dump to: $OUT"
 
-add_file "apps/api/src/main.ts"
-add_file "apps/web/src/sync/api.ts"
+add_file "apps/web/src/sync/index.ts"
 
 echo "DONE ✅  Open the file with:"
 echo "  less -R $OUT"

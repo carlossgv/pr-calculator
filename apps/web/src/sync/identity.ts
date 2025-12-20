@@ -1,6 +1,16 @@
 /* FILE: apps/web/src/sync/identity.ts */
 import { db } from "../storage/db";
 
+const DEBUG_ID = (import.meta as any).env?.VITE_DEBUG_IDENTITY === "1";
+
+// keys legacy (auth.ts)
+const LS_KEY_ID = "prcalc_deviceId";
+const LS_KEY_TOKEN = "prcalc_deviceToken";
+
+function dbg(...args: any[]) {
+  if (DEBUG_ID) console.log("[sync/identity]", ...args);
+}
+
 function base64Url(bytes: Uint8Array) {
   let str = "";
   for (let i = 0; i < bytes.length; i++) str += String.fromCharCode(bytes[i]);
@@ -22,6 +32,12 @@ function uuid(): string {
   b[8] = (b[8] & 0x3f) | 0x80;
   const hex = [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+function mask(s: string, head = 6, tail = 4) {
+  if (!s) return "";
+  if (s.length <= head + tail) return `${s.slice(0, 2)}…`;
+  return `${s.slice(0, head)}…${s.slice(-tail)}`;
 }
 
 export type Identity = {
@@ -48,6 +64,24 @@ export async function getOrCreateIdentity(): Promise<Identity> {
     deviceToken = base64Url(randomBytes(32));
     await db.meta.put({ id: "deviceId", value: deviceId });
     await db.meta.put({ id: "deviceToken", value: deviceToken });
+    dbg("created", { deviceId, deviceToken: mask(deviceToken) });
+  } else {
+    dbg("loaded", { deviceId, deviceToken: mask(deviceToken) });
+  }
+
+  // 🔥 Detecta si existe identidad distinta en localStorage (auth.ts)
+  try {
+    const lsId = window.localStorage.getItem(LS_KEY_ID) ?? "";
+    const lsTok = window.localStorage.getItem(LS_KEY_TOKEN) ?? "";
+
+    if ((lsId && lsId !== deviceId) || (lsTok && lsTok !== deviceToken)) {
+      dbg("WARNING mismatch between Dexie(meta) and localStorage(auth.ts)", {
+        dexie: { deviceId, deviceToken: mask(deviceToken) },
+        localStorage: { deviceId: lsId || "∅", deviceToken: lsTok ? mask(lsTok) : "∅" },
+      });
+    }
+  } catch {
+    // ignore
   }
 
   return {

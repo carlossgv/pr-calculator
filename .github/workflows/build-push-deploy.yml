@@ -1,3 +1,4 @@
+# FILE: .github/workflows/build-push-deploy.yml
 name: Build & Push (API+WEB) + Deploy (staging/main)
 
 on:
@@ -74,7 +75,7 @@ jobs:
             type=ref,event=tag
 
       # ──────────────────────────────────────────────
-      # Build & push 
+      # Build & push API
       # ──────────────────────────────────────────────
       - name: Build & push API image
         uses: docker/build-push-action@v6
@@ -90,6 +91,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # ──────────────────────────────────────────────
+      # Build & push WEB (Vite vars are build-time!)
+      # ──────────────────────────────────────────────
       - name: Build & push WEB image
         uses: docker/build-push-action@v6
         with:
@@ -108,6 +112,9 @@ jobs:
             VITE_APP_TITLE=${{ github.ref_name == 'main' && 'PR Calculator' || 'PR Calculator Dev' }}
             VITE_API_BASE=${{ github.ref_name == 'main' && 'https://prcalc-api.carlosgv.dev' || 'https://prcalc-api-dev.carlosgv.dev' }}
             VITE_APP_VERSION=${{ github.sha }}
+            VITE_DEBUG_SYNC=${{ github.ref_name == 'main' && '0' || '1' }}
+            VITE_DEBUG_HTTP=${{ github.ref_name == 'main' && '0' || '1' }}
+            VITE_DEBUG_IDENTITY=${{ github.ref_name == 'main' && '0' || '1' }}
 
   deploy_main:
     needs: build_and_push

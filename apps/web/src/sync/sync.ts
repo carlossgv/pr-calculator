@@ -1,6 +1,11 @@
 /* FILE: apps/web/src/sync/sync.ts */
 import type { Movement, PrEntry, UserPreferences } from "@repo/core";
-import type { SyncEntityEnvelope, SyncPushRequest } from "@repo/api-contracts";
+import type {
+  SyncEntityEnvelope,
+  SyncPushRequest,
+  SyncPushResponse,
+  SyncPullResponse,
+} from "@repo/api-contracts";
 import { db } from "../storage/db";
 import { consumeDirty, subscribeChanges } from "../storage/changes";
 import { bootstrap, syncPull, syncPush } from "./api";
@@ -10,6 +15,18 @@ import {
   setAccountId,
   setLastSyncMs,
 } from "./identity";
+
+const DEBUG_SYNC = (import.meta as any).env?.VITE_DEBUG_SYNC === "1";
+
+function dbg(...args: any[]) {
+  if (DEBUG_SYNC) console.log("[sync]", ...args);
+}
+
+function mask(s: string, head = 6, tail = 4) {
+  if (!s) return "";
+  if (s.length <= head + tail) return `${s.slice(0, 2)}…`;
+  return `${s.slice(0, head)}…${s.slice(-tail)}`;
+}
 
 function nowMs() {
   return Date.now();
@@ -49,6 +66,19 @@ function coerceDeletedAtMs(x: any): number | null {
 
 function isDeleted(obj: any): boolean {
   return Boolean(obj && (obj.deletedAt || obj.deletedAtMs));
+}
+
+function isAuthError(e: unknown): boolean {
+  const msg = (e as any)?.message ? String((e as any).message) : "";
+  // nuestro req() en api.ts lanza: `API ${path} failed: ${status} ${text}`
+  // el text del API incluye: {"message":"Unknown device","error":"Unauthorized","statusCode":401}
+  return (
+    msg.includes(" 401 ") ||
+    msg.includes("Unauthorized") ||
+    msg.includes("Unknown device") ||
+    msg.includes("Bad token") ||
+    msg.includes("Missing device auth")
+  );
 }
 
 async function buildPushPayload(sinceMs: number): Promise<SyncPushRequest> {
@@ -92,7 +122,7 @@ async function buildPushPayload(sinceMs: number): Promise<SyncPushRequest> {
   };
 }
 
-async function applyPull(pull: Awaited<ReturnType<typeof syncPull>>) {
+async function applyPull(pull: SyncPullResponse) {
   // preferences
   if (pull.preferences?.value) {
     await db.preferences.put({ id: "prefs", value: pull.preferences.value as any });
@@ -182,6 +212,47 @@ async function applyPull(pull: Awaited<ReturnType<typeof syncPull>>) {
   }
 }
 
+// Prevent bootstrap storms
+let bootstrapInFlight: Promise<void> | null = null;
+
+async function ensureBootstrapped(auth: { deviceId: string; deviceToken: string }) {
+  if (bootstrapInFlight) return bootstrapInFlight;
+
+  bootstrapInFlight = (async () => {
+    dbg("bootstrap => start", { deviceId: auth.deviceId, token: mask(auth.deviceToken) });
+    const b = await bootstrap(auth);
+    await setAccountId(b.accountId);
+    await setLastSyncMs(Math.max(await getLastSyncMs(), 0));
+    dbg("bootstrap <= ok", { accountId: b.accountId, serverTimeMs: b.serverTimeMs });
+  })()
+    .catch((e) => {
+      dbg("bootstrap <= fail", e);
+      throw e;
+    })
+    .finally(() => {
+      bootstrapInFlight = null;
+    });
+
+  return bootstrapInFlight;
+}
+
+async function withSelfHeal<T>(
+  auth: { deviceId: string; deviceToken: string },
+  opName: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (e) {
+    if (!isAuthError(e)) throw e;
+
+    // Self-heal: bootstrap + retry once
+    dbg(`${opName} auth error -> self-heal`, e);
+    await ensureBootstrapped(auth);
+    return await fn();
+  }
+}
+
 let started = false;
 let pushing = false;
 let pullInFlight = false;
@@ -190,11 +261,22 @@ let debounceTimer: number | null = null;
 async function doPull(auth: { deviceId: string; deviceToken: string }) {
   if (pullInFlight) return;
   pullInFlight = true;
+
   try {
     const sinceMs = await getLastSyncMs();
-    const pull = await syncPull(auth, sinceMs);
+
+    const pull = await withSelfHeal(auth, "pull", async () => {
+      dbg("pull =>", { sinceMs });
+      return await syncPull(auth, sinceMs);
+    });
+
     await applyPull(pull);
     await setLastSyncMs(pull.serverTimeMs);
+
+    dbg("pull <= ok", { serverTimeMs: pull.serverTimeMs });
+  } catch (e) {
+    dbg("pull <= fail", e);
+    // best-effort (offline ok)
   } finally {
     pullInFlight = false;
   }
@@ -203,10 +285,27 @@ async function doPull(auth: { deviceId: string; deviceToken: string }) {
 async function doPush(auth: { deviceId: string; deviceToken: string }) {
   if (pushing) return;
   pushing = true;
+
   try {
     const sinceMs = await getLastSyncMs();
     const payload = await buildPushPayload(sinceMs);
-    await syncPush(auth, payload);
+
+    if (DEBUG_SYNC) {
+      const prefs = payload.preferences ? 1 : 0;
+      const mov = Array.isArray(payload.movements) ? payload.movements.length : 0;
+      const prs = Array.isArray(payload.prEntries) ? payload.prEntries.length : 0;
+      dbg("push payload", { sinceMs, prefs, movements: mov, prEntries: prs, clientTimeMs: payload.clientTimeMs });
+    }
+
+    const res: SyncPushResponse = await withSelfHeal(auth, "push", async () => {
+      dbg("push =>", { sinceMs });
+      return await syncPush(auth, payload);
+    });
+
+    dbg("push <= ok", res);
+  } catch (e) {
+    dbg("push <= fail", e);
+    // best-effort
   } finally {
     pushing = false;
   }
@@ -217,14 +316,13 @@ function schedulePush(auth: { deviceId: string; deviceToken: string }) {
   debounceTimer = window.setTimeout(async () => {
     debounceTimer = null;
 
-    if (!consumeDirty()) return;
-
-    try {
-      await doPush(auth);
-      await doPull(auth);
-    } catch {
-      // best-effort
+    if (!consumeDirty()) {
+      dbg("schedulePush: no dirty -> skip");
+      return;
     }
+
+    await doPush(auth);
+    await doPull(auth);
   }, 2500);
 }
 
@@ -235,20 +333,22 @@ export async function initSync() {
   const id = await getOrCreateIdentity();
   const auth = { deviceId: id.deviceId, deviceToken: id.deviceToken };
 
+  dbg("initSync", {
+    deviceId: auth.deviceId,
+    token: mask(auth.deviceToken),
+    accountId: id.accountId ?? "∅",
+    lastSyncMs: id.lastSyncMs ?? 0,
+  });
+
+  // Bootstrap best effort, pero ahora loggeado
   try {
-    const b = await bootstrap(auth);
-    await setAccountId(b.accountId);
-    // mantenemos lastSyncMs (no lo “subimos” aquí)
-    await setLastSyncMs(Math.max(await getLastSyncMs(), 0));
+    await ensureBootstrapped(auth);
   } catch {
     // offline ok
   }
 
-  try {
-    await doPull(auth);
-  } catch {
-    // offline ok
-  }
+  // Pull inicial
+  await doPull(auth);
 
   subscribeChanges(() => schedulePush(auth));
 

@@ -8,6 +8,19 @@ import type {
 } from "@repo/api-contracts";
 
 const API_BASE = (import.meta as any).env?.VITE_API_BASE ?? "/api";
+const DEBUG_HTTP = (import.meta as any).env?.VITE_DEBUG_HTTP === "1";
+
+let printedBase = false;
+
+function dbg(...args: any[]) {
+  if (DEBUG_HTTP) console.log("[sync/http]", ...args);
+}
+
+function join(base: string, path: string) {
+  const b = String(base).replace(/\/+$/, "");
+  const p = String(path).startsWith("/") ? path : `/${path}`;
+  return `${b}${p}`;
+}
 
 export type ApiAuth = {
   deviceId: string;
@@ -15,7 +28,15 @@ export type ApiAuth = {
 };
 
 async function req<T>(path: string, auth: ApiAuth, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
+  if (DEBUG_HTTP && !printedBase) {
+    printedBase = true;
+    dbg("API_BASE =", API_BASE);
+  }
+
+  const url = join(API_BASE, path);
+  dbg("=>", init?.method ?? "GET", url, { deviceId: auth.deviceId });
+
+  const res = await fetch(url, {
     ...init,
     headers: {
       ...(init?.headers ?? {}),
@@ -25,8 +46,11 @@ async function req<T>(path: string, auth: ApiAuth, init?: RequestInit): Promise<
     },
   });
 
+  dbg("<=", res.status, url);
+
   if (!res.ok) {
     const text = await res.text().catch(() => "");
+    dbg("<= body", text.slice(0, 800));
     throw new Error(`API ${path} failed: ${res.status} ${text}`);
   }
 

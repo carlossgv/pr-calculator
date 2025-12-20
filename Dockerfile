@@ -40,11 +40,19 @@ ARG VITE_APP_TITLE="PR Calculator"
 ARG VITE_API_BASE="/api"
 ARG VITE_APP_VERSION=""
 
-# ---- Ensure Vite sees them
+# ---- Debug build-time flags (optional)
+ARG VITE_DEBUG_SYNC="0"
+ARG VITE_DEBUG_HTTP="0"
+ARG VITE_DEBUG_IDENTITY="0"
+
+# ---- Ensure Vite sees them (Vite reads at build-time)
 ENV VITE_APP_ENV=$VITE_APP_ENV
 ENV VITE_APP_TITLE=$VITE_APP_TITLE
 ENV VITE_API_BASE=$VITE_API_BASE
 ENV VITE_APP_VERSION=$VITE_APP_VERSION
+ENV VITE_DEBUG_SYNC=$VITE_DEBUG_SYNC
+ENV VITE_DEBUG_HTTP=$VITE_DEBUG_HTTP
+ENV VITE_DEBUG_IDENTITY=$VITE_DEBUG_IDENTITY
 
 # ✅ Prisma Client MUST be generated in CI (since we used --ignore-scripts)
 RUN pnpm --filter @repo/api prisma:generate
