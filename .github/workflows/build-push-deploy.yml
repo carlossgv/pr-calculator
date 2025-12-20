@@ -47,9 +47,6 @@ jobs:
             echo "value=linux/amd64" >> $GITHUB_OUTPUT
           fi
 
-      # ──────────────────────────────────────────────
-      # Docker metadata – same tagging scheme for both
-      # ──────────────────────────────────────────────
       - name: Docker meta (API)
         id: meta_api
         uses: docker/metadata-action@v5
@@ -74,9 +71,6 @@ jobs:
             type=sha,format=short,prefix=
             type=ref,event=tag
 
-      # ──────────────────────────────────────────────
-      # Build & push API
-      # ──────────────────────────────────────────────
       - name: Build & push API image
         uses: docker/build-push-action@v6
         with:
@@ -91,9 +85,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ──────────────────────────────────────────────
-      # Build & push WEB (Vite vars are build-time!)
-      # ──────────────────────────────────────────────
       - name: Build & push WEB image
         uses: docker/build-push-action@v6
         with:
