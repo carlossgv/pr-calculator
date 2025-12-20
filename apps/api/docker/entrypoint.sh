@@ -37,4 +37,35 @@ else
 fi
 
 echo "[api] starting server…"
-exec node /app/dist/main.js
+# FILE: apps/api/docker/entrypoint.sh
+# ... (todo igual arriba)
+
+echo "[api] starting server…"
+
+MAIN=""
+for p in \
+  /app/dist/main.js \
+  /app/dist/src/main.js \
+  /app/dist/apps/api/src/main.js \
+  /app/dist/apps/api/main.js \
+  /app/dist/**/main.js
+do
+  if [ -f "$p" ]; then MAIN="$p"; break; fi
+done
+
+# Busybox sh no expande **, así que hacemos un fallback con find
+if [ -z "$MAIN" ]; then
+  MAIN="$(find /app -maxdepth 6 -type f -name main.js 2>/dev/null | head -n 1 || true)"
+fi
+
+if [ -z "$MAIN" ]; then
+  echo "[api] ERROR: could not locate main.js under /app" >&2
+  echo "[api] DEBUG: /app tree (top):" >&2
+  ls -la /app >&2 || true
+  echo "[api] DEBUG: /app/dist:" >&2
+  ls -la /app/dist >&2 || true
+  exit 1
+fi
+
+echo "[api] using entry: $MAIN"
+exec node "$MAIN"
