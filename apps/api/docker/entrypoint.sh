@@ -1,5 +1,4 @@
-# FILE: apps/api/docker/entrypoint.sh
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 set -e
 
 echo "[api] booting…"
@@ -9,7 +8,6 @@ if [ -z "${DATABASE_URL:-}" ]; then
   exit 1
 fi
 
-# Parse host/port from DATABASE_URL (postgresql://user:pass@host:port/db?x=y)
 DB_HOST="$(node -e 'const u=new URL(process.env.DATABASE_URL); process.stdout.write(u.hostname || "")')"
 DB_PORT="$(node -e 'const u=new URL(process.env.DATABASE_URL); process.stdout.write(String(u.port || 5432))')"
 
@@ -36,7 +34,6 @@ until node -e '
   sleep 1
 done
 
-# Apply migrations (idempotent)
 if [ -d "/app/prisma/migrations" ]; then
   echo "[api] applying prisma migrations…"
   /app/node_modules/.bin/prisma migrate deploy
