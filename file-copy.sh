@@ -51,9 +51,9 @@ add_file () {
 
 echo "Writing dump to: $OUT"
 
-add_file "apps/api/prisma.config.ts"
-add_file "apps/api/prisma/schema.prisma"
-add_file "apps/api/src/prisma.ts"
+add_file "apps/api/src/main.ts" 
+
+add_file "apps/api/nest-cli.json" 
 
 echo "DONE ✅  Open the file with:"
 echo "  less -R $OUT"

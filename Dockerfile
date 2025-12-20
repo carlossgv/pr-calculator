@@ -1,4 +1,4 @@
-# Dockerfile
+# FILE: Dockerfile
 # =========================
 # Base with pnpm + turbo
 # =========================
@@ -47,7 +47,6 @@ ENV VITE_API_BASE=$VITE_API_BASE
 ENV VITE_APP_VERSION=$VITE_APP_VERSION
 
 # ✅ Prisma Client MUST be generated in CI (since we used --ignore-scripts)
-# ✅ Prisma Client MUST be generated
 RUN pnpm --filter @repo/api prisma:generate
 
 # Build API + WEB
@@ -57,6 +56,10 @@ RUN pnpm --filter @repo/web build
 # ✅ Create self-contained prod bundle
 RUN pnpm --filter @repo/api deploy --prod /app/deploy/api
 
+# ✅ Include Prisma schema + migrations in the deployed bundle (needed for migrate deploy at runtime)
+RUN mkdir -p /app/deploy/api/prisma && \
+    cp -r /app/apps/api/prisma/* /app/deploy/api/prisma/
+
 # =========================
 # Runtime API image
 # =========================
@@ -65,13 +68,18 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 # Prisma engines on alpine often need openssl (safe to include)
-RUN apk add --no-cache dumb-init openssl
-
+RUN apk add --no-cache dumb-init openssl bash
 
 EXPOSE 3001
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Copy the deployed API bundle (includes prisma/)
 COPY --from=builder /app/deploy/api /app
-CMD ["node", "/app/dist/src/main.js"]
+
+# Run migrations on boot, then start the server
+COPY ./apps/api/docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+CMD ["/entrypoint.sh"]
 
 # =========================
 # Runtime WEB image (Nginx static)
