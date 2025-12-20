@@ -27,8 +27,8 @@ until node -e '
   s.on("error", () => process.exit(1));
 ' DB_HOST="$DB_HOST" DB_PORT="$DB_PORT" >/dev/null 2>&1; do
   i=$((i + 1))
-  if [ "$i" -ge 45 ]; then
-    echo "[api] ERROR: db not reachable after 45s (${DB_HOST}:${DB_PORT})" >&2
+  if [ "$i" -ge 180 ]; then
+    echo "[api] ERROR: db not reachable after 180 (${DB_HOST}:${DB_PORT})" >&2
     exit 1
   fi
   sleep 1
