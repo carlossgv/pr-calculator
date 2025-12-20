@@ -15,7 +15,7 @@ import { applyTheme, type ResolvedTheme } from "../theme/theme";
 import { Mars, Venus, ChevronRight, Check } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
 import { downloadJson, exportBackup, importBackup } from "../storage/backup";
-import { getOrCreateIdentity, getSupportId } from "../sync/identity";
+import { getOrCreateIdentity } from "../sync/identity";
 
 type BarGender = "male" | "female";
 type PresetKey = "olympicKg" | "crossfitLb" | null;
@@ -146,12 +146,11 @@ export function PreferencesPage() {
     });
   }, []);
 
-
-useEffect(() => {
-  getOrCreateIdentity()
-    .then((id) => setSupportId(id.deviceId || "unknown"))
-    .catch(() => setSupportId("unknown"));
-}, []);
+  useEffect(() => {
+    getOrCreateIdentity()
+      .then((id) => setSupportId(id.deviceId || t.prefs.support.unknownId))
+      .catch(() => setSupportId(t.prefs.support.unknownId));
+  }, []);
 
   async function doExport() {
     try {
@@ -162,7 +161,7 @@ useEffect(() => {
       downloadJson(`pr-calc-backup-${stamp}.json`, b);
     } catch (e) {
       console.error(e);
-      setBackupErr("No se pudo exportar el backup");
+      setBackupErr(t.prefs.backup.exportError);
     } finally {
       setBackupBusy(null);
     }
@@ -183,7 +182,7 @@ useEffect(() => {
       applyTheme(resolvePrefsTheme(nextPrefs));
     } catch (e) {
       console.error(e);
-      setBackupErr("No se pudo importar el backup (archivo inválido?)");
+      setBackupErr(t.prefs.backup.importError);
     } finally {
       setBackupBusy(null);
       if (fileRef.current) fileRef.current.value = "";
@@ -276,11 +275,22 @@ useEffect(() => {
   }
 
   const isFemale = barGender === "female";
-  const olympicHint = `${barValueFor("kg", barGender)}kg bar, kg plates`;
-  const crossfitHint = `${barValueFor("lb", barGender)}lb bar, lb plates + kg change`;
+
+  const olympicHint = t.prefs.presets.olympicHint
+    .replace("{bar}", String(barValueFor("kg", barGender)))
+    .replace("{unit}", "kg");
+
+  const crossfitHint = t.prefs.presets.crossfitHint
+    .replace("{bar}", String(barValueFor("lb", barGender)))
+    .replace("{unit}", "lb");
 
   const olympicActive = selectedPreset === "olympicKg";
   const crossfitActive = selectedPreset === "crossfitLb";
+
+  const supportIdShort =
+    supportId === t.prefs.support.unknownId
+      ? t.prefs.support.unknownId
+      : supportId.slice(0, 8);
 
   return (
     <div className={styles.page}>
@@ -299,7 +309,6 @@ useEffect(() => {
           >
             <div className={styles.rowLeft}>
               <div className={styles.rowTitle}>{t.prefs.theme.title}</div>
-              {/* Minimal: no “Current: dark”. Lo dejamos accesible igual */}
               <span className={styles.srOnly}>
                 {t.prefs.theme.current}: {resolvedTheme}
               </span>
@@ -362,7 +371,6 @@ useEffect(() => {
                   </button>
                 </div>
 
-                {/* ✅ Peso único acá (sin duplicar “Current”) */}
                 <span
                   className={styles.valuePill}
                   aria-label={t.prefs.bar.currentHint}
@@ -400,7 +408,7 @@ useEffect(() => {
                 <span
                   className={styles.selectedPill}
                   aria-hidden="true"
-                  title="Selected"
+                  title={t.prefs.presets.selectedTitle}
                 >
                   <Check size={16} />
                 </span>
@@ -432,7 +440,7 @@ useEffect(() => {
                 <span
                   className={styles.selectedPill}
                   aria-hidden="true"
-                  title="Selected"
+                  title={t.prefs.presets.selectedTitle}
                 >
                   <Check size={16} />
                 </span>
@@ -446,9 +454,10 @@ useEffect(() => {
           </button>
         </div>
       </section>
+
       {/* BACKUP (manual) */}
-      <section className={styles.section} aria-label="Backup">
-        <div className={styles.sectionTitle}>Backup</div>
+      <section className={styles.section} aria-label={t.prefs.backup.title}>
+        <div className={styles.sectionTitle}>{t.prefs.backup.title}</div>
 
         <div className={styles.card}>
           <button
@@ -456,11 +465,14 @@ useEffect(() => {
             className={styles.actionRow}
             onClick={doExport}
             disabled={backupBusy !== null}
+            aria-label={t.prefs.backup.exportAria}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>Exportar</div>
+              <div className={styles.actionTitle}>
+                {t.prefs.backup.exportTitle}
+              </div>
               <div className={styles.actionHint}>
-                Guarda un JSON por si acaso.
+                {t.prefs.backup.exportHint}
               </div>
             </div>
             <div className={styles.actionRight}>
@@ -477,11 +489,14 @@ useEffect(() => {
             className={styles.actionRow}
             onClick={doImportClick}
             disabled={backupBusy !== null}
+            aria-label={t.prefs.backup.importAria}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>Importar</div>
+              <div className={styles.actionTitle}>
+                {t.prefs.backup.importTitle}
+              </div>
               <div className={styles.actionHint}>
-                Restaura desde un JSON exportado.
+                {t.prefs.backup.importHint}
               </div>
             </div>
             <div className={styles.actionRight}>
@@ -512,36 +527,31 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* SUPPORT (abajo, escondido-ish) */}
-      <section className={styles.section} aria-label="Soporte">
-        <div className={styles.sectionTitle}>Soporte</div>
+      {/* SUPPORT */}
+      <section className={styles.section} aria-label={t.prefs.support.title}>
+        <div className={styles.sectionTitle}>{t.prefs.support.title}</div>
 
         <div className={styles.card}>
           <div className={styles.row}>
             <div className={styles.rowLeft}>
-              <div className={styles.rowTitle}>ID</div>
-              <div className={styles.rowHint}>
-                Si pierdes datos, mándame este ID.
-              </div>
+              <div className={styles.rowTitle}>{t.prefs.support.idTitle}</div>
             </div>
 
             <div className={styles.rowRight}>
-<button
-  type="button"
-  className={styles.supportId}
-  onClick={async () => {
-    try {
-      await navigator.clipboard.writeText(supportId);
-    } catch {}
-  }}
-  title="Copiar ID completo"
-  aria-label="Copiar ID de soporte"
->
-  <span className={styles.supportIdMono}>
-    {supportId === "unknown" ? "unknown" : supportId.slice(0, 8)}
-  </span>
-  <span className={styles.supportIdDots}>…</span>
-</button>
+              <button
+                type="button"
+                className={styles.supportId}
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(supportId);
+                  } catch {}
+                }}
+                title={t.prefs.support.copyFullTitle}
+                aria-label={t.prefs.support.copyAria}
+              >
+                <span className={styles.supportIdMono}>{supportIdShort}</span>
+                <span className={styles.supportIdDots}>…</span>
+              </button>
             </div>
           </div>
         </div>

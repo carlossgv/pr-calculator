@@ -55,6 +55,11 @@ export const en = {
       olympicKg: "Olympic (KG)",
       crossfitLb: "CrossFit (LB + KG change plates)",
       applied: "Preset applied",
+
+      // NEW (for PreferencesPage UI)
+      selectedTitle: "Selected",
+      olympicHint: "{bar}{unit} bar, {unit} plates",
+      crossfitHint: "{bar}{unit} bar, {unit} plates + kg change",
     },
     theme: {
       title: "Theme",
@@ -74,6 +79,26 @@ export const en = {
       female: "Women’s bar",
       currentTitle: "Current",
       currentHint: "Current bar weight",
+    },
+
+    // NEW (for PreferencesPage UI)
+    backup: {
+      title: "Backup",
+      exportTitle: "Export",
+      exportHint: "Save a JSON backup.",
+      exportAria: "Export backup",
+      importTitle: "Import",
+      importHint: "Restore from a JSON backup.",
+      importAria: "Import backup",
+      exportError: "Could not export backup",
+      importError: "Could not import backup (invalid file?)",
+    },
+    support: {
+      title: "Support",
+      idTitle: "ID",
+      copyFullTitle: "Copy full ID",
+      copyAria: "Copy support ID",
+      unknownId: "unknown",
     },
   },
   movements: {
