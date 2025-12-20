@@ -1,5 +1,5 @@
 # FILE: apps/api/docker/entrypoint.sh
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -e
 
 echo "[api] booting…"
