@@ -68,7 +68,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 # Prisma engines on alpine often need openssl (safe to include)
-RUN apk add --no-cache dumb-init openssl bash
+RUN apk add --no-cache dumb-init openssl bash postgresql-client
 
 EXPOSE 3001
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
