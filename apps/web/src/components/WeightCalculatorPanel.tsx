@@ -261,7 +261,7 @@ export function WeightCalculatorPanel({
             <Button
               variant="primary"
               size="lg"
-              shape="rounded"
+              shape="round"
               iconOnly
               disabled={!canAdd}
               onClick={addCustomPct}

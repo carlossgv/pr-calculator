@@ -34,6 +34,14 @@
 }
 
 /* Sizes */
+.lg {
+  height: 52px;
+  padding: 0 18px;
+  border-radius: 16px;
+  font-weight: 900;
+  font-size: 15px;
+}
+
 .md {
   height: 44px;
   padding: 0 14px;
@@ -115,10 +123,12 @@
   border-color: color-mix(in oklab, var(--accent) 30%, transparent);
 }
 
-
 .solid {
   background: var(--accent-solid, var(--accent));
-  border-color: var(--accent-solid-border, color-mix(in oklab, var(--accent) 82%, var(--border)));
+  border-color: var(
+    --accent-solid-border,
+    color-mix(in oklab, var(--accent) 82%, var(--border))
+  );
   color: var(--accent-solid-contrast, var(--accent-contrast));
 }
 

@@ -2,8 +2,16 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import styles from "./Button.module.css";
 
-type Variant = "solid" | "outline" | "ghost" | "danger" | "row";
-type Size = "sm" | "md";
+type Variant =
+  | "solid"
+  | "outline"
+  | "ghost"
+  | "danger"
+  | "row"
+  | "primary"
+  | "neutral";
+
+type Size = "sm" | "md" | "lg";
 type Shape = "default" | "pill" | "round";
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -14,6 +22,9 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   iconOnly?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
+
+  /** Convenience prop used across the app (maps to aria-label). */
+  ariaLabel?: string;
 };
 
 function cx(...parts: Array<string | false | null | undefined>) {
@@ -28,11 +39,15 @@ export function Button({
   iconOnly,
   leftIcon,
   rightIcon,
+  ariaLabel,
   className,
   children,
   type,
   ...rest
 }: ButtonProps) {
+  const resolvedVariant =
+    variant === "primary" ? "solid" : variant === "neutral" ? "outline" : variant;
+
   const shapeClass =
     shape === "pill"
       ? styles.pill
@@ -40,11 +55,12 @@ export function Button({
         ? styles.round
         : styles.defaultShape;
 
-  const sizeClass = size === "sm" ? styles.sm : styles.md;
+  const sizeClass =
+    size === "sm" ? styles.sm : size === "lg" ? styles.lg : styles.md;
 
   const classes = cx(
     styles.base,
-    styles[variant],
+    styles[resolvedVariant],
     sizeClass,
     shapeClass,
     fullWidth && styles.fullWidth,
@@ -62,10 +78,15 @@ export function Button({
   // ✅ IMPORTANT:
   // For variant="row", children are often complex layout (divs).
   // Wrapping them in a <span> breaks layout (div-inside-span).
-  const shouldWrapChildrenAsLabel = !iconOnly && variant !== "row";
+  const shouldWrapChildrenAsLabel = !iconOnly && resolvedVariant !== "row";
 
   return (
-    <button type={type ?? "button"} className={classes} {...rest}>
+    <button
+      type={type ?? "button"}
+      className={classes}
+      aria-label={ariaLabel}
+      {...rest}
+    >
       {leftIcon ? <span className={styles.icon}>{leftIcon}</span> : null}
 
       {iconOnlyIcon ? (

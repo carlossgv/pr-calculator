@@ -262,9 +262,6 @@ export function MovementDetailsPage() {
   }
 
   function goBack() {
-    // Fix: Button no soporta `to`, así que navegamos en onClick.
-    // Esto vuelve atrás de verdad (si hay history); si te deja incómodo,
-    // lo cambiamos a navigate("/movements") directamente.
     navigate(-1);
   }
 
@@ -296,7 +293,7 @@ export function MovementDetailsPage() {
         <Button
           variant="neutral"
           size="md"
-          shape="rounded"
+          shape="round"
           iconOnly
           className={styles.iconBtnMd}
           ariaLabel={t.movement.back}
@@ -310,7 +307,7 @@ export function MovementDetailsPage() {
           <Button
             variant="neutral"
             size="md"
-            shape="rounded"
+            shape="round"
             iconOnly
             className={styles.iconBtnMd}
             ariaLabel={t.movements.openCalculator}
@@ -323,7 +320,7 @@ export function MovementDetailsPage() {
           <Button
             variant="danger"
             size="md"
-            shape="rounded"
+            shape="round"
             iconOnly
             className={styles.iconBtnMd}
             ariaLabel={t.movement.delete}
@@ -396,7 +393,7 @@ export function MovementDetailsPage() {
           <Button
             variant="primary"
             size="lg"
-            shape="rounded"
+            shape="pill"
             fullWidth
             onClick={addEntry}
           >
@@ -465,7 +462,7 @@ export function MovementDetailsPage() {
                         <Button
                           variant="primary"
                           size="md"
-                          shape="rounded"
+                          shape="pill"
                           onClick={saveEditEntry}
                         >
                           {t.movement.save}
@@ -474,7 +471,7 @@ export function MovementDetailsPage() {
                         <Button
                           variant="ghost"
                           size="md"
-                          shape="rounded"
+                          shape="pill"
                           onClick={() => setEditingEntryId(null)}
                         >
                           {t.movement.cancel}
@@ -495,7 +492,7 @@ export function MovementDetailsPage() {
                         <Button
                           variant="neutral"
                           size="md"
-                          shape="rounded"
+                          shape="round"
                           iconOnly
                           className={styles.iconBtnMd}
                           ariaLabel={t.movements.openCalculator}
@@ -508,7 +505,7 @@ export function MovementDetailsPage() {
                         <Button
                           variant="neutral"
                           size="md"
-                          shape="rounded"
+                          shape="round"
                           iconOnly
                           className={styles.iconBtnMd}
                           ariaLabel={t.movement.editAria}
@@ -521,7 +518,7 @@ export function MovementDetailsPage() {
                         <Button
                           variant="danger"
                           size="md"
-                          shape="rounded"
+                          shape="round"
                           iconOnly
                           className={styles.iconBtnMd}
                           ariaLabel={t.movement.deleteAria}
@@ -552,7 +549,7 @@ export function MovementDetailsPage() {
             <Button
               variant="danger"
               size="lg"
-              shape="rounded"
+              shape="pill"
               fullWidth
               disabled={confirmBusy}
               onClick={confirmDelete}
@@ -565,7 +562,7 @@ export function MovementDetailsPage() {
             <Button
               variant="ghost"
               size="lg"
-              shape="rounded"
+              shape="pill"
               fullWidth
               disabled={confirmBusy}
               onClick={() => setConfirm(null)}
