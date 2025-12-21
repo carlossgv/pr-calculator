@@ -11,6 +11,7 @@ import { NumberInput } from "../components/NumberInput";
 import { Chip, Sticker, Surface, SurfaceHeader } from "../ui/Surface";
 import styles from "./MovementDetailsPage.module.css";
 import { Button } from "../ui/Button";
+import { Modal } from "../ui/Modal";
 
 function uid() {
   try {
@@ -57,6 +58,11 @@ function parsePositiveInt(raw: string): number | null {
   return n;
 }
 
+type ConfirmState =
+  | { kind: "deleteEntry"; entry: PrEntry }
+  | { kind: "deleteMovement" }
+  | null;
+
 export function MovementDetailsPage() {
   const navigate = useNavigate();
   const { movementId } = useParams<{ movementId: string }>();
@@ -85,6 +91,10 @@ export function MovementDetailsPage() {
   );
 
   const [error, setError] = useState<string | null>(null);
+
+  // confirm modal
+  const [confirm, setConfirm] = useState<ConfirmState>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
 
   async function reload() {
     setLoading(true);
@@ -129,9 +139,9 @@ export function MovementDetailsPage() {
       const weight = parsePositiveFloat(weightText);
       const reps = parsePositiveInt(repsText);
 
-      if (!weight) return setError("Weight inválido");
-      if (!reps) return setError("Reps inválidas");
-      if (!date?.trim()) return setError("Fecha inválida");
+      if (!weight) return setError(t.movement.errors.invalidWeight);
+      if (!reps) return setError(t.movement.errors.invalidReps);
+      if (!date?.trim()) return setError(t.movement.errors.invalidDate);
 
       const isoDate = new Date(date + "T12:00:00.000Z").toISOString();
       const normalizedWeight = normalizeToDefaultUnit({
@@ -155,7 +165,7 @@ export function MovementDetailsPage() {
       await reload();
     } catch (err) {
       console.error("Add PR failed:", err);
-      setError("No se pudo guardar el PR");
+      setError(t.movement.errors.saveFailed);
     }
   }
 
@@ -177,11 +187,13 @@ export function MovementDetailsPage() {
 
       const w = parsePositiveFloat(editWeightText);
       const r = parsePositiveInt(editRepsText);
-      if (!w) return setError("Weight inválido");
-      if (!r) return setError("Reps inválidas");
+      if (!w) return setError(t.movement.errors.invalidWeight);
+      if (!r) return setError(t.movement.errors.invalidReps);
 
       const original = entries.find((x) => x.id === entryId);
       if (!original) return;
+
+      if (!editDate?.trim()) return setError(t.movement.errors.invalidDate);
 
       const isoDate = new Date(editDate + "T12:00:00.000Z").toISOString();
       const normalizedWeight = normalizeToDefaultUnit({
@@ -205,29 +217,43 @@ export function MovementDetailsPage() {
       await reload();
     } catch (err) {
       console.error("Save PR edit failed:", err);
-      setError("No se pudo guardar el cambio");
+      setError(t.movement.errors.updateFailed);
     }
   }
 
-  async function deleteEntry(e: PrEntry) {
-    const ok = window.confirm(
-      `Delete PR ${toDateInputValue(e.date)} · ${e.weight} × ${e.reps}?`,
-    );
-    if (!ok) return;
-    await repo.deletePrEntry(e.id);
-    await reload();
+  function requestDeleteEntry(e: PrEntry) {
+    setError(null);
+    setConfirm({ kind: "deleteEntry", entry: e });
   }
 
-  async function deleteMovement() {
-    if (!movement) return;
+  function requestDeleteMovement() {
+    setError(null);
+    setConfirm({ kind: "deleteMovement" });
+  }
 
-    const ok = window.confirm(
-      `Delete "${movement.name}"? This will remove its PRs too.`,
-    );
-    if (!ok) return;
+  async function confirmDelete() {
+    if (!confirm) return;
 
-    await repo.deleteMovement(movement.id);
-    navigate("/movements");
+    try {
+      setConfirmBusy(true);
+
+      if (confirm.kind === "deleteEntry") {
+        await repo.deletePrEntry(confirm.entry.id);
+        setConfirm(null);
+        await reload();
+        return;
+      }
+
+      if (confirm.kind === "deleteMovement") {
+        if (!movement) return;
+        await repo.deleteMovement(movement.id);
+        setConfirm(null);
+        navigate("/movements");
+        return;
+      }
+    } finally {
+      setConfirmBusy(false);
+    }
   }
 
   function goCalc(targetWeight: number) {
@@ -235,21 +261,47 @@ export function MovementDetailsPage() {
     navigate(`/movements/${id}/calc/${unit}/${targetWeight}`);
   }
 
+  function goBack() {
+    // Fix: Button no soporta `to`, así que navegamos en onClick.
+    // Esto vuelve atrás de verdad (si hay history); si te deja incómodo,
+    // lo cambiamos a navigate("/movements") directamente.
+    navigate(-1);
+  }
+
   if (loading) return <p>{t.movement.loading}</p>;
 
   const unit = prefs?.defaultUnit ?? "kg";
+
+  const confirmTitle =
+    confirm?.kind === "deleteMovement"
+      ? t.movement.confirm.deleteMovementTitle
+      : t.movement.confirm.deleteEntryTitle;
+
+  const confirmBody =
+    confirm?.kind === "deleteMovement"
+      ? t.movement.confirm.deleteMovementBody.replace(
+          "{name}",
+          movement?.name ?? t.movement.title,
+        )
+      : confirm?.kind === "deleteEntry"
+        ? t.movement.confirm.deleteEntryBody
+            .replace("{date}", toDateInputValue(confirm.entry.date))
+            .replace("{weight}", String(confirm.entry.weight))
+            .replace("{reps}", String(confirm.entry.reps))
+        : "";
 
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
         <Button
-          to="/movements"
           variant="neutral"
           size="md"
           shape="rounded"
           iconOnly
+          className={styles.iconBtnMd}
           ariaLabel={t.movement.back}
           title={t.movement.back}
+          onClick={goBack}
         >
           <ArrowLeft size={18} />
         </Button>
@@ -260,8 +312,9 @@ export function MovementDetailsPage() {
             size="md"
             shape="rounded"
             iconOnly
-            ariaLabel="Calculator"
-            title="Calculator"
+            className={styles.iconBtnMd}
+            ariaLabel={t.movements.openCalculator}
+            title={t.movements.openCalculator}
             onClick={() => navigate(`/movements/${id}/calc/${unit}/100`)}
           >
             <Calculator size={18} />
@@ -272,9 +325,10 @@ export function MovementDetailsPage() {
             size="md"
             shape="rounded"
             iconOnly
-            ariaLabel={t.movements.delete}
-            title={t.movements.delete}
-            onClick={deleteMovement}
+            className={styles.iconBtnMd}
+            ariaLabel={t.movement.delete}
+            title={t.movement.delete}
+            onClick={requestDeleteMovement}
           >
             <Trash2 size={18} />
           </Button>
@@ -351,129 +405,176 @@ export function MovementDetailsPage() {
         </div>
 
         <div className={styles.divider}>
-          <div className={styles.dividerTitle}>PRs</div>
+          <div className={styles.dividerTitle}>{t.movement.prsTitle}</div>
           <div className={styles.count}>{sorted.length}</div>
         </div>
 
         <div className={styles.list}>
-          {sorted.map((e) => {
-            const isEditing = editingEntryId === e.id;
+          {sorted.length === 0 ? (
+            <div className={styles.empty}>{t.movement.empty}</div>
+          ) : (
+            sorted.map((e) => {
+              const isEditing = editingEntryId === e.id;
 
-            return (
-              <Surface key={e.id} variant="card" className={styles.item}>
-                {isEditing ? (
-                  <>
-                    <input
-                      className={styles.dateInput}
-                      type="date"
-                      value={editDate}
-                      onChange={(ev) => setEditDate(ev.target.value)}
-                    />
+              return (
+                <Surface key={e.id} variant="card" className={styles.item}>
+                  {isEditing ? (
+                    <>
+                      <input
+                        className={styles.dateInput}
+                        type="date"
+                        value={editDate}
+                        onChange={(ev) => setEditDate(ev.target.value)}
+                      />
 
-                    <div className={styles.editGrid}>
-                      <label className={styles.label}>
-                        <span className={styles.labelText}>{t.movement.weight}</span>
-                        <div className={styles.row}>
-                          <div className={styles.grow}>
-                            <NumberInput
-                              value={editWeightText}
-                              onChange={setEditWeightText}
-                              inputMode="decimal"
-                            />
+                      <div className={styles.editGrid}>
+                        <label className={styles.label}>
+                          <span className={styles.labelText}>
+                            {t.movement.weight}
+                          </span>
+                          <div className={styles.row}>
+                            <div className={styles.grow}>
+                              <NumberInput
+                                value={editWeightText}
+                                onChange={setEditWeightText}
+                                inputMode="decimal"
+                              />
+                            </div>
+                            <div className={styles.unitWrap}>
+                              <UnitPill
+                                value={editWeightUnit}
+                                onChange={setEditWeightUnit}
+                              />
+                            </div>
                           </div>
-                          <div className={styles.unitWrap}>
-                            <UnitPill
-                              value={editWeightUnit}
-                              onChange={setEditWeightUnit}
-                            />
-                          </div>
-                        </div>
-                      </label>
+                        </label>
 
-                      <label className={styles.label}>
-                        <span className={styles.labelText}>{t.movement.reps}</span>
-                        <NumberInput
-                          value={editRepsText}
-                          onChange={setEditRepsText}
-                          inputMode="numeric"
-                        />
-                      </label>
+                        <label className={styles.label}>
+                          <span className={styles.labelText}>
+                            {t.movement.reps}
+                          </span>
+                          <NumberInput
+                            value={editRepsText}
+                            onChange={setEditRepsText}
+                            inputMode="numeric"
+                          />
+                        </label>
+                      </div>
+
+                      <div className={styles.actions}>
+                        <Button
+                          variant="primary"
+                          size="md"
+                          shape="rounded"
+                          onClick={saveEditEntry}
+                        >
+                          {t.movement.save}
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="md"
+                          shape="rounded"
+                          onClick={() => setEditingEntryId(null)}
+                        >
+                          {t.movement.cancel}
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className={styles.itemRow}>
+                      <div className={styles.itemMeta}>
+                        <b>{toDateInputValue(e.date)}</b>
+                        <span className={styles.itemMetaText}>
+                          {e.weight} × {e.reps}{" "}
+                          <span className={styles.unitHint}>{unit}</span>
+                        </span>
+                      </div>
+
+                      <div className={styles.actions}>
+                        <Button
+                          variant="neutral"
+                          size="md"
+                          shape="rounded"
+                          iconOnly
+                          className={styles.iconBtnMd}
+                          ariaLabel={t.movements.openCalculator}
+                          title={t.movements.openCalculator}
+                          onClick={() => goCalc(e.weight)}
+                        >
+                          <Calculator size={18} />
+                        </Button>
+
+                        <Button
+                          variant="neutral"
+                          size="md"
+                          shape="rounded"
+                          iconOnly
+                          className={styles.iconBtnMd}
+                          ariaLabel={t.movement.editAria}
+                          title={t.movement.editAria}
+                          onClick={() => startEditEntry(e)}
+                        >
+                          <Pencil size={18} />
+                        </Button>
+
+                        <Button
+                          variant="danger"
+                          size="md"
+                          shape="rounded"
+                          iconOnly
+                          className={styles.iconBtnMd}
+                          ariaLabel={t.movement.deleteAria}
+                          title={t.movement.deleteAria}
+                          onClick={() => requestDeleteEntry(e)}
+                        >
+                          <Trash2 size={18} />
+                        </Button>
+                      </div>
                     </div>
-
-                    <div className={styles.actions}>
-                      <Button
-                        variant="primary"
-                        size="md"
-                        shape="rounded"
-                        onClick={saveEditEntry}
-                      >
-                        Save
-                      </Button>
-
-                      <Button
-                        variant="ghost"
-                        size="md"
-                        shape="rounded"
-                        onClick={() => setEditingEntryId(null)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div className={styles.itemRow}>
-                    <div className={styles.itemMeta}>
-                      <b>{toDateInputValue(e.date)}</b>
-                      <span className={styles.itemMetaText}>
-                        {e.weight} × {e.reps}{" "}
-                        <span className={styles.unitHint}>{unit}</span>
-                      </span>
-                    </div>
-
-                    <div className={styles.actions}>
-                      <Button
-                        variant="neutral"
-                        size="md"
-                        shape="rounded"
-                        iconOnly
-                        ariaLabel="Calculator"
-                        title="Calculator"
-                        onClick={() => goCalc(e.weight)}
-                      >
-                        <Calculator size={18} />
-                      </Button>
-
-                      <Button
-                        variant="neutral"
-                        size="md"
-                        shape="rounded"
-                        iconOnly
-                        ariaLabel="Edit"
-                        title="Edit"
-                        onClick={() => startEditEntry(e)}
-                      >
-                        <Pencil size={18} />
-                      </Button>
-
-                      <Button
-                        variant="danger"
-                        size="md"
-                        shape="rounded"
-                        iconOnly
-                        ariaLabel="Delete"
-                        title="Delete"
-                        onClick={() => deleteEntry(e)}
-                      >
-                        <Trash2 size={18} />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </Surface>
-            );
-          })}
+                  )}
+                </Surface>
+              );
+            })
+          )}
         </div>
       </Surface>
+
+      {confirm ? (
+        <Modal
+          title={confirmTitle}
+          ariaLabel={confirmTitle}
+          onClose={() => (confirmBusy ? null : setConfirm(null))}
+        >
+          <div className={styles.confirmBody}>{confirmBody}</div>
+
+          <div className={styles.modalActions}>
+            <Button
+              variant="danger"
+              size="lg"
+              shape="rounded"
+              fullWidth
+              disabled={confirmBusy}
+              onClick={confirmDelete}
+            >
+              {confirm.kind === "deleteMovement"
+                ? t.movement.confirm.deleteMovementCta
+                : t.movement.confirm.deleteEntryCta}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="lg"
+              shape="rounded"
+              fullWidth
+              disabled={confirmBusy}
+              onClick={() => setConfirm(null)}
+            >
+              {t.movement.confirm.cancelCta}
+            </Button>
+          </div>
+        </Modal>
+      ) : null}
     </div>
   );
 }

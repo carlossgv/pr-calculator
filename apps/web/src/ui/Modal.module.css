@@ -46,6 +46,13 @@
 .close {
   width: 36px;
   height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+
+  /* 🔧 iconOnly buttons were collapsing in some cases */
+  padding: 0 !important;
+  flex: 0 0 auto;
+
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--card-bg);

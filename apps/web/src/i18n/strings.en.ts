@@ -142,15 +142,44 @@ export const en = {
   movement: {
     title: "Movement",
     prs: "PR entries",
+    prsTitle: "PRs",
+
     weight: "Weight",
     reps: "Reps",
     date: "Date",
+
     add: "Add PR",
+    save: "Save",
+    cancel: "Cancel",
+
     delete: "delete",
     back: "← Back",
     loading: "Loading…",
     empty: "No PR entries yet.",
     savedIn: "Saved in",
+
+    editAria: "Edit PR",
+    deleteAria: "Delete PR",
+
+    errors: {
+      invalidWeight: "Invalid weight",
+      invalidReps: "Invalid reps",
+      invalidDate: "Invalid date",
+      saveFailed: "Could not save PR",
+      updateFailed: "Could not save changes",
+    },
+
+    confirm: {
+      deleteEntryTitle: "Delete PR?",
+      deleteEntryBody: "Delete PR {date} · {weight} × {reps}?",
+      deleteEntryCta: "Delete PR",
+
+      deleteMovementTitle: "Delete movement?",
+      deleteMovementBody: "Delete “{name}”? This will remove its PRs too.",
+      deleteMovementCta: "Delete movement",
+
+      cancelCta: "Cancel",
+    },
   },
   context: {
     label: "Context",

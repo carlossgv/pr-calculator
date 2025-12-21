@@ -95,6 +95,9 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
+
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .rowTitle {
@@ -142,6 +145,9 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
+
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 /* ===== Gender selector (icons only) ===== */
@@ -155,13 +161,21 @@
   border-radius: 999px;
   border: 1px solid var(--border);
   background: color-mix(in oklab, var(--card-bg) 86%, var(--bg));
+
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
-/* Button override: just the "active" look (base styles come from ui/Button) */
 .genderIconBtn {
   color: var(--muted);
+
   width: 40px;
   height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+
+  padding: 0 !important;
+  flex: 0 0 40px;
 }
 
 .genderIconBtn[data-active="true"] {
@@ -194,7 +208,6 @@
 
 /* ===== Presets / Backup rows ===== */
 
-/* Keeps your border separators + rounding, while Button handles hover/focus */
 .actionRow:first-child {
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
@@ -244,7 +257,11 @@
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
+
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .chev {
@@ -258,6 +275,8 @@
 
   width: 30px;
   height: 30px;
+  min-width: 30px;
+  min-height: 30px;
 
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--border));
@@ -265,10 +284,12 @@
   color: var(--fg);
 }
 
-/* Support ID button: purely spacing/typography; base look comes from Button */
+/* ===== Support ID button ===== */
+
 .supportId {
   gap: 4px;
   padding: 6px 10px;
+  flex: 0 0 auto;
 }
 
 .supportIdMono {

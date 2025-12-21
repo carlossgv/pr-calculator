@@ -66,15 +66,24 @@
   height: 40px;
 }
 
-/* Label/icon */
 .label {
   min-width: 0;
+
+  /* ✅ makes label behave nicely with icons/text */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ✅ asegura que lucide (svg) pinte con el color del botón */
+.icon :global(svg) {
+  display: block;
 }
 
 .iconOnly .label {
@@ -106,15 +115,17 @@
   border-color: color-mix(in oklab, var(--accent) 30%, transparent);
 }
 
+
 .solid {
-  background: var(--accent);
-  border-color: color-mix(in oklab, var(--accent) 82%, var(--border));
-  color: var(--accent-contrast);
+  background: var(--accent-solid, var(--accent));
+  border-color: var(--accent-solid-border, color-mix(in oklab, var(--accent) 82%, var(--border)));
+  color: var(--accent-solid-contrast, var(--accent-contrast));
 }
 
 .solid:hover {
-  filter: brightness(1.02) saturate(1.06);
+  background: var(--accent-solid-hover, var(--accent));
   border-color: color-mix(in oklab, var(--accent) 92%, var(--border));
+  filter: none; /* quita el “extra punch” que en light se siente chillón */
 }
 
 .danger {

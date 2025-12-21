@@ -24,6 +24,17 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* icon-only sizing fixes */
+.iconBtnMd {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 !important;
+  flex: 0 0 40px;
 }
 
 .form {
@@ -52,6 +63,14 @@
   border: 1px solid var(--border);
   font-size: 16px;
   color-scheme: light dark;
+  background: var(--input-bg);
+  color: var(--fg);
+  outline: none;
+}
+
+.dateInput:focus {
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  box-shadow: 0 0 0 6px var(--ring);
 }
 
 :global(:root[data-theme="dark"])
@@ -76,8 +95,7 @@
   overflow-wrap: anywhere;
 }
 
-/* -------- Weight × Reps row -------- */
-
+/* Weight × Reps row */
 .setRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 96px);
@@ -145,8 +163,7 @@
   }
 }
 
-/* -------- list -------- */
-
+/* list */
 .divider {
   margin-top: 6px;
   padding-top: 12px;
@@ -175,6 +192,16 @@
   display: grid;
   gap: 10px;
   min-width: 0;
+}
+
+.empty {
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  opacity: 0.8;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .item {
@@ -230,4 +257,18 @@
 .editGrid {
   display: grid;
   gap: 10px;
+}
+
+.confirmBody {
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.9;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+
+.modalActions {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
 }

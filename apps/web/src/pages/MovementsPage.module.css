@@ -61,7 +61,7 @@
   opacity: 0.75;
 }
 
-/* --- Controls (single row, anti-text) --- */
+/* --- Controls --- */
 
 .controlsRow {
   display: flex;
@@ -69,6 +69,7 @@
   align-items: center;
   margin-top: 10px;
   flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .searchWrap {
@@ -93,7 +94,6 @@
   box-shadow: 0 0 0 6px var(--ring);
 }
 
-/* position-only; Button handles visuals */
 .clearBtnPos {
   position: absolute;
   right: 8px;
@@ -101,19 +101,37 @@
   transform: translateY(-50%);
 }
 
-/* Sort pill: keep dot layout */
+/* 🔧 icon-only sizing fixes */
+.iconBtnMd {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 !important;
+  flex: 0 0 40px;
+}
+
+.iconBtnSm {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 !important;
+  flex: 0 0 36px;
+}
+
+/* Sort button dot (no children; use ::after) */
 .sortPill {
   position: relative;
 }
 
-/* Dot indicator: aparece solo cuando sort != default */
-.sortDot {
+.sortPill::after {
+  content: "";
   position: absolute;
   top: 6px;
   right: 6px;
   width: 7px;
   height: 7px;
-  border-radius: 999px;
   background: var(--accent);
   border: 2px solid var(--card-bg);
   opacity: 0;
@@ -123,7 +141,7 @@
     transform 120ms ease;
 }
 
-.sortPill :global(.selected) .sortDot {
+.sortActive::after {
   opacity: 1;
   transform: scale(1);
 }
@@ -132,11 +150,12 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  min-width: 0;
 }
 
 .calcWide {
   flex: 1 1 auto;
-  padding: 0 12px;
+  min-width: 0;
 }
 
 @media (min-width: 900px) {
@@ -145,7 +164,7 @@
   }
 }
 
-/* --- Sheet default (mobile/tablet) --- */
+/* --- Sheet --- */
 .sheetOverlay {
   position: fixed;
   inset: 0;
@@ -188,70 +207,13 @@
   padding-bottom: 4px;
 }
 
-/* Button gets visuals; this keeps spacing/alignment */
 .sheetOption {
   width: 100%;
   justify-content: space-between;
   padding: 0 12px;
 }
 
-.sheetOptionLabel {
-  font-size: 13px;
-  font-weight: 650;
-  opacity: 0.92;
-}
-
-/* Tablet */
-@media (min-width: 700px) and (max-width: 1023px) {
-  .sheetOverlay {
-    justify-items: center;
-    padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
-  }
-
-  .sheet {
-    width: min(640px, calc(100vw - 28px));
-    border-radius: 18px;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-/* Desktop */
-@media (min-width: 1024px) {
-  .sheetOverlay {
-    background: rgba(2, 6, 23, 0.18);
-    align-items: start;
-    justify-items: start;
-    padding: 0;
-  }
-
-  .sheetOverlayDesktop {
-    align-items: start;
-    justify-items: start;
-  }
-
-  .sheet {
-    border-radius: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .sheetDesktop {
-    position: fixed;
-    width: 360px;
-    max-height: min(70vh, 520px);
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    padding: 12px;
-    overflow: auto;
-    transform-origin: top right;
-  }
-
-  .sheetAbove {
-    transform-origin: bottom right;
-  }
-}
-
-/* --- Add modal form content (inside ui/Modal) --- */
-
+/* --- Add modal bits --- */
 .modalLabel {
   display: grid;
   gap: 6px;

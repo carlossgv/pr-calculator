@@ -339,48 +339,47 @@ export function MovementsPage() {
             {q.trim() ? (
               <div className={styles.clearBtnPos}>
                 <Button
-                  variant="neutral"
-                  size="xs"
-                  shape="rounded"
+                  variant="outline"
+                  size="sm"
+                  shape="round"
                   iconOnly
-                  ariaLabel={t.movements.clearFilterAria}
+                  className={styles.iconBtnSm}
+                  aria-label={t.movements.clearFilterAria}
                   title={t.movements.clearFilterAria}
                   onClick={() => setQ("")}
-                >
-                  <X size={16} />
-                </Button>
+                  leftIcon={<X size={16} />}
+                />
               </div>
             ) : null}
           </div>
 
           <div ref={sortBtnRef as any}>
             <Button
-              variant="neutral"
+              variant="outline"
               size="md"
-              shape="circle"
+              shape="round"
               iconOnly
-              className={styles.sortPill}
-              selected={!sortIsDefault}
+              className={`${styles.sortPill} ${styles.iconBtnMd} ${
+                !sortIsDefault ? styles.sortActive : ""
+              }`}
               onClick={openSort}
-              ariaLabel={t.movements.sort.aria}
+              aria-label={t.movements.sort.aria}
               title={t.movements.sort.aria}
-            >
-              <ArrowUpDown size={18} />
-              <span className={styles.sortDot} aria-hidden="true" />
-            </Button>
+              leftIcon={<ArrowUpDown size={18} />}
+            />
           </div>
 
           <Button
-            variant="soft"
+            variant="solid"
             size="md"
-            shape="circle"
+            shape="round"
             iconOnly
+            className={styles.iconBtnMd}
             onClick={openAdd}
-            ariaLabel={t.movements.create.aria}
+            aria-label={t.movements.create.aria}
             title={t.movements.create.aria}
-          >
-            <Plus size={18} />
-          </Button>
+            leftIcon={<Plus size={18} />}
+          />
         </div>
 
         <div className={styles.hint}>
@@ -409,8 +408,8 @@ export function MovementsPage() {
 
                 {best ? (
                   <div className={styles.sub}>
-                    {toDateLabel(best.date)} · <b>{best.weight}</b> × {best.reps}{" "}
-                    <span className={styles.unitHint}>{unit}</span>
+                    {toDateLabel(best.date)} · <b>{best.weight}</b> ×{" "}
+                    {best.reps} <span className={styles.unitHint}>{unit}</span>
                   </div>
                 ) : (
                   <div className={styles.subMuted}>{t.movements.noPrYet}</div>
@@ -420,28 +419,28 @@ export function MovementsPage() {
 
             <div className={styles.actionsRow}>
               <Button
-                variant="soft"
+                variant="solid"
                 size="md"
-                shape="rounded"
+                shape="default"
                 className={styles.calcWide}
                 onClick={() => goCalc(m.id)}
-                ariaLabel={t.movements.openCalculator}
+                aria-label={t.movements.openCalculator}
                 title={t.movements.openCalculator}
               >
                 PR Calculator
               </Button>
 
               <Button
-                variant="neutral"
+                variant="outline"
                 size="md"
-                shape="rounded"
+                shape="round"
                 iconOnly
-                ariaLabel={t.movements.managePrs}
+                className={styles.iconBtnMd}
+                aria-label={t.movements.managePrs}
                 title={t.movements.managePrs}
                 onClick={() => goManage(m.id)}
-              >
-                <Settings2 size={18} />
-              </Button>
+                leftIcon={<Settings2 size={18} />}
+              />
             </div>
           </Surface>
         ))}
@@ -475,16 +474,16 @@ export function MovementsPage() {
               <div className={styles.sheetTitle}>{t.movements.sort.title}</div>
 
               <Button
-                variant="neutral"
+                variant="outline"
                 size="sm"
-                shape="rounded"
+                shape="round"
                 iconOnly
+                className={styles.iconBtnSm}
                 onClick={() => setSortOpen(false)}
-                ariaLabel={t.movements.closeAria}
+                aria-label={t.movements.closeAria}
                 title={t.movements.closeAria}
-              >
-                <X size={18} />
-              </Button>
+                leftIcon={<X size={18} />}
+              />
             </div>
 
             <div className={styles.sheetBody}>
@@ -494,17 +493,16 @@ export function MovementsPage() {
                   <Button
                     key={opt.key}
                     variant="ghost"
-                    size="lg"
-                    shape="rounded"
+                    size="md"
+                    shape="default"
                     className={styles.sheetOption}
-                    selected={active}
                     onClick={() => {
                       setSortKey(opt.key);
                       setSortOpen(false);
                     }}
+                    rightIcon={active ? <Check size={18} /> : null}
                   >
-                    <span className={styles.sheetOptionLabel}>{opt.label}</span>
-                    {active ? <Check size={18} /> : null}
+                    {opt.label}
                   </Button>
                 );
               })}
@@ -543,9 +541,9 @@ export function MovementsPage() {
 
           <div className={styles.modalActions}>
             <Button
-              variant="primary"
-              size="lg"
-              shape="rounded"
+              variant="solid"
+              size="md"
+              shape="pill"
               fullWidth
               disabled={addBusy}
               onClick={createMovementAndGoManage}
@@ -555,8 +553,8 @@ export function MovementsPage() {
 
             <Button
               variant="ghost"
-              size="lg"
-              shape="rounded"
+              size="md"
+              shape="pill"
               fullWidth
               disabled={addBusy}
               onClick={() => setAddOpen(false)}

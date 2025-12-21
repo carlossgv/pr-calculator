@@ -52,10 +52,34 @@ export function Button({
     className,
   );
 
+  const hasSideIcons = Boolean(leftIcon) || Boolean(rightIcon);
+
+  // ✅ iconOnly: allow <Button iconOnly><X /></Button>
+  // - If left/right icons exist, render those.
+  // - Otherwise treat children as the icon node (NOT as label).
+  const iconOnlyIcon = iconOnly && !hasSideIcons ? children : null;
+
+  // ✅ IMPORTANT:
+  // For variant="row", children are often complex layout (divs).
+  // Wrapping them in a <span> breaks layout (div-inside-span).
+  const shouldWrapChildrenAsLabel = !iconOnly && variant !== "row";
+
   return (
     <button type={type ?? "button"} className={classes} {...rest}>
       {leftIcon ? <span className={styles.icon}>{leftIcon}</span> : null}
-      {children ? <span className={styles.label}>{children}</span> : null}
+
+      {iconOnlyIcon ? (
+        <span className={styles.icon} aria-hidden="true">
+          {iconOnlyIcon}
+        </span>
+      ) : null}
+
+      {iconOnly ? null : shouldWrapChildrenAsLabel ? (
+        children ? <span className={styles.label}>{children}</span> : null
+      ) : (
+        children
+      )}
+
       {rightIcon ? <span className={styles.icon}>{rightIcon}</span> : null}
     </button>
   );
