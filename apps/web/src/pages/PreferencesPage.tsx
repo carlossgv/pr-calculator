@@ -1,12 +1,6 @@
 // FILE: apps/web/src/pages/PreferencesPage.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import type {
-  Plate,
-  Unit,
-  UnitContext,
-  UserPreferences,
-  Weight,
-} from "@repo/core";
+import type { Plate, Unit, UnitContext, UserPreferences, Weight } from "@repo/core";
 import { DEFAULT_PREFS, CROSSFIT_LB_WITH_KG_CHANGES } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
@@ -16,6 +10,7 @@ import { Mars, Venus, ChevronRight, Check } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
 import { downloadJson, exportBackup, importBackup } from "../storage/backup";
 import { getOrCreateIdentity } from "../sync/identity";
+import { Button } from "../ui/Button";
 
 type BarGender = "male" | "female";
 type PresetKey = "olympicKg" | "crossfitLb" | null;
@@ -98,10 +93,7 @@ function eqPlates(a: Plate[], b: Plate[]) {
   return true;
 }
 
-function eqContexts(
-  a: Record<Unit, UnitContext>,
-  b: Record<Unit, UnitContext>,
-) {
+function eqContexts(a: Record<Unit, UnitContext>, b: Record<Unit, UnitContext>) {
   return a.kg === b.kg && a.lb === b.lb;
 }
 
@@ -132,9 +124,7 @@ export function PreferencesPage() {
 
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [backupErr, setBackupErr] = useState<string | null>(null);
-  const [backupBusy, setBackupBusy] = useState<"export" | "import" | null>(
-    null,
-  );
+  const [backupBusy, setBackupBusy] = useState<"export" | "import" | null>(null);
   const [supportId, setSupportId] = useState<string>("…");
 
   useEffect(() => {
@@ -278,19 +268,19 @@ export function PreferencesPage() {
 
   const olympicHint = t.prefs.presets.olympicHint
     .replace("{bar}", String(barValueFor("kg", barGender)))
+    .replace("{unit}", "kg")
     .replace("{unit}", "kg");
 
   const crossfitHint = t.prefs.presets.crossfitHint
     .replace("{bar}", String(barValueFor("lb", barGender)))
+    .replace("{unit}", "lb")
     .replace("{unit}", "lb");
 
   const olympicActive = selectedPreset === "olympicKg";
   const crossfitActive = selectedPreset === "crossfitLb";
 
   const supportIdShort =
-    supportId === t.prefs.support.unknownId
-      ? t.prefs.support.unknownId
-      : supportId.slice(0, 8);
+    supportId === t.prefs.support.unknownId ? t.prefs.support.unknownId : supportId.slice(0, 8);
 
   return (
     <div className={styles.page}>
@@ -315,10 +305,7 @@ export function PreferencesPage() {
             </div>
 
             <div className={styles.rowRight}>
-              <span
-                className={styles.iconWrap}
-                onClick={(e) => e.stopPropagation()}
-              >
+              <span className={styles.iconWrap} onClick={(e) => e.stopPropagation()}>
                 <ThemeToggle value={resolvedTheme} onToggle={toggleTheme} />
               </span>
             </div>
@@ -346,8 +333,11 @@ export function PreferencesPage() {
                   role="radiogroup"
                   aria-label={t.prefs.bar.genderToggleAria}
                 >
-                  <button
-                    type="button"
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    shape="round"
+                    iconOnly
                     className={styles.genderIconBtn}
                     data-active={!isFemale}
                     role="radio"
@@ -356,10 +346,13 @@ export function PreferencesPage() {
                     onClick={() => setGender("male")}
                   >
                     <Mars size={20} />
-                  </button>
+                  </Button>
 
-                  <button
-                    type="button"
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    shape="round"
+                    iconOnly
                     className={styles.genderIconBtn}
                     data-active={isFemale}
                     role="radio"
@@ -368,13 +361,10 @@ export function PreferencesPage() {
                     onClick={() => setGender("female")}
                   >
                     <Venus size={20} />
-                  </button>
+                  </Button>
                 </div>
 
-                <span
-                  className={styles.valuePill}
-                  aria-label={t.prefs.bar.currentHint}
-                >
+                <span className={styles.valuePill} aria-label={t.prefs.bar.currentHint}>
                   <span className={styles.mono}>{prefs.bar.value}</span>
                   <span className={styles.valueUnit}>{barUnit}</span>
                 </span>
@@ -389,69 +379,49 @@ export function PreferencesPage() {
         <div className={styles.sectionTitle}>{t.prefs.presets.title}</div>
 
         <div className={styles.card}>
-          <button
-            type="button"
+          <Button
+            variant="row"
             className={styles.actionRow}
             data-active={olympicActive}
             aria-pressed={olympicActive}
             onClick={() => applyPreset(DEFAULT_PREFS)}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>
-                {t.prefs.presets.olympicKg}
-              </div>
+              <div className={styles.actionTitle}>{t.prefs.presets.olympicKg}</div>
               <div className={styles.actionHint}>{olympicHint}</div>
             </div>
 
             <div className={styles.actionRight}>
               {olympicActive ? (
-                <span
-                  className={styles.selectedPill}
-                  aria-hidden="true"
-                  title={t.prefs.presets.selectedTitle}
-                >
+                <span className={styles.selectedPill} aria-hidden="true" title={t.prefs.presets.selectedTitle}>
                   <Check size={16} />
                 </span>
               ) : null}
-              <ChevronRight
-                className={styles.chev}
-                size={18}
-                aria-hidden="true"
-              />
+              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
             </div>
-          </button>
+          </Button>
 
-          <button
-            type="button"
+          <Button
+            variant="row"
             className={styles.actionRow}
             data-active={crossfitActive}
             aria-pressed={crossfitActive}
             onClick={() => applyPreset(CROSSFIT_LB_WITH_KG_CHANGES)}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>
-                {t.prefs.presets.crossfitLb}
-              </div>
+              <div className={styles.actionTitle}>{t.prefs.presets.crossfitLb}</div>
               <div className={styles.actionHint}>{crossfitHint}</div>
             </div>
 
             <div className={styles.actionRight}>
               {crossfitActive ? (
-                <span
-                  className={styles.selectedPill}
-                  aria-hidden="true"
-                  title={t.prefs.presets.selectedTitle}
-                >
+                <span className={styles.selectedPill} aria-hidden="true" title={t.prefs.presets.selectedTitle}>
                   <Check size={16} />
                 </span>
               ) : null}
-              <ChevronRight
-                className={styles.chev}
-                size={18}
-                aria-hidden="true"
-              />
+              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
             </div>
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -460,53 +430,37 @@ export function PreferencesPage() {
         <div className={styles.sectionTitle}>{t.prefs.backup.title}</div>
 
         <div className={styles.card}>
-          <button
-            type="button"
+          <Button
+            variant="row"
             className={styles.actionRow}
             onClick={doExport}
             disabled={backupBusy !== null}
             aria-label={t.prefs.backup.exportAria}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>
-                {t.prefs.backup.exportTitle}
-              </div>
-              <div className={styles.actionHint}>
-                {t.prefs.backup.exportHint}
-              </div>
+              <div className={styles.actionTitle}>{t.prefs.backup.exportTitle}</div>
+              <div className={styles.actionHint}>{t.prefs.backup.exportHint}</div>
             </div>
             <div className={styles.actionRight}>
-              <ChevronRight
-                className={styles.chev}
-                size={18}
-                aria-hidden="true"
-              />
+              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
             </div>
-          </button>
+          </Button>
 
-          <button
-            type="button"
+          <Button
+            variant="row"
             className={styles.actionRow}
             onClick={doImportClick}
             disabled={backupBusy !== null}
             aria-label={t.prefs.backup.importAria}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>
-                {t.prefs.backup.importTitle}
-              </div>
-              <div className={styles.actionHint}>
-                {t.prefs.backup.importHint}
-              </div>
+              <div className={styles.actionTitle}>{t.prefs.backup.importTitle}</div>
+              <div className={styles.actionHint}>{t.prefs.backup.importHint}</div>
             </div>
             <div className={styles.actionRight}>
-              <ChevronRight
-                className={styles.chev}
-                size={18}
-                aria-hidden="true"
-              />
+              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
             </div>
-          </button>
+          </Button>
 
           <input
             ref={fileRef}
@@ -538,8 +492,10 @@ export function PreferencesPage() {
             </div>
 
             <div className={styles.rowRight}>
-              <button
-                type="button"
+              <Button
+                size="sm"
+                variant="outline"
+                shape="pill"
                 className={styles.supportId}
                 onClick={async () => {
                   try {
@@ -551,7 +507,7 @@ export function PreferencesPage() {
               >
                 <span className={styles.supportIdMono}>{supportIdShort}</span>
                 <span className={styles.supportIdDots}>…</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>

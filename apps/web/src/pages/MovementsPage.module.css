@@ -61,11 +61,6 @@
   opacity: 0.75;
 }
 
-.actions {
-  display: grid;
-  gap: 10px;
-}
-
 /* --- Controls (single row, anti-text) --- */
 
 .controlsRow {
@@ -73,7 +68,7 @@
   gap: 10px;
   align-items: center;
   margin-top: 10px;
-  flex-wrap: nowrap; /* 👈 clave: 1 fila */
+  flex-wrap: nowrap;
 }
 
 .searchWrap {
@@ -94,40 +89,21 @@
 }
 
 .searchInput:focus {
-  border-color: rgba(37, 99, 235, 0.45);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  box-shadow: 0 0 0 6px var(--ring);
 }
 
-.clearBtn {
+/* position-only; Button handles visuals */
+.clearBtnPos {
   position: absolute;
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  color: var(--muted);
-  border-radius: 10px;
 }
 
-/* Sort pill (icon-only) */
+/* Sort pill: keep dot layout */
 .sortPill {
   position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  color: var(--fg);
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
 }
 
 /* Dot indicator: aparece solo cuando sort != default */
@@ -142,31 +118,31 @@
   border: 2px solid var(--card-bg);
   opacity: 0;
   transform: scale(0.9);
-  transition: opacity 120ms ease, transform 120ms ease;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
 }
 
-.sortPill[data-dirty="true"] .sortDot {
+.sortPill :global(.selected) .sortDot {
   opacity: 1;
   transform: scale(1);
 }
 
-/* Add button */
-.addPill {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--accent) 16%, var(--card-bg));
-  color: var(--fg);
-  display: inline-flex;
+.actionsRow {
+  display: flex;
+  gap: 10px;
   align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
 }
 
-.addPill:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+.calcWide {
+  flex: 1 1 auto;
+  padding: 0 12px;
+}
+
+@media (min-width: 900px) {
+  .calcWide {
+    flex: 0 0 140px;
+  }
 }
 
 /* --- Sheet default (mobile/tablet) --- */
@@ -206,40 +182,17 @@
   font-weight: 800;
 }
 
-.sheetClose {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--card-bg);
-  color: var(--muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .sheetBody {
   display: grid;
   gap: 8px;
   padding-bottom: 4px;
 }
 
+/* Button gets visuals; this keeps spacing/alignment */
 .sheetOption {
   width: 100%;
-  height: 44px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--fg);
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   padding: 0 12px;
-}
-
-.sheetOptionActive {
-  border-color: rgba(37, 99, 235, 0.45);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 .sheetOptionLabel {
@@ -322,8 +275,8 @@
 }
 
 .modalInput:focus {
-  border-color: rgba(37, 99, 235, 0.45);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  box-shadow: 0 0 0 6px var(--ring);
 }
 
 .modalError {

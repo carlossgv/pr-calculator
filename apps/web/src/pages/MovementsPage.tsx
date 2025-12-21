@@ -4,17 +4,11 @@ import type { Movement, PrEntry, UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  ActionButton,
-  Chip,
-  IconButton,
-  Sticker,
-  Surface,
-  SurfaceHeader,
-} from "../ui/Surface";
+import { Chip, Sticker, Surface, SurfaceHeader } from "../ui/Surface";
 import { Modal } from "../ui/Modal";
 import styles from "./MovementsPage.module.css";
-import { ArrowUpDown, Check, Plus, Trash2, X } from "lucide-react";
+import { ArrowUpDown, Check, Plus, X, Settings2 } from "lucide-react";
+import { Button } from "../ui/Button";
 
 function uid() {
   try {
@@ -38,8 +32,8 @@ function uid() {
 }
 
 type Stats = {
-  best: PrEntry | null; // by weight
-  latest: PrEntry | null; // by date
+  best: PrEntry | null;
+  latest: PrEntry | null;
 };
 
 function pickStats(entries: PrEntry[]): Stats {
@@ -50,7 +44,7 @@ function pickStats(entries: PrEntry[]): Stats {
 
   for (const e of entries) {
     if (e.weight > best.weight) best = e;
-    if (e.date > latest.date) latest = e; // ISO compare ok
+    if (e.date > latest.date) latest = e;
   }
 
   return { best, latest };
@@ -168,15 +162,6 @@ export function MovementsPage() {
     } finally {
       setAddBusy(false);
     }
-  }
-
-  async function removeMovement(m: Movement) {
-    const ok = window.confirm(
-      `Delete "${m.name}"? This will remove its PRs too.`,
-    );
-    if (!ok) return;
-    await repo.deleteMovement(m.id);
-    await reload();
   }
 
   function goCalc(movementId: string) {
@@ -350,41 +335,52 @@ export function MovementsPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
+
             {q.trim() ? (
-              <button
-                type="button"
-                className={styles.clearBtn}
-                aria-label={t.movements.clearFilterAria}
-                title={t.movements.clearFilterAria}
-                onClick={() => setQ("")}
-              >
-                <X size={16} />
-              </button>
+              <div className={styles.clearBtnPos}>
+                <Button
+                  variant="neutral"
+                  size="xs"
+                  shape="rounded"
+                  iconOnly
+                  ariaLabel={t.movements.clearFilterAria}
+                  title={t.movements.clearFilterAria}
+                  onClick={() => setQ("")}
+                >
+                  <X size={16} />
+                </Button>
+              </div>
             ) : null}
           </div>
 
-          <button
-            ref={sortBtnRef}
-            type="button"
-            className={styles.sortPill}
-            data-dirty={!sortIsDefault}
-            onClick={openSort}
-            aria-label={t.movements.sort.aria}
-            title={t.movements.sort.aria}
-          >
-            <ArrowUpDown size={18} />
-            <span className={styles.sortDot} aria-hidden="true" />
-          </button>
+          <div ref={sortBtnRef as any}>
+            <Button
+              variant="neutral"
+              size="md"
+              shape="circle"
+              iconOnly
+              className={styles.sortPill}
+              selected={!sortIsDefault}
+              onClick={openSort}
+              ariaLabel={t.movements.sort.aria}
+              title={t.movements.sort.aria}
+            >
+              <ArrowUpDown size={18} />
+              <span className={styles.sortDot} aria-hidden="true" />
+            </Button>
+          </div>
 
-          <button
-            type="button"
-            className={styles.addPill}
+          <Button
+            variant="soft"
+            size="md"
+            shape="circle"
+            iconOnly
             onClick={openAdd}
-            aria-label={t.movements.create.aria}
+            ariaLabel={t.movements.create.aria}
             title={t.movements.create.aria}
           >
             <Plus size={18} />
-          </button>
+          </Button>
         </div>
 
         <div className={styles.hint}>
@@ -420,29 +416,32 @@ export function MovementsPage() {
                   <div className={styles.subMuted}>{t.movements.noPrYet}</div>
                 )}
               </div>
-
-              <IconButton
-                variant="danger"
-                ariaLabel={t.movements.delete}
-                title={t.movements.delete}
-                onClick={() => removeMovement(m)}
-              >
-                <Trash2 size={18} />
-              </IconButton>
             </div>
 
-            <div className={styles.actions}>
-              <ActionButton
-                variant="primary"
-                fullWidth
+            <div className={styles.actionsRow}>
+              <Button
+                variant="soft"
+                size="md"
+                shape="rounded"
+                className={styles.calcWide}
                 onClick={() => goCalc(m.id)}
+                ariaLabel={t.movements.openCalculator}
+                title={t.movements.openCalculator}
               >
-                {t.movements.openCalculator}
-              </ActionButton>
+                PR Calculator
+              </Button>
 
-              <ActionButton fullWidth onClick={() => goManage(m.id)}>
-                {t.movements.managePrs}
-              </ActionButton>
+              <Button
+                variant="neutral"
+                size="md"
+                shape="rounded"
+                iconOnly
+                ariaLabel={t.movements.managePrs}
+                title={t.movements.managePrs}
+                onClick={() => goManage(m.id)}
+              >
+                <Settings2 size={18} />
+              </Button>
             </div>
           </Surface>
         ))}
@@ -474,27 +473,31 @@ export function MovementsPage() {
           >
             <div className={styles.sheetHeader}>
               <div className={styles.sheetTitle}>{t.movements.sort.title}</div>
-              <button
-                type="button"
-                className={styles.sheetClose}
+
+              <Button
+                variant="neutral"
+                size="sm"
+                shape="rounded"
+                iconOnly
                 onClick={() => setSortOpen(false)}
-                aria-label={t.movements.closeAria}
+                ariaLabel={t.movements.closeAria}
                 title={t.movements.closeAria}
               >
                 <X size={18} />
-              </button>
+              </Button>
             </div>
 
             <div className={styles.sheetBody}>
               {sortOptions.map((opt) => {
                 const active = opt.key === sortKey;
                 return (
-                  <button
+                  <Button
                     key={opt.key}
-                    type="button"
-                    className={`${styles.sheetOption} ${
-                      active ? styles.sheetOptionActive : ""
-                    }`}
+                    variant="ghost"
+                    size="lg"
+                    shape="rounded"
+                    className={styles.sheetOption}
+                    selected={active}
                     onClick={() => {
                       setSortKey(opt.key);
                       setSortOpen(false);
@@ -502,7 +505,7 @@ export function MovementsPage() {
                   >
                     <span className={styles.sheetOptionLabel}>{opt.label}</span>
                     {active ? <Check size={18} /> : null}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -539,22 +542,27 @@ export function MovementsPage() {
           {addErr ? <div className={styles.modalError}>{addErr}</div> : null}
 
           <div className={styles.modalActions}>
-            <ActionButton
+            <Button
               variant="primary"
+              size="lg"
+              shape="rounded"
               fullWidth
               disabled={addBusy}
               onClick={createMovementAndGoManage}
             >
               {t.movements.create.createCta}
-            </ActionButton>
+            </Button>
 
-            <ActionButton
+            <Button
+              variant="ghost"
+              size="lg"
+              shape="rounded"
               fullWidth
               disabled={addBusy}
               onClick={() => setAddOpen(false)}
             >
               {t.movements.create.cancelCta}
-            </ActionButton>
+            </Button>
           </div>
         </Modal>
       ) : null}

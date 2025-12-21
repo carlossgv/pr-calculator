@@ -1,5 +1,6 @@
-// apps/web/src/components/UnitPill.tsx
+// FILE: apps/web/src/components/UnitPill.tsx
 import type { Unit } from "@repo/core";
+import { Button } from "../ui/Button";
 
 type Props = {
   value: Unit;
@@ -9,15 +10,16 @@ type Props = {
 
 export function UnitPill({ value, onChange, disabled }: Props) {
   return (
-    <button
-      type="button"
-      className="unitPill"
+    <Button
+      size="sm"
+      variant="outline"
+      shape="pill"
       disabled={disabled}
       onClick={() => onChange(value === "kg" ? "lb" : "kg")}
       aria-label={`Toggle unit (current ${value.toUpperCase()})`}
       title="Toggle unit"
     >
       {value.toUpperCase()}
-    </button>
+    </Button>
   );
 }

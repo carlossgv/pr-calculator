@@ -2,6 +2,7 @@
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
 import styles from "./Modal.module.css";
+import { Button } from "./Button";
 
 type Props = {
   title: ReactNode;
@@ -25,15 +26,17 @@ export function Modal({ title, children, onClose, ariaLabel }: Props) {
         <div className={styles.header}>
           <div className={styles.title}>{title}</div>
 
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            shape="round"
+            iconOnly
             className={styles.close}
             onClick={onClose}
             aria-label="Close"
             title="Close"
           >
             <X size={18} />
-          </button>
+          </Button>
         </div>
 
         <div className={styles.body}>{children}</div>

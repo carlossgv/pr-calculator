@@ -116,7 +116,7 @@
 
 .iconWrap {
   display: inline-flex;
-  transform: scale(1.08); /* 👈 theme icon un toque más grande */
+  transform: scale(1.08);
   transform-origin: center;
 }
 
@@ -157,41 +157,16 @@
   background: color-mix(in oklab, var(--card-bg) 86%, var(--bg));
 }
 
+/* Button override: just the "active" look (base styles come from ui/Button) */
 .genderIconBtn {
-  appearance: none;
-  border: 0;
-  background: transparent;
   color: var(--muted);
-
-  width: 40px; /* 👈 más grande */
+  width: 40px;
   height: 40px;
-  border-radius: 999px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-  user-select: none;
-
-  transition:
-    background 120ms ease,
-    transform 120ms ease,
-    color 120ms ease;
-}
-
-.genderIconBtn:active {
-  transform: translateY(1px);
-}
-
-.genderIconBtn:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
 }
 
 .genderIconBtn[data-active="true"] {
-  background: color-mix(in oklab, var(--accent) 14%, transparent);
-  color: var(--fg);
+  background: color-mix(in oklab, var(--accent) 14%, transparent) !important;
+  color: var(--fg) !important;
   box-shadow: 0 10px 22px rgba(2, 6, 23, 0.18);
 }
 
@@ -217,30 +192,9 @@
   font-weight: 900;
 }
 
-/* ===== Presets ===== */
+/* ===== Presets / Backup rows ===== */
 
-.actionRow {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  width: 100%;
-  text-align: left;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-
-  padding: 14px 16px;
-  cursor: pointer;
-
-  transition:
-    background 120ms ease,
-    transform 120ms ease;
-  border-radius: 0; /* 👈 evita los radios por fila y elimina el “gap” visual */
-}
-
+/* Keeps your border separators + rounding, while Button handles hover/focus */
 .actionRow:first-child {
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
@@ -255,16 +209,8 @@
   border-top: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
 }
 
-.actionRow:hover {
-  background: color-mix(in oklab, var(--accent) 6%, transparent);
-}
-
-.actionRow:active {
-  transform: translateY(1px);
-}
-
 .actionRow[data-active="true"] {
-  background: color-mix(in oklab, var(--accent) 9%, transparent);
+  background: color-mix(in oklab, var(--accent) 9%, transparent) !important;
 }
 
 .actionRow[data-active="true"] .actionTitle {
@@ -319,17 +265,10 @@
   color: var(--fg);
 }
 
+/* Support ID button: purely spacing/typography; base look comes from Button */
 .supportId {
-  display: inline-flex;
-  align-items: center;
   gap: 4px;
   padding: 6px 10px;
-
-  border-radius: 999px;
-  background: var(--chip-bg, rgba(0, 0, 0, 0.06));
-
-  font-size: 13px;
-  cursor: pointer;
 }
 
 .supportIdMono {

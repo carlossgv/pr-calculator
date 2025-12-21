@@ -1,22 +1,16 @@
 // FILE: apps/web/src/pages/MovementDetailsPage.tsx
-import { Calculator, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Calculator, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import type { Movement, PrEntry, Unit, UserPreferences } from "@repo/core";
 import { convertWeightValue } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { UnitPill } from "../components/UnitPill";
 import { NumberInput } from "../components/NumberInput";
-import {
-  ActionButton,
-  Chip,
-  IconButton,
-  Sticker,
-  Surface,
-  SurfaceHeader,
-} from "../ui/Surface";
+import { Chip, Sticker, Surface, SurfaceHeader } from "../ui/Surface";
 import styles from "./MovementDetailsPage.module.css";
+import { Button } from "../ui/Button";
 
 function uid() {
   try {
@@ -224,6 +218,18 @@ export function MovementDetailsPage() {
     await reload();
   }
 
+  async function deleteMovement() {
+    if (!movement) return;
+
+    const ok = window.confirm(
+      `Delete "${movement.name}"? This will remove its PRs too.`,
+    );
+    if (!ok) return;
+
+    await repo.deleteMovement(movement.id);
+    navigate("/movements");
+  }
+
   function goCalc(targetWeight: number) {
     const unit: Unit = (prefs?.defaultUnit ?? "kg") as Unit;
     navigate(`/movements/${id}/calc/${unit}/${targetWeight}`);
@@ -236,10 +242,43 @@ export function MovementDetailsPage() {
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
-        <Link to="/movements">{t.movement.back}</Link>
-        <Link to={`/movements/${id}/calc/${unit}/100`} className={styles.topLink}>
-          Calculator
-        </Link>
+        <Button
+          to="/movements"
+          variant="neutral"
+          size="md"
+          shape="rounded"
+          iconOnly
+          ariaLabel={t.movement.back}
+          title={t.movement.back}
+        >
+          <ArrowLeft size={18} />
+        </Button>
+
+        <div className={styles.topActions}>
+          <Button
+            variant="neutral"
+            size="md"
+            shape="rounded"
+            iconOnly
+            ariaLabel="Calculator"
+            title="Calculator"
+            onClick={() => navigate(`/movements/${id}/calc/${unit}/100`)}
+          >
+            <Calculator size={18} />
+          </Button>
+
+          <Button
+            variant="danger"
+            size="md"
+            shape="rounded"
+            iconOnly
+            ariaLabel={t.movements.delete}
+            title={t.movements.delete}
+            onClick={deleteMovement}
+          >
+            <Trash2 size={18} />
+          </Button>
+        </div>
       </div>
 
       <h2 className={styles.title}>{movement?.name ?? t.movement.title}</h2>
@@ -300,9 +339,15 @@ export function MovementDetailsPage() {
 
           {error ? <div className={styles.error}>{error}</div> : null}
 
-          <ActionButton variant="primary" fullWidth onClick={addEntry}>
+          <Button
+            variant="primary"
+            size="lg"
+            shape="rounded"
+            fullWidth
+            onClick={addEntry}
+          >
             {t.movement.add}
-          </ActionButton>
+          </Button>
         </div>
 
         <div className={styles.divider}>
@@ -356,12 +401,23 @@ export function MovementDetailsPage() {
                     </div>
 
                     <div className={styles.actions}>
-                      <ActionButton variant="primary" onClick={saveEditEntry}>
+                      <Button
+                        variant="primary"
+                        size="md"
+                        shape="rounded"
+                        onClick={saveEditEntry}
+                      >
                         Save
-                      </ActionButton>
-                      <ActionButton onClick={() => setEditingEntryId(null)}>
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        size="md"
+                        shape="rounded"
+                        onClick={() => setEditingEntryId(null)}
+                      >
                         Cancel
-                      </ActionButton>
+                      </Button>
                     </div>
                   </>
                 ) : (
@@ -375,30 +431,41 @@ export function MovementDetailsPage() {
                     </div>
 
                     <div className={styles.actions}>
-                      <IconButton
+                      <Button
+                        variant="neutral"
+                        size="md"
+                        shape="rounded"
+                        iconOnly
                         ariaLabel="Calculator"
                         title="Calculator"
                         onClick={() => goCalc(e.weight)}
                       >
                         <Calculator size={18} />
-                      </IconButton>
+                      </Button>
 
-                      <IconButton
+                      <Button
+                        variant="neutral"
+                        size="md"
+                        shape="rounded"
+                        iconOnly
                         ariaLabel="Edit"
                         title="Edit"
                         onClick={() => startEditEntry(e)}
                       >
                         <Pencil size={18} />
-                      </IconButton>
+                      </Button>
 
-                      <IconButton
+                      <Button
                         variant="danger"
+                        size="md"
+                        shape="rounded"
+                        iconOnly
                         ariaLabel="Delete"
                         title="Delete"
                         onClick={() => deleteEntry(e)}
                       >
                         <Trash2 size={18} />
-                      </IconButton>
+                      </Button>
                     </div>
                   </div>
                 )}

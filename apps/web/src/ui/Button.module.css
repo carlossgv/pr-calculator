@@ -1,0 +1,158 @@
+/* FILE: apps/web/src/ui/Button.module.css */
+
+.base {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--fg);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    transform 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease,
+    filter 120ms ease,
+    box-shadow 120ms ease,
+    opacity 120ms ease;
+}
+
+.base:active {
+  transform: translateY(1px);
+}
+
+.base:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 6px var(--ring);
+}
+
+/* Sizes */
+.md {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-weight: 850;
+  font-size: 14px;
+}
+
+.sm {
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-weight: 850;
+  font-size: 13px;
+}
+
+/* Shapes */
+.defaultShape {
+  /* size sets radius */
+}
+
+.pill {
+  border-radius: 999px;
+}
+
+.round {
+  border-radius: 999px;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+}
+
+/* Label/icon */
+.label {
+  min-width: 0;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconOnly .label {
+  display: none;
+}
+
+.iconOnly {
+  padding: 0;
+}
+
+/* Full width */
+.fullWidth {
+  width: 100%;
+}
+
+/* Variants */
+.outline:hover {
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  background: color-mix(in oklab, var(--accent) 6%, var(--card-bg));
+}
+
+.ghost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.ghost:hover {
+  background: color-mix(in oklab, var(--accent) 7%, transparent);
+  border-color: color-mix(in oklab, var(--accent) 30%, transparent);
+}
+
+.solid {
+  background: var(--accent);
+  border-color: color-mix(in oklab, var(--accent) 82%, var(--border));
+  color: var(--accent-contrast);
+}
+
+.solid:hover {
+  filter: brightness(1.02) saturate(1.06);
+  border-color: color-mix(in oklab, var(--accent) 92%, var(--border));
+}
+
+.danger {
+  background: color-mix(in oklab, var(--danger) 18%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--danger) 55%, var(--border));
+}
+
+.danger:hover {
+  background: color-mix(in oklab, var(--danger) 24%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--danger) 65%, var(--border));
+}
+
+/* Row-style button (full-width list rows) */
+.row {
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+
+  padding: 14px 16px;
+  min-height: 62px;
+}
+
+.row:hover {
+  background: color-mix(in oklab, var(--accent) 6%, transparent);
+}
+
+.row:focus-visible {
+  box-shadow: 0 0 0 6px var(--ring);
+}
+
+/* Disabled */
+.base:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}

@@ -6,7 +6,9 @@
   min-width: 0;
 }
 
-/* FILE: apps/web/src/ui/Surface.module.css */
+/* =========================
+   Variants
+   ========================= */
 
 .card {
   border: 1px solid var(--border);
@@ -17,7 +19,7 @@
 }
 
 .panel {
-  border: 2px solid color-mix(in oklab, var(--accent) 28%, var(--border));
+  border: 2px solid color-mix(in oklab, var(--accent) 34%, var(--border));
   border-radius: 18px;
   padding: 12px;
 
@@ -28,12 +30,13 @@
   overflow: hidden;
 }
 
-/* dark: si quieres un toque “premium”, que sea sutil y SOLO en dark */
+/* dark: un toque premium sutil */
 :global([data-theme="dark"]) .panel {
+  border-color: color-mix(in oklab, var(--accent) 42%, rgba(255, 255, 255, 0.10));
   background: linear-gradient(
     180deg,
-    color-mix(in oklab, var(--fg) 6%, var(--card-bg)) 0%,
-    var(--card-bg) 75%
+    color-mix(in oklab, var(--fg) 7%, var(--card-bg)) 0%,
+    var(--card-bg) 76%
   );
 }
 
@@ -44,11 +47,13 @@
   overflow: hidden;
 }
 
-/* ===== Header block (PR CALC / chip / barcode) ===== */
+/* =========================
+   Header block (Sticker / Chip / Barcode)
+   ========================= */
 
 .headerBlock {
   display: grid;
-  gap: 14px; /* ⬅️ más aire con lo que viene abajo */
+  gap: 14px;
 }
 
 .header {
@@ -67,6 +72,8 @@
   gap: 8px;
 }
 
+/* ===== Sticker ===== */
+
 .sticker {
   display: inline-flex;
   align-items: center;
@@ -80,10 +87,18 @@
   padding: 6px 10px;
   border-radius: 999px;
 
-  background: var(--sticker-bg);
-  border: 1px solid var(--sticker-border);
+  /* más “pop” sin ser pintura sólida */
+  background: color-mix(in oklab, var(--accent) 18%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent) 55%, var(--border));
   box-shadow: var(--sticker-shadow);
 }
+
+:global([data-theme="dark"]) .sticker {
+  background: color-mix(in oklab, var(--accent) 20%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--accent) 62%, rgba(255, 255, 255, 0.10));
+}
+
+/* ===== Stamp ===== */
 
 .stamp {
   display: inline-flex;
@@ -98,18 +113,27 @@
   padding: 6px 10px;
   border-radius: 10px;
 
-  background: color-mix(in oklab, var(--accent-2) 18%, var(--card-bg));
-  border: 1px dashed color-mix(in oklab, var(--accent-2) 60%, var(--border));
+  background: color-mix(in oklab, var(--accent-2) 26%, var(--card-bg));
+  border: 1px dashed color-mix(in oklab, var(--accent-2) 75%, var(--border));
 }
+
+:global([data-theme="dark"]) .stamp {
+  background: color-mix(in oklab, var(--accent-2) 28%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--accent-2) 82%, rgba(255, 255, 255, 0.10));
+}
+
+/* ===== Barcode ===== */
 
 .barcodeRule {
   height: 10px;
   border-radius: 999px;
   background: var(--barcode);
-  opacity: 0.85;
+  opacity: 0.88;
 }
 
-/* ===== Chips ===== */
+/* =========================
+   Chips
+   ========================= */
 
 .chip {
   display: inline-flex;
@@ -123,6 +147,9 @@
 
   padding: 6px 10px;
   border-radius: 999px;
+
+  user-select: none;
+  white-space: nowrap;
 }
 
 .chipNeutral {
@@ -132,26 +159,67 @@
 }
 
 .chipAccent {
-  background: color-mix(in oklab, var(--accent) 14%, var(--card-bg));
-  border: 1px solid color-mix(in oklab, var(--accent) 55%, var(--border));
+  background: color-mix(in oklab, var(--accent) 28%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent) 72%, var(--border));
+  color: var(--fg);
 }
 
 .chipAccent2 {
-  background: color-mix(in oklab, var(--accent-2) 14%, var(--card-bg));
-  border: 1px solid color-mix(in oklab, var(--accent-2) 55%, var(--border));
+  background: color-mix(in oklab, var(--accent-2) 26%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent-2) 70%, var(--border));
+  color: var(--fg);
 }
 
 .chipAccent3 {
-  background: color-mix(in oklab, var(--accent-3) 16%, var(--card-bg));
-  border: 1px solid color-mix(in oklab, var(--accent-3) 55%, var(--border));
+  background: color-mix(in oklab, var(--accent-3) 30%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent-3) 70%, var(--border));
+  color: var(--fg);
 }
 
-/* ===== Buttons ===== */
+:global([data-theme="dark"]) .chipNeutral {
+  background: color-mix(in oklab, var(--fg) 8%, var(--card-bg));
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:global([data-theme="dark"]) .chipAccent {
+  background: color-mix(in oklab, var(--accent) 22%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--accent) 68%, rgba(255, 255, 255, 0.10));
+}
+
+:global([data-theme="dark"]) .chipAccent2 {
+  background: color-mix(in oklab, var(--accent-2) 22%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--accent-2) 68%, rgba(255, 255, 255, 0.10));
+}
+
+:global([data-theme="dark"]) .chipAccent3 {
+  background: color-mix(in oklab, var(--accent-3) 24%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--accent-3) 70%, rgba(255, 255, 255, 0.10));
+}
+
+/* =========================
+   Buttons
+   ========================= */
 
 .btn {
   border-radius: 14px;
   border: 1px solid var(--border);
   font-weight: 900;
+
+  transition:
+    transform 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    filter 120ms ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.60;
+  cursor: not-allowed;
 }
 
 .btnFull {
@@ -162,34 +230,76 @@
   background: var(--card-bg);
 }
 
+.btnGhost:hover {
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  background: color-mix(in oklab, var(--accent) 10%, var(--card-bg));
+}
+
 .btnPrimary {
-  background: color-mix(in oklab, var(--accent) 12%, var(--card-bg));
-  border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+  /* 🔥 pop real: sólido */
+  background: var(--accent);
+  border-color: color-mix(in oklab, var(--accent) 80%, var(--border));
+  color: var(--accent-contrast);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.14);
+}
+
+.btnPrimary:hover {
+  filter: brightness(1.02) saturate(1.06);
+  border-color: color-mix(in oklab, var(--accent) 92%, var(--border));
+}
+
+:global([data-theme="dark"]) .btnPrimary {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.50);
 }
 
 .btnDanger {
-  background: color-mix(in oklab, var(--danger) 10%, var(--card-bg));
-  border-color: color-mix(in oklab, var(--danger) 45%, var(--border));
+  background: color-mix(in oklab, var(--danger) 14%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--danger) 55%, var(--border));
   color: var(--danger);
 }
 
-/* ===== Icon buttons (reusable) ===== */
+.btnDanger:hover {
+  background: color-mix(in oklab, var(--danger) 18%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--danger) 72%, var(--border));
+}
+
+/* =========================
+   Icon buttons
+   ========================= */
 
 .iconBtnBase {
   width: 40px;
   height: 40px;
   padding: 0;
+
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--card-bg);
+
   color: var(--fg);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  transition:
+    transform 120ms ease,
+    background 120ms ease,
+    border-color 120ms ease,
+    filter 120ms ease;
 }
 
 .iconBtnBase:active {
   transform: translateY(1px);
+}
+
+.iconBtnBase:disabled {
+  opacity: 0.60;
+  cursor: not-allowed;
+}
+
+.iconBtnBase:hover {
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  background: color-mix(in oklab, var(--accent) 10%, var(--card-bg));
 }
 
 .iconBtn {
@@ -197,7 +307,12 @@
 }
 
 .iconBtnDanger {
-  border-color: color-mix(in oklab, var(--danger) 45%, var(--border));
-  background: color-mix(in oklab, var(--danger) 10%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--danger) 55%, var(--border));
+  background: color-mix(in oklab, var(--danger) 12%, var(--card-bg));
   color: var(--danger);
+}
+
+.iconBtnDanger:hover {
+  border-color: color-mix(in oklab, var(--danger) 75%, var(--border));
+  background: color-mix(in oklab, var(--danger) 16%, var(--card-bg));
 }

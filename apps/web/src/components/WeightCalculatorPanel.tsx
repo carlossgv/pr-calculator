@@ -1,4 +1,3 @@
-// apps/web/src/components/WeightCalculatorPanel.tsx
 // FILE: apps/web/src/components/WeightCalculatorPanel.tsx
 import { useEffect, useMemo, useState } from "react";
 import type { Unit, UserPreferences } from "@repo/core";
@@ -10,6 +9,7 @@ import { prefsForUnit } from "../utils/equipment";
 import { UnitSwitch } from "./UnitSwitch";
 import { Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
+import { Button } from "../ui/Button";
 
 function round1(n: number) {
   return Math.round(n * 10) / 10;
@@ -108,8 +108,10 @@ export function WeightCalculatorPanel({
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [rawWeight, setRawWeight] = useState<number>(initialWeight ?? 100);
 
-  // 👇 NUEVO: el input se controla como string (para permitir borrar todo)
-  const [weightText, setWeightText] = useState<string>(formatWeight(initialWeight ?? 100));
+  // 👇 el input se controla como string (para permitir borrar todo)
+  const [weightText, setWeightText] = useState<string>(
+    formatWeight(initialWeight ?? 100),
+  );
 
   const [customPctInput, setCustomPctInput] = useState<string>("");
   const [customPcts, setCustomPcts] = useState<number[]>([]);
@@ -144,7 +146,7 @@ export function WeightCalculatorPanel({
     const converted = round1(convertWeightValue(rawWeight, unit, next));
     setUnit(next);
     setRawWeight(converted);
-    setWeightText(formatWeight(converted)); // 👈 sincroniza el texto
+    setWeightText(formatWeight(converted));
   }
 
   useEffect(() => {
@@ -198,28 +200,25 @@ export function WeightCalculatorPanel({
           <div className={styles.weightInputWrap}>
             <input
               className={styles.weightInput}
-              type="text"              // ✅ adiós spinners
+              type="text"
               inputMode="decimal"
               value={weightText}
               onChange={(e) => {
                 const nextText = sanitizeWeightText(e.target.value);
                 setWeightText(nextText);
 
-                // Si está vacío, no forzamos rawWeight a 0 (así puedes borrar completo)
                 if (nextText === "") return;
 
                 const n = Number(nextText);
                 if (Number.isFinite(n)) setRawWeight(n);
               }}
               onBlur={() => {
-                // Si lo dejas vacío al salir, lo llevamos a 0 (y evitamos estado raro)
                 if (weightText.trim() === "") {
                   setWeightText("0");
                   setRawWeight(0);
                   return;
                 }
 
-                // Normaliza en blur para evitar "000" etc
                 const normalized = sanitizeWeightText(weightText);
                 setWeightText(normalized);
 
@@ -259,35 +258,39 @@ export function WeightCalculatorPanel({
               aria-label={t.home.customPercent}
             />
 
-            <button
-              type="button"
-              className={styles.customPctAddBtn}
-              onClick={addCustomPct}
+            <Button
+              variant="primary"
+              size="lg"
+              shape="rounded"
+              iconOnly
               disabled={!canAdd}
-              aria-label={t.home.customPercentAddAria}
+              onClick={addCustomPct}
+              ariaLabel={t.home.customPercentAddAria}
               title={t.home.customPercentAdd}
             >
               <Plus size={18} aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         </div>
 
         {customPcts.length ? (
           <div className={styles.customPctChips} aria-label={t.home.customPercentAdded}>
             {customPcts.map((p) => (
-              <button
+              <Button
                 key={p}
-                type="button"
+                variant="ghost"
+                size="sm"
+                shape="pill"
                 className={styles.customPctChip}
                 onClick={() => removeCustomPct(p)}
                 title={t.home.customPercentRemove}
-                aria-label={`${t.home.customPercentRemove} ${p}%`}
+                ariaLabel={`${t.home.customPercentRemove} ${p}%`}
               >
                 <span>{p}%</span>
                 <span className={styles.customPctChipX} aria-hidden="true">
                   ×
                 </span>
-              </button>
+              </Button>
             ))}
           </div>
         ) : (

@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OUT="/tmp/boxflow_dump.txt"
-: > "$OUT"
-
 # ✅ Enable recursive globbing (**) and sane glob behavior
 shopt -s globstar nullglob
 
@@ -11,11 +8,9 @@ add_file () {
   local pattern="$1"
   local matches=()
 
-  # Expand glob patterns safely into an array.
-  # With nullglob, non-matching globs expand to nothing (not the raw pattern).
   matches=( $pattern )
 
-  # If it's a literal path (no glob chars) and doesn't exist, keep it as-is so we print MISSING.
+  # If no glob match, keep literal so we can report MISSING
   if [[ ${#matches[@]} -eq 0 ]]; then
     matches=( "$pattern" )
   fi
@@ -33,28 +28,41 @@ add_file () {
       echo "[MISSING FILE] $path" >&2
     fi
 
-    {
-      echo
-      echo "============================================================"
-      echo "FILE: $path"
-      echo "============================================================"
-      echo
-      if [[ -f "$path" ]]; then
-        cat "$path"
-      else
-        echo "[MISSING FILE] $path"
-      fi
-      echo
-    } >> "$OUT"
+    echo
+    echo "============================================================"
+    echo "FILE: $path"
+    echo "============================================================"
+    echo
+    if [[ -f "$path" ]]; then
+      cat "$path"
+    else
+      echo "[MISSING FILE] $path"
+    fi
+    echo
   done
 }
 
-echo "Writing dump to: $OUT"
+# ------------------------------------------------------------
+# Output
+# ------------------------------------------------------------
 
-add_file "apps/web/src/sync/index.ts"
+add_file "apps/web/src/ui/Modal.tsx"
+add_file "apps/web/src/ui/Modal.module.css"
+add_file "apps/web/src/pages/PreferencesPage.tsx"
+add_file "apps/web/src/pages/PreferencesPage.module.css"
+add_file "apps/web/src/components/Switch.tsx"
+add_file "apps/web/src/components/ThemeToggle.tsx"
+add_file "apps/web/src/components/PwaUpdateBanner.tsx"
+add_file "apps/web/src/components/UnitSwitch.tsx"
+add_file "apps/web/src/components/UnitPill.tsx"
+add_file "apps/web/src/components/PercentCards.tsx"
+add_file "apps/web/src/components/PercentCards.module.css"
 
-echo "DONE ✅  Open the file with:"
-echo "  less -R $OUT"
-echo
-echo "If you want it in clipboard (mac):"
-echo "  pbcopy < $OUT"
+# If running interactively (no pipe), give a hint
+if [[ -t 1 ]]; then
+  echo "DONE ✅"
+  echo
+  echo "Tip:"
+  echo "  ./dump.sh | pbcopy        # copy to clipboard (macOS)"
+  echo "  ./dump.sh > dump.txt      # save to file"
+fi

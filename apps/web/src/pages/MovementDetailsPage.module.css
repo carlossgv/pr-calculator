@@ -15,13 +15,15 @@
   min-width: 0;
 }
 
-.topLink {
-  font-weight: 800;
-}
-
 .title {
   margin: 0;
   font-size: 18px;
+}
+
+.topActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .form {
@@ -52,7 +54,8 @@
   color-scheme: light dark;
 }
 
-:global(:root[data-theme="dark"]) .dateInput::-webkit-calendar-picker-indicator {
+:global(:root[data-theme="dark"])
+  .dateInput::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(1.1);
   opacity: 0.9;
 }
