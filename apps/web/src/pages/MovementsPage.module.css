@@ -26,6 +26,57 @@
   gap: 12px;
 }
 
+/* ✅ click affordance + subtle accent strip */
+.itemClickable {
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
+}
+
+/* Accent strip (subtle) */
+.itemClickable::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--accent) 55%, transparent);
+  opacity: 0.55;
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.itemClickable:hover {
+  border-color: color-mix(in oklab, var(--accent) 22%, var(--border));
+}
+
+.itemClickable:hover::before {
+  opacity: 0.95;
+  transform: scaleY(1.02);
+}
+
+.itemClickable:active {
+  transform: translateY(1px);
+}
+
+.itemClickable:focus-visible {
+  box-shadow: 0 0 0 6px var(--ring);
+}
+
+/* Title reacts slightly on hover (nice, not loud) */
+.itemClickable:hover .name {
+  color: color-mix(in oklab, var(--accent) 55%, var(--fg));
+}
+
 .itemTop {
   display: flex;
   gap: 12px;
@@ -37,6 +88,7 @@
   min-width: 0;
   display: grid;
   gap: 6px;
+  padding-left: 10px; /* space so strip doesn't feel cramped */
 }
 
 .name {
@@ -45,6 +97,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color 140ms ease;
 }
 
 .sub {
@@ -59,6 +112,34 @@
 
 .unitHint {
   opacity: 0.75;
+}
+
+/* Right side cluster */
+.rightCluster {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.chevron {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  color: color-mix(in oklab, var(--accent) 48%, var(--muted));
+  opacity: 0.85;
+  transform: translateX(0);
+  transition:
+    transform 140ms ease,
+    opacity 140ms ease,
+    color 140ms ease;
+}
+
+.itemClickable:hover .chevron {
+  opacity: 1;
+  transform: translateX(2px);
+  color: color-mix(in oklab, var(--accent) 68%, var(--fg));
 }
 
 /* --- Controls --- */
@@ -146,22 +227,9 @@
   transform: scale(1);
 }
 
-.actionsRow {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  min-width: 0;
-}
-
-.calcWide {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-@media (min-width: 900px) {
-  .calcWide {
-    flex: 0 0 140px;
-  }
+/* Prevent manage button from inheriting card tap feel */
+.manageBtn {
+  cursor: pointer;
 }
 
 /* --- Sheet --- */

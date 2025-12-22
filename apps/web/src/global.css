@@ -339,6 +339,11 @@ select:focus-visible {
 }
 
 @media (max-width: 520px) {
+
+  .mainContent {
+    margin-top: 0px;
+  }
+
   .topNav {
     display: none;
   }

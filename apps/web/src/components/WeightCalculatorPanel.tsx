@@ -10,6 +10,7 @@ import { UnitSwitch } from "./UnitSwitch";
 import { Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
 import { Button } from "../ui/Button";
+import { Surface } from "../ui/Surface";
 
 function round1(n: number) {
   return Math.round(n * 10) / 10;
@@ -57,6 +58,8 @@ type ChangePayload = { unit: Unit; weight: number };
 
 type Props = {
   mode: "editable" | "readonly";
+
+  /** Title to show above the calculator (usually the Movement name). */
   title?: string;
 
   initialUnit?: Unit;
@@ -74,7 +77,7 @@ function contextChipWord(ctx: unknown): string {
     typeof ctx === "string"
       ? ctx
       : typeof ctx === "object" && ctx
-        ? (ctx as any).id ?? (ctx as any).kind ?? (ctx as any).name
+        ? ((ctx as any).id ?? (ctx as any).kind ?? (ctx as any).name)
         : "";
 
   const s = String(id ?? "").toLowerCase();
@@ -181,7 +184,7 @@ export function WeightCalculatorPanel({
     <div className={styles.root}>
       {title ? <h2 style={{ margin: 0 }}>{title}</h2> : null}
 
-      <section className={styles.panel}>
+      <Surface variant="panel" className={styles.panel}>
         <div className={styles.header}>
           <span className={styles.utilLabel}>
             PR CALC <span className={styles.stamp}>LIVE</span>
@@ -232,13 +235,20 @@ export function WeightCalculatorPanel({
             </span>
           </div>
         ) : (
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
             <div style={{ fontSize: 34, fontWeight: 950 }}>
-              {rawWeight} <span style={{ fontSize: 14, opacity: 0.9 }}>{unit}</span>
+              {rawWeight}{" "}
+              <span style={{ fontSize: 14, opacity: 0.9 }}>{unit}</span>
             </div>
           </div>
         )}
-      </section>
+      </Surface>
 
       <section className={styles.customPct} aria-label={t.home.customPercent}>
         <div className={styles.customPctTop}>
@@ -274,7 +284,10 @@ export function WeightCalculatorPanel({
         </div>
 
         {customPcts.length ? (
-          <div className={styles.customPctChips} aria-label={t.home.customPercentAdded}>
+          <div
+            className={styles.customPctChips}
+            aria-label={t.home.customPercentAdded}
+          >
             {customPcts.map((p) => (
               <Button
                 key={p}

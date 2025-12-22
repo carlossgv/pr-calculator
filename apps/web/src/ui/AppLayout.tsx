@@ -93,12 +93,6 @@ export function AppLayout() {
   return (
     <div className="appShell">
       <header className="topHeader">
-        <div className="topLeft">
-          <h1 className="appTitle">
-            {appTitle}
-            <DevBadge isDev={isDev} />
-          </h1>
-        </div>
 
         <div className="topRight">
           <nav className="topNav" aria-label="Top navigation">

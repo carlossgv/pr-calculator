@@ -7,7 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Chip, Sticker, Surface, SurfaceHeader } from "../ui/Surface";
 import { Modal } from "../ui/Modal";
 import styles from "./MovementsPage.module.css";
-import { ArrowUpDown, Check, Plus, X, Settings2 } from "lucide-react";
+import { ArrowUpDown, Check, Plus, X, Settings2, ChevronRight } from "lucide-react";
 import { Button } from "../ui/Button";
 
 function uid() {
@@ -399,7 +399,21 @@ export function MovementsPage() {
 
       <div className={styles.list}>
         {cards.map(({ m, best }) => (
-          <Surface key={m.id} variant="card" className={styles.item}>
+          <Surface
+            key={m.id}
+            variant="card"
+            className={`${styles.item} ${styles.itemClickable}`}
+            role="button"
+            tabIndex={0}
+            aria-label={t.movements.openCalculator}
+            onClick={() => goCalc(m.id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                goCalc(m.id);
+              }
+            }}
+          >
             <div className={styles.itemTop}>
               <div className={styles.meta}>
                 <div className={styles.name} title={m.name}>
@@ -408,39 +422,37 @@ export function MovementsPage() {
 
                 {best ? (
                   <div className={styles.sub}>
-                    {toDateLabel(best.date)} · <b>{best.weight}</b> ×{" "}
-                    {best.reps} <span className={styles.unitHint}>{unit}</span>
+                    {toDateLabel(best.date)} · <b>{best.weight}</b> × {best.reps}{" "}
+                    <span className={styles.unitHint}>{unit}</span>
                   </div>
                 ) : (
                   <div className={styles.subMuted}>{t.movements.noPrYet}</div>
                 )}
               </div>
-            </div>
 
-            <div className={styles.actionsRow}>
-              <Button
-                variant="solid"
-                size="md"
-                shape="default"
-                className={styles.calcWide}
-                onClick={() => goCalc(m.id)}
-                aria-label={t.movements.openCalculator}
-                title={t.movements.openCalculator}
-              >
-                PR Calculator
-              </Button>
+              <div className={styles.rightCluster}>
+                <span className={styles.chevron} aria-hidden="true">
+                  <ChevronRight size={18} />
+                </span>
 
-              <Button
-                variant="outline"
-                size="md"
-                shape="round"
-                iconOnly
-                className={styles.iconBtnMd}
-                aria-label={t.movements.managePrs}
-                title={t.movements.managePrs}
-                onClick={() => goManage(m.id)}
-                leftIcon={<Settings2 size={18} />}
-              />
+                <Button
+                  variant="outline"
+                  size="md"
+                  shape="round"
+                  iconOnly
+                  className={`${styles.iconBtnMd} ${styles.manageBtn}`}
+                  aria-label={t.movements.managePrs}
+                  title={t.movements.managePrs}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goManage(m.id);
+                  }}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                  }}
+                  leftIcon={<Settings2 size={18} />}
+                />
+              </div>
             </div>
           </Surface>
         ))}

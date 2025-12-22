@@ -5,7 +5,7 @@ import { HomePage } from "./pages/HomePage";
 import { PreferencesPage } from "./pages/PreferencesPage";
 import { MovementsPage } from "./pages/MovementsPage";
 import { MovementDetailsPage } from "./pages/MovementDetailsPage";
-import { MovementCalcPage } from "./pages/MovementCalcPage";
+import { MovementCalculatorPage } from "./pages/MovementCalculatorPage";
 
 export const router = createBrowserRouter(
   [
@@ -26,7 +26,7 @@ export const router = createBrowserRouter(
         // Calc
         {
           path: "movements/:movementId/calc/:unit/:weight",
-          element: <MovementCalcPage />,
+          element: <MovementCalculatorPage />,
         },
       ],
     },
