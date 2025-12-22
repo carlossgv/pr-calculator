@@ -23,13 +23,20 @@
    ========================= */
 
 .tile {
+  position: relative;
+
   border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
-  border-radius: 16px;
-  padding: 12px;
+  border-radius: 18px;
+
+  /* en vez de padding gigante: min-height + layout consistente */
+  padding: 14px 14px 12px;
+
   background: var(--card-bg);
 
   display: grid;
-  gap: 8px;
+  gap: 10px;
+
+  min-height: 68px;
 
   transition:
     transform 120ms ease,
@@ -39,6 +46,33 @@
     filter 120ms ease;
 }
 
+/* highlight interno sutil para que no se vea “plain” */
+.tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  pointer-events: none;
+
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, white 6%, transparent),
+    transparent 48%,
+    transparent
+  );
+  opacity: 0.7;
+}
+
+:global([data-theme="dark"]) .tile::before {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, white 8%, transparent),
+    transparent 52%,
+    transparent
+  );
+  opacity: 0.55;
+}
+
 .tile:hover {
   border-color: color-mix(in oklab, var(--accent) 60%, var(--border));
   background: color-mix(in oklab, var(--accent) 8%, var(--card-bg));
@@ -46,6 +80,13 @@
 
 .tile:active {
   transform: translateY(1px);
+}
+
+.tile:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--accent) 28%, transparent),
+    var(--shadow);
 }
 
 /* 100% anchor */
@@ -68,7 +109,11 @@
 }
 
 :global([data-theme="dark"]) .tile:hover {
-  border-color: color-mix(in oklab, var(--accent) 55%, rgba(255, 255, 255, 0.10));
+  border-color: color-mix(
+    in oklab,
+    var(--accent) 55%,
+    rgba(255, 255, 255, 0.10)
+  );
   background: color-mix(in oklab, var(--accent) 10%, var(--card-bg));
 }
 
@@ -82,17 +127,24 @@
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
 }
 
-.tileTop {
+.tileRow {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
+
+  /* asegura que el contenido quede centrado verticalmente */
+  min-height: 36px;
+
+  position: relative;
+  z-index: 1; /* sobre ::before */
 }
 
 .pct,
 .target {
   font-size: 16px;
   font-weight: 950;
+  letter-spacing: -0.01em;
 }
 
 .pctHint {
@@ -102,13 +154,76 @@
   letter-spacing: 0.06em;
 }
 
-.meta {
-  font-size: 12px;
-  opacity: 0.92;
-  line-height: 1.25;
+/* ✅ cluster derecho: target + chevron */
+.rightTop {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
 
-  overflow-wrap: anywhere;
-  word-break: break-word;
+.chevronPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+
+  border: 1px solid color-mix(in oklab, var(--fg) 14%, transparent);
+  background: color-mix(in oklab, var(--fg) 6%, transparent);
+
+  opacity: 0.92;
+  transform: translateY(0px);
+
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    opacity 120ms ease,
+    transform 120ms ease;
+
+  position: relative;
+  z-index: 1; /* sobre ::before */
+}
+
+.tile:hover .chevronPill {
+  background: color-mix(in oklab, var(--fg) 8%, transparent);
+  border-color: color-mix(in oklab, var(--accent) 35%, transparent);
+  opacity: 1;
+  transform: translateX(1px);
+}
+
+:global([data-theme="dark"]) .chevronPill {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ✅ línea sutil, tipo “detalle” como tu listado (sin texto) */
+.tileRule {
+  height: 1px;
+  border-radius: 999px;
+
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--fg) 16%, transparent),
+    color-mix(in oklab, var(--fg) 8%, transparent) 55%,
+    transparent
+  );
+
+  opacity: 0.95;
+
+  position: relative;
+  z-index: 1; /* sobre ::before */
+}
+
+:global([data-theme="dark"]) .tileRule {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, white 14%, transparent),
+    color-mix(in oklab, white 6%, transparent) 55%,
+    transparent
+  );
+  opacity: 0.8;
 }
 
 /* =========================
@@ -164,14 +279,17 @@
   padding: 12px;
   border-radius: 16px;
 
-  /* antes: 12% */
   background: color-mix(in oklab, var(--accent) 16%, var(--card-bg));
   border: 1px solid color-mix(in oklab, var(--accent) 55%, var(--border));
 }
 
 :global([data-theme="dark"]) .detailKpi {
   background: color-mix(in oklab, var(--accent) 18%, var(--card-bg));
-  border-color: color-mix(in oklab, var(--accent) 60%, rgba(255, 255, 255, 0.10));
+  border-color: color-mix(
+    in oklab,
+    var(--accent) 60%,
+    rgba(255, 255, 255, 0.10)
+  );
 }
 
 .detailKpiLabel {
@@ -194,7 +312,6 @@
   padding: 10px 12px;
   border-radius: 14px;
 
-  /* antes: 12% */
   background: color-mix(in oklab, var(--accent-2) 16%, var(--card-bg));
   border: 1px solid color-mix(in oklab, var(--accent-2) 55%, var(--border));
   font-weight: 850;
@@ -202,7 +319,11 @@
 
 :global([data-theme="dark"]) .detailAchieved {
   background: color-mix(in oklab, var(--accent-2) 18%, var(--card-bg));
-  border-color: color-mix(in oklab, var(--accent-2) 60%, rgba(255, 255, 255, 0.10));
+  border-color: color-mix(
+    in oklab,
+    var(--accent-2) 60%,
+    rgba(255, 255, 255, 0.10)
+  );
 }
 
 .detailClamp {
@@ -232,7 +353,6 @@
   display: grid;
   place-items: center;
 
-  /* oscurece un pelo más: ayuda a que el modal “pop” */
   background: color-mix(in oklab, var(--fg) 16%, transparent);
 
   backdrop-filter: blur(14px) saturate(1.15);
@@ -259,7 +379,11 @@
 }
 
 :global([data-theme="dark"]) .modal {
-  border-color: color-mix(in oklab, var(--accent) 65%, rgba(255, 255, 255, 0.10));
+  border-color: color-mix(
+    in oklab,
+    var(--accent) 65%,
+    rgba(255, 255, 255, 0.10)
+  );
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
 }
 

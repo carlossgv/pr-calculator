@@ -49,28 +49,6 @@ function BottomNav() {
   );
 }
 
-function DevBadge({ isDev }: { isDev: boolean }) {
-  if (!isDev) return null;
-
-  return (
-    <span
-      style={{
-        marginLeft: 8,
-        fontSize: 11,
-        fontWeight: 800,
-        letterSpacing: 0.6,
-        padding: "3px 8px",
-        borderRadius: 999,
-        border: "1px solid var(--border)",
-        background: "rgba(124, 58, 237, 0.14)",
-      }}
-      aria-label="Development environment"
-      title="Development environment"
-    >
-      DEV
-    </span>
-  );
-}
 
 export function AppLayout() {
   const [, setPrefs] = useState<UserPreferences | null>(null);

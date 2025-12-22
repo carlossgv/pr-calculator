@@ -1,5 +1,6 @@
 // FILE: apps/web/src/ui/Surface.tsx
 import type { ReactNode } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 import styles from "./Surface.module.css";
 
 type Variant = "panel" | "card" | "flat";
@@ -8,8 +9,7 @@ type SurfaceProps = {
   variant?: Variant;
   className?: string;
   children: ReactNode;
-  "aria-label"?: string;
-};
+} & Omit<ComponentPropsWithoutRef<"section">, "className" | "children">;
 
 export function Surface({
   variant = "card",
