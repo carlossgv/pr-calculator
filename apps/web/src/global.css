@@ -382,7 +382,7 @@ select:focus-visible {
     inset: 0;
 
     /* slightly more solid so text/icons are readable */
-    background: color-mix(in oklab, var(--nav-bg) 92%, transparent);
+    background: color-mix(in oklab, var(--nav-bg) 62%, transparent);
 
     backdrop-filter: blur(18px) saturate(1.25);
     -webkit-backdrop-filter: blur(18px) saturate(1.25);
