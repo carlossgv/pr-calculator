@@ -169,36 +169,29 @@ jobs:
             --login-server=https://vpn.carlosgv.dev
             --accept-dns=false
             --timeout=45s
-          # Esto evita depender de /dev/net/tun del runner
-          # tailscaled-args: --tun=userspace-networking
-          # Espera a que el runner "aparezca" y el dockervm lo acepte
           ping: ${{ vars.DEPLOY_HOST_TS }}
-
-      # - name: Debug TCP/22 to dockervm
-      #   run: |
-      #     set -euo pipefail
-      #     nc -vz -w 5 ${{ vars.DEPLOY_HOST_TS }} 22
-      #
-      # - name: Write SSH key for appleboy
-      #   run: |
-      #     set -euo pipefail
-      #     mkdir -p "$HOME/.ssh"
-      #     echo "${{ secrets.SERVER_SSH_KEY_B64 }}" | base64 -d > "$HOME/.ssh/deploy_key"
-      #     chmod 600 "$HOME/.ssh/deploy_key"
-      #     ssh-keyscan -p 22 ${{ vars.DEPLOY_HOST_TS }} >> "$HOME/.ssh/known_hosts"
-
-      # - name: Sanity check deploy key exists
-      #   run: |
-      #     ls -l "$HOME/.ssh"
-
+      - name: Setup SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 22 ${{ vars.DEPLOY_HOST_TS }} >> ~/.ssh/known_hosts
+      - name: Test SSH connection
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=10 \
+            ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} \
+            "echo 'SSH OK from GitHub Actions'"
       - name: Deploy PR Calculator (staging)
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ vars.DEPLOY_HOST_TS }}
-          username: ${{ vars.SERVER_USER }}
-          port: 22
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          # key_path: "$HOME/.ssh/deploy_key"
-          script: |
-            whoami
-            ls -al
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=yes \
+            ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
+              cd /home/carlos/homelab/pr-calculator-web
+              docker compose pull pr-calculator-api-dev pr-calculator-web-dev
+              docker compose up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
+              docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | rg "pr-calculator-(db-dev|api-dev|web-dev)" || true
+            EOF
