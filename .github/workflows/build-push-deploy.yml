@@ -119,10 +119,8 @@ jobs:
       - name: Connect to Tailscale
         uses: tailscale/github-action@v2
         with:
-          host: ${{ vars.DEPLOY_HOST_TS }}
-          username: ${{ vars.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
+          authkey: ${{ secrets.TS_AUTHKEY }}   
+          args: --accept-dns=false
 
 
       - name: Deploy PR Calculator (production) via docker compose over Tailscale SSH
@@ -165,10 +163,8 @@ jobs:
       - name: Connect to Tailscale
         uses: tailscale/github-action@v2
         with:
-          host: ${{ vars.DEPLOY_HOST_TS }}
-          username: ${{ vars.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
+          authkey: ${{ secrets.TS_AUTHKEY }}   
+          args: --accept-dns=false
 
       - name: Deploy PR Calculator (staging) via docker compose over Tailscale SSH
         uses: appleboy/ssh-action@v1.0.0
