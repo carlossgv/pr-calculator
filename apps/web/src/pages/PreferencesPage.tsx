@@ -1,6 +1,12 @@
-// FILE: apps/web/src/pages/PreferencesPage.tsx
+/* FILE: apps/web/src/pages/PreferencesPage.tsx */
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Plate, Unit, UnitContext, UserPreferences, Weight } from "@repo/core";
+import type {
+  Plate,
+  Unit,
+  UnitContext,
+  UserPreferences,
+  Weight,
+} from "@repo/core";
 import { DEFAULT_PREFS, CROSSFIT_LB_WITH_KG_CHANGES } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
@@ -93,7 +99,10 @@ function eqPlates(a: Plate[], b: Plate[]) {
   return true;
 }
 
-function eqContexts(a: Record<Unit, UnitContext>, b: Record<Unit, UnitContext>) {
+function eqContexts(
+  a: Record<Unit, UnitContext>,
+  b: Record<Unit, UnitContext>,
+) {
   return a.kg === b.kg && a.lb === b.lb;
 }
 
@@ -118,13 +127,23 @@ function inferSelectedPreset(p: UserPreferences): PresetKey {
   return null;
 }
 
+function buildMailto(opts: { email: string; subject: string; body: string }) {
+  const qs = new URLSearchParams({
+    subject: opts.subject,
+    body: opts.body,
+  });
+  return `mailto:${opts.email}?${qs.toString()}`;
+}
+
 export function PreferencesPage() {
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [barGender, setBarGender] = useState<BarGender>("male");
 
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [backupErr, setBackupErr] = useState<string | null>(null);
-  const [backupBusy, setBackupBusy] = useState<"export" | "import" | null>(null);
+  const [backupBusy, setBackupBusy] = useState<"export" | "import" | null>(
+    null,
+  );
   const [supportId, setSupportId] = useState<string>("…");
 
   useEffect(() => {
@@ -196,6 +215,27 @@ export function PreferencesPage() {
     if (!prefs) return null;
     return inferSelectedPreset(prefs);
   }, [prefs]);
+
+  // ✅ Contact (i18n)
+  const contactName = t.prefs.contact.name;
+  const contactEmail = t.prefs.contact.email;
+
+  const mailtoHref = useMemo(() => {
+    const sid =
+      supportId && supportId !== "…" && supportId !== t.prefs.support.unknownId
+        ? supportId
+        : t.prefs.support.unknownId;
+
+    const body = t.prefs.contact.body
+      .replace("{name}", contactName)
+      .replace("{supportId}", sid);
+
+    return buildMailto({
+      email: contactEmail,
+      subject: t.prefs.contact.subject,
+      body,
+    });
+  }, [supportId, contactName, contactEmail]);
 
   if (!prefs) return <p>{t.home.loading}</p>;
 
@@ -280,7 +320,10 @@ export function PreferencesPage() {
   const crossfitActive = selectedPreset === "crossfitLb";
 
   const supportIdShort =
-    supportId === t.prefs.support.unknownId ? t.prefs.support.unknownId : supportId.slice(0, 8);
+    supportId === t.prefs.support.unknownId
+      ? t.prefs.support.unknownId
+      : supportId.slice(0, 8);
+
 
   return (
     <div className={styles.page}>
@@ -305,7 +348,10 @@ export function PreferencesPage() {
             </div>
 
             <div className={styles.rowRight}>
-              <span className={styles.iconWrap} onClick={(e) => e.stopPropagation()}>
+              <span
+                className={styles.iconWrap}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <ThemeToggle value={resolvedTheme} onToggle={toggleTheme} />
               </span>
             </div>
@@ -364,7 +410,10 @@ export function PreferencesPage() {
                   </Button>
                 </div>
 
-                <span className={styles.valuePill} aria-label={t.prefs.bar.currentHint}>
+                <span
+                  className={styles.valuePill}
+                  aria-label={t.prefs.bar.currentHint}
+                >
                   <span className={styles.mono}>{prefs.bar.value}</span>
                   <span className={styles.valueUnit}>{barUnit}</span>
                 </span>
@@ -387,17 +436,27 @@ export function PreferencesPage() {
             onClick={() => applyPreset(DEFAULT_PREFS)}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>{t.prefs.presets.olympicKg}</div>
+              <div className={styles.actionTitle}>
+                {t.prefs.presets.olympicKg}
+              </div>
               <div className={styles.actionHint}>{olympicHint}</div>
             </div>
 
             <div className={styles.actionRight}>
               {olympicActive ? (
-                <span className={styles.selectedPill} aria-hidden="true" title={t.prefs.presets.selectedTitle}>
+                <span
+                  className={styles.selectedPill}
+                  aria-hidden="true"
+                  title={t.prefs.presets.selectedTitle}
+                >
                   <Check size={16} />
                 </span>
               ) : null}
-              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
             </div>
           </Button>
 
@@ -409,17 +468,27 @@ export function PreferencesPage() {
             onClick={() => applyPreset(CROSSFIT_LB_WITH_KG_CHANGES)}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>{t.prefs.presets.crossfitLb}</div>
+              <div className={styles.actionTitle}>
+                {t.prefs.presets.crossfitLb}
+              </div>
               <div className={styles.actionHint}>{crossfitHint}</div>
             </div>
 
             <div className={styles.actionRight}>
               {crossfitActive ? (
-                <span className={styles.selectedPill} aria-hidden="true" title={t.prefs.presets.selectedTitle}>
+                <span
+                  className={styles.selectedPill}
+                  aria-hidden="true"
+                  title={t.prefs.presets.selectedTitle}
+                >
                   <Check size={16} />
                 </span>
               ) : null}
-              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
             </div>
           </Button>
         </div>
@@ -438,11 +507,19 @@ export function PreferencesPage() {
             aria-label={t.prefs.backup.exportAria}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>{t.prefs.backup.exportTitle}</div>
-              <div className={styles.actionHint}>{t.prefs.backup.exportHint}</div>
+              <div className={styles.actionTitle}>
+                {t.prefs.backup.exportTitle}
+              </div>
+              <div className={styles.actionHint}>
+                {t.prefs.backup.exportHint}
+              </div>
             </div>
             <div className={styles.actionRight}>
-              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
             </div>
           </Button>
 
@@ -454,11 +531,19 @@ export function PreferencesPage() {
             aria-label={t.prefs.backup.importAria}
           >
             <div className={styles.actionLeft}>
-              <div className={styles.actionTitle}>{t.prefs.backup.importTitle}</div>
-              <div className={styles.actionHint}>{t.prefs.backup.importHint}</div>
+              <div className={styles.actionTitle}>
+                {t.prefs.backup.importTitle}
+              </div>
+              <div className={styles.actionHint}>
+                {t.prefs.backup.importHint}
+              </div>
             </div>
             <div className={styles.actionRight}>
-              <ChevronRight className={styles.chev} size={18} aria-hidden="true" />
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
             </div>
           </Button>
 
@@ -510,6 +595,38 @@ export function PreferencesPage() {
               </Button>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* CONTACT (simple) */}
+      <section className={styles.section} aria-label={t.prefs.contact.title}>
+        <div className={styles.sectionTitle}>{t.prefs.contact.title}</div>
+
+        <div className={styles.card}>
+          <Button
+            variant="row"
+            className={styles.actionRow}
+            aria-label={t.prefs.contact.aria}
+            onClick={() => {
+              // iOS Safari: window.location suele ser más confiable para mailto
+              window.location.href = mailtoHref;
+            }}
+          >
+            <div className={styles.actionLeft}>
+              <div className={styles.actionTitle}>{contactName}</div>
+              <div className={styles.actionHint}>
+                <span className={styles.mono}>{contactEmail}</span>
+              </div>
+            </div>
+
+            <div className={styles.actionRight}>
+              <ChevronRight
+                className={styles.chev}
+                size={18}
+                aria-hidden="true"
+              />
+            </div>
+          </Button>
         </div>
       </section>
     </div>

@@ -1,4 +1,4 @@
-// FILE: apps/web/src/i18n/strings.en.ts
+/* FILE: apps/web/src/i18n/strings.en.ts */
 export const en = {
   appName: "PR Calculator",
   nav: {
@@ -81,7 +81,6 @@ export const en = {
       currentHint: "Current bar weight",
     },
 
-    // NEW (for PreferencesPage UI)
     backup: {
       title: "Backup",
       exportTitle: "Export",
@@ -99,6 +98,17 @@ export const en = {
       copyFullTitle: "Copy full ID",
       copyAria: "Copy support ID",
       unknownId: "unknown",
+    },
+
+    // ✅ NEW: simple contact row
+    contact: {
+      title: "Contact",
+      name: "Carlos G",
+      email: "contact@carlosgv.dev",
+      subject: "PR Calc — Support",
+      body:
+        "Hi {name},\n\nI need help with PR Calc.\n\nSupport ID: {supportId}\n\nDescribe the issue:\n- \n\nThanks!",
+      aria: "Open email to contact support",
     },
   },
   movements: {
