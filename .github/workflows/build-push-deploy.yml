@@ -1,5 +1,5 @@
 # FILE: .github/workflows/build-push-deploy.yml
-name: Build & Push (API+WEB) + Deploy (staging/main)
+name: Build & Push (API+WEB) + Deploy
 
 on:
   push:
@@ -15,150 +15,106 @@ env:
   IMAGE_NAME_API: ghcr.io/${{ github.repository }}-api
   IMAGE_NAME_WEB: ghcr.io/${{ github.repository }}-web
 
+# =========================
+# BUILD & PUSH
+# =========================
 jobs:
-  # build_and_push:
-  #   runs-on: ubuntu-latest
-  #
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #
-  #     - name: Set up QEMU
-  #       uses: docker/setup-qemu-action@v3
-  #
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v3
-  #
-  #     - name: Login to GHCR
-  #       uses: docker/login-action@v3
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.repository_owner }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-  #
-  #     - name: Select build platforms
-  #       id: platforms
-  #       run: |
-  #         if [ "${{ github.ref_type }}" = "tag" ] || [ "${{ github.ref_name }}" = "main" ]; then
-  #           echo "value=linux/amd64,linux/arm64" >> $GITHUB_OUTPUT
-  #         else
-  #           echo "value=linux/amd64" >> $GITHUB_OUTPUT
-  #         fi
-  #
-  #     - name: Docker meta (API)
-  #       id: meta_api
-  #       uses: docker/metadata-action@v5
-  #       with:
-  #         images: ${{ env.IMAGE_NAME_API }}
-  #         tags: |
-  #           type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
-  #           type=raw,value=staging,enable=${{ github.ref_name == 'staging' || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main') }}
-  #           type=ref,event=branch
-  #           type=sha,format=short,prefix=
-  #           type=ref,event=tag
-  #
-  #     - name: Docker meta (WEB)
-  #       id: meta_web
-  #       uses: docker/metadata-action@v5
-  #       with:
-  #         images: ${{ env.IMAGE_NAME_WEB }}
-  #         tags: |
-  #           type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
-  #           type=raw,value=staging,enable=${{ github.ref_name == 'staging' || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main') }}
-  #           type=ref,event=branch
-  #           type=sha,format=short,prefix=
-  #           type=ref,event=tag
-  #
-  #     - name: Build & push API image
-  #       uses: docker/build-push-action@v6
-  #       with:
-  #         context: .
-  #         file: Dockerfile
-  #         target: api
-  #         platforms: ${{ steps.platforms.outputs.value }}
-  #         push: true
-  #         tags: ${{ steps.meta_api.outputs.tags }}
-  #         labels: ${{ steps.meta_api.outputs.labels }}
-  #         provenance: false
-  #         cache-from: type=gha
-  #         cache-to: type=gha,mode=max
-  #
-  #     - name: Build & push WEB image
-  #       uses: docker/build-push-action@v6
-  #       with:
-  #         context: .
-  #         file: Dockerfile
-  #         target: web
-  #         platforms: ${{ steps.platforms.outputs.value }}
-  #         push: true
-  #         tags: ${{ steps.meta_web.outputs.tags }}
-  #         labels: ${{ steps.meta_web.outputs.labels }}
-  #         provenance: false
-  #         cache-from: type=gha
-  #         cache-to: type=gha,mode=max
-  #         build-args: |
-  #           VITE_APP_ENV=${{ github.ref_name == 'main' && 'prod' || 'dev' }}
-  #           VITE_APP_TITLE=${{ github.ref_name == 'main' && 'PR Calculator' || 'PR Calculator Dev' }}
-  #           VITE_API_BASE=${{ github.ref_name == 'main' && 'https://prcalc-api.carlosgv.dev' || 'https://prcalc-api-dev.carlosgv.dev' }}
-  #           VITE_APP_VERSION=${{ github.sha }}
-  #           VITE_DEBUG_SYNC=${{ github.ref_name == 'main' && '0' || '1' }}
-  #           VITE_DEBUG_HTTP=${{ github.ref_name == 'main' && '0' || '1' }}
-  #           VITE_DEBUG_IDENTITY=${{ github.ref_name == 'main' && '0' || '1' }}
+  build_and_push:
+    runs-on: ubuntu-latest
 
-  # deploy_main:
-  #   needs: build_and_push
-  #   runs-on: ubuntu-latest
-  #   environment: production
-  #   if: >
-  #     (github.event_name == 'push' && github.ref_name == 'main')
-  #     || (github.event_name == 'workflow_dispatch' && github.ref_name == 'main')
-  #
-  #   steps:
-  #     - name: Connect to Tailscale
-  #       uses: tailscale/github-action@v4
-  #       with:
-  #         authkey: ${{ secrets.TS_AUTHKEY }}
-  #         args: --accept-dns=false
-  #         ping: ${{ vars.DEPLOY_HOST_TS }}
-  #
-  #
-  #     - name: Deploy PR Calculator (production) via docker compose over Tailscale SSH
-  #       uses: appleboy/ssh-action@v1.0.0
-  #       with:
-  #         host: ${{ vars.DEPLOY_HOST_TS }}   # ej: 100.64.0.3
-  #         username: ${{ vars.SERVER_USER }}
-  #         key: ${{ secrets.SERVER_SSH_KEY }}
-  #         port: 22
-  #         script: |
-  #           set -euo pipefail
-  #           cd /home/carlos/homelab/pr-calculator-web
-  #
-  #           docker compose pull pr-calculator-api pr-calculator-web
-  #           docker compose up -d pr-calculator-db pr-calculator-api pr-calculator-web
-  #
-  #           docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | (rg -n "pr-calculator-(db|api|web)(\s|$)" || true)
-  #
-  #     - name: Notify ntfy about deploy (production)
-  #       env:
-  #         NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
-  #       run: |
-  #         curl -sS -X POST \
-  #           -u :"${NTFY_TOKEN}" \
-  #           -H "Title: PR Calculator deployed (production)" \
-  #           -H "Tags: rocket,production" \
-  #           -H "Priority: default" \
-  #           -d "Env: production | Services: pr-calculator-api, pr-calculator-web | Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
-  #           https://ntfy.carlosgv.dev/pr-calculator >/dev/null 2>&1 || true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Select platforms
+        id: platforms
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ] || [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "value=linux/amd64,linux/arm64" >> $GITHUB_OUTPUT
+          else
+            echo "value=linux/amd64" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Docker meta (API)
+        id: meta_api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME_API }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
+            type=raw,value=staging,enable=${{ github.ref_name == 'staging' }}
+            type=ref,event=branch
+            type=sha,format=short
+            type=ref,event=tag
+
+      - name: Docker meta (WEB)
+        id: meta_web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME_WEB }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
+            type=raw,value=staging,enable=${{ github.ref_name == 'staging' }}
+            type=ref,event=branch
+            type=sha,format=short
+            type=ref,event=tag
+
+      - name: Build & push API
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: api
+          platforms: ${{ steps.platforms.outputs.value }}
+          push: true
+          tags: ${{ steps.meta_api.outputs.tags }}
+          labels: ${{ steps.meta_api.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: Build & push WEB
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          target: web
+          platforms: ${{ steps.platforms.outputs.value }}
+          push: true
+          tags: ${{ steps.meta_web.outputs.tags }}
+          labels: ${{ steps.meta_web.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+          build-args: |
+            VITE_APP_ENV=${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+            VITE_APP_TITLE=${{ github.ref_name == 'main' && 'PR Calculator' || 'PR Calculator Dev' }}
+            VITE_API_BASE=${{ github.ref_name == 'main' && 'https://prcalc-api.carlosgv.dev' || 'https://prcalc-api-dev.carlosgv.dev' }}
+            VITE_APP_VERSION=${{ github.sha }}
+
+# =========================
+# DEPLOY STAGING
+# =========================
   deploy_staging:
-    # needs: build_and_push
+    needs: build_and_push
     runs-on: ubuntu-latest
     environment: staging
-    if: >
-      (github.event_name == 'push' && github.ref_name == 'staging')
-      || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main')
+    if: github.ref_name == 'staging'
 
     steps:
       - name: Connect to Tailscale (Headscale)
@@ -170,6 +126,7 @@ jobs:
             --accept-dns=false
             --timeout=45s
           ping: ${{ vars.DEPLOY_HOST_TS }}
+
       - name: Setup SSH
         run: |
           set -euo pipefail
@@ -177,21 +134,60 @@ jobs:
           echo "${{ secrets.SERVER_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p 22 ${{ vars.DEPLOY_HOST_TS }} >> ~/.ssh/known_hosts
-      - name: Test SSH connection
-        run: |
-          ssh -i ~/.ssh/deploy_key \
-            -o StrictHostKeyChecking=yes \
-            -o ConnectTimeout=10 \
-            ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} \
-            "echo 'SSH OK from GitHub Actions'"
-      - name: Deploy PR Calculator (staging)
+
+      - name: Deploy (staging)
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/deploy_key \
-            -o StrictHostKeyChecking=yes \
-            ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
-              cd /home/carlos/homelab/pr-calculator-web
-              docker compose pull pr-calculator-api-dev pr-calculator-web-dev
-              docker compose up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
-              docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | rg "pr-calculator-(db-dev|api-dev|web-dev)" || true
-            EOF
+          ssh -i ~/.ssh/deploy_key ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
+            cd /home/carlos/homelab/pr-calculator-web
+            docker compose pull pr-calculator-api-dev pr-calculator-web-dev
+            docker compose up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
+          EOF
+
+# =========================
+# DEPLOY PRODUCTION
+# =========================
+  deploy_production:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.ref_name == 'main'
+
+    steps:
+      - name: Connect to Tailscale (Headscale)
+        uses: tailscale/github-action@v4
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
+          args: >
+            --login-server=https://vpn.carlosgv.dev
+            --accept-dns=false
+            --timeout=45s
+          ping: ${{ vars.DEPLOY_HOST_TS }}
+
+      - name: Setup SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 22 ${{ vars.DEPLOY_HOST_TS }} >> ~/.ssh/known_hosts
+
+      - name: Deploy (production)
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
+            cd /home/carlos/homelab/pr-calculator-web
+            docker compose pull pr-calculator-api pr-calculator-web
+            docker compose up -d pr-calculator-db pr-calculator-api pr-calculator-web
+          EOF
+
+      - name: Notify ntfy
+        env:
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+        run: |
+          curl -sS -X POST \
+            -u :"$NTFY_TOKEN" \
+            -H "Title: PR Calculator deployed (production)" \
+            -H "Tags: rocket,production" \
+            -d "Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
+            https://ntfy.carlosgv.dev/pr-calculator || true
