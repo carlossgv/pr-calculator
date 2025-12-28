@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import type { UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
-import { t } from "../i18n/strings";
+import { t,useLanguage } from "../i18n/strings";
 import { applyTheme, toResolvedTheme } from "../theme/theme";
 import { Home, Dumbbell, Settings } from "lucide-react";
 import { PwaUpdateBanner } from "../components/PwaUpdateBanner";
@@ -51,6 +51,7 @@ function BottomNav() {
 
 
 export function AppLayout() {
+   useLanguage(); // ✅ fuerza re-render cuando cambia el idioma
   const [, setPrefs] = useState<UserPreferences | null>(null);
 
   const appEnv = import.meta.env.VITE_APP_ENV ?? "prod";

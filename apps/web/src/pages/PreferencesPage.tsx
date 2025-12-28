@@ -342,54 +342,64 @@ export function PreferencesPage() {
 
   return (
     <div className={styles.page}>
-{/* LANGUAGE (compact) */}
-<section className={styles.section} aria-label={t.prefs.language.title}>
-  <div className={styles.sectionTitle}>{t.prefs.language.title}</div>
+      {/* LANGUAGE (compact) */}
+      <section className={styles.section} aria-label={t.prefs.language.title}>
+        <div className={styles.sectionTitle}>{t.prefs.language.title}</div>
 
-  <div className={styles.card}>
-    <div className={styles.row}>
-      <div className={styles.rowLeft}>
-        <div className={styles.rowTitle}>{t.prefs.language.title}</div>
-      </div>
+        <div className={styles.card}>
+          <div className={styles.row}>
+            <div className={styles.rowLeft}>
+              <div className={styles.rowTitle}>{t.prefs.language.title}</div>
+            </div>
 
-      <div className={styles.rowRight}>
-        <div className={styles.seg}>
-          <Button
-            size="sm"
-            variant="ghost"
-            shape="pill"
-            className={styles.segBtn}
-            data-active={prefs.language === "en"}
-            aria-pressed={prefs.language === "en"}
-            onClick={() => {
-              const next: Language = "en";
-              setLanguage(next);
-              save({ ...prefs, language: next });
-            }}
-          >
-            EN
-          </Button>
+            <div className={styles.rowRight}>
+              <div
+                className={styles.seg}
+                role="radiogroup"
+                aria-label={t.prefs.language.aria}
+              >
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  shape="pill"
+                  className={styles.segBtn}
+                  data-active={prefs.language === "en"}
+                  role="radio"
+                  aria-checked={prefs.language === "en"}
+                  ariaLabel="English"
+                  onClick={() => {
+                    if (prefs.language === "en") return;
+                    const next: Language = "en";
+                    setLanguage(next);
+                    save({ ...prefs, language: next });
+                  }}
+                >
+                  EN
+                </Button>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            shape="pill"
-            className={styles.segBtn}
-            data-active={prefs.language === "es"}
-            aria-pressed={prefs.language === "es"}
-            onClick={() => {
-              const next: Language = "es";
-              setLanguage(next);
-              save({ ...prefs, language: next });
-            }}
-          >
-            ES
-          </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  shape="pill"
+                  className={styles.segBtn}
+                  data-active={prefs.language === "es"}
+                  role="radio"
+                  aria-checked={prefs.language === "es"}
+                  ariaLabel="Español"
+                  onClick={() => {
+                    if (prefs.language === "es") return;
+                    const next: Language = "es";
+                    setLanguage(next);
+                    save({ ...prefs, language: next });
+                  }}
+                >
+                  ES
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
+      </section>
       {/* THEME */}
       <section className={styles.section} aria-label={t.prefs.theme.title}>
         <div className={styles.sectionTitle}>{t.prefs.theme.title}</div>
