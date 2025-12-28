@@ -200,7 +200,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           # key_path: "$HOME/.ssh/deploy_key"
           script: |
-            set -euo pipefail
-            cd /home/carlos/homelab/pr-calculator-web
-            docker compose pull pr-calculator-api-dev pr-calculator-web-dev
-            docker compose up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
+            whoami
+            ls -al
