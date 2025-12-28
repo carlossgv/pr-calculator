@@ -6,11 +6,9 @@ function plate(value: number, unit: "kg" | "lb", label?: string): Plate {
 }
 
 export const DEFAULT_PREFS: UserPreferences = {
+  language: "es", // ✅ NEW
   defaultUnit: "kg",
-  contexts: {
-    kg: "olympic",
-    lb: "crossfit",
-  },
+  contexts: { kg: "olympic", lb: "crossfit" },
   theme: "dark",
   bar: plate(20, "kg", "20 kg bar"),
   rounding: { value: 2.5, unit: "kg" },
@@ -26,11 +24,9 @@ export const DEFAULT_PREFS: UserPreferences = {
 };
 
 export const CROSSFIT_LB_WITH_KG_CHANGES: UserPreferences = {
+  language: "es", // ✅ NEW (hereda si quieres, pero en defaults conviene explícito)
   defaultUnit: "lb",
-  contexts: {
-    kg: "olympic",
-    lb: "crossfit",
-  },
+  contexts: { kg: "olympic", lb: "crossfit" },
   theme: "dark",
   bar: plate(45, "lb", "45 lb bar"),
   rounding: { value: 1, unit: "lb" },

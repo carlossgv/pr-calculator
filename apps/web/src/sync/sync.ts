@@ -15,6 +15,8 @@ import {
   setAccountId,
   setLastSyncMs,
 } from "./identity";
+import { repo } from "../storage/repo";
+import { setLanguage } from "../i18n/strings";
 
 const DEBUG_SYNC = (import.meta as any).env?.VITE_DEBUG_SYNC === "1";
 
@@ -125,7 +127,16 @@ async function buildPushPayload(sinceMs: number): Promise<SyncPushRequest> {
 async function applyPull(pull: SyncPullResponse) {
   // preferences
   if (pull.preferences?.value) {
-    await db.preferences.put({ id: "prefs", value: pull.preferences.value as any });
+    await db.preferences.put({
+      id: "prefs",
+      value: pull.preferences.value as any,
+    });
+
+    // Opción 2: repo es la fuente de verdad (backfill + shape)
+    try {
+      const next = await repo.getPreferences();
+      setLanguage(next.language);
+    } catch {}
   }
 
   const upsertMovementFromEnv = async (env: any) => {
@@ -201,7 +212,8 @@ async function applyPull(pull: SyncPullResponse) {
 
   if (pull.movements?.length) {
     await db.transaction("rw", db.movements, async () => {
-      for (const env of pull.movements as any[]) await upsertMovementFromEnv(env);
+      for (const env of pull.movements as any[])
+        await upsertMovementFromEnv(env);
     });
   }
 
@@ -215,15 +227,24 @@ async function applyPull(pull: SyncPullResponse) {
 // Prevent bootstrap storms
 let bootstrapInFlight: Promise<void> | null = null;
 
-async function ensureBootstrapped(auth: { deviceId: string; deviceToken: string }) {
+async function ensureBootstrapped(auth: {
+  deviceId: string;
+  deviceToken: string;
+}) {
   if (bootstrapInFlight) return bootstrapInFlight;
 
   bootstrapInFlight = (async () => {
-    dbg("bootstrap => start", { deviceId: auth.deviceId, token: mask(auth.deviceToken) });
+    dbg("bootstrap => start", {
+      deviceId: auth.deviceId,
+      token: mask(auth.deviceToken),
+    });
     const b = await bootstrap(auth);
     await setAccountId(b.accountId);
     await setLastSyncMs(Math.max(await getLastSyncMs(), 0));
-    dbg("bootstrap <= ok", { accountId: b.accountId, serverTimeMs: b.serverTimeMs });
+    dbg("bootstrap <= ok", {
+      accountId: b.accountId,
+      serverTimeMs: b.serverTimeMs,
+    });
   })()
     .catch((e) => {
       dbg("bootstrap <= fail", e);
@@ -292,9 +313,19 @@ async function doPush(auth: { deviceId: string; deviceToken: string }) {
 
     if (DEBUG_SYNC) {
       const prefs = payload.preferences ? 1 : 0;
-      const mov = Array.isArray(payload.movements) ? payload.movements.length : 0;
-      const prs = Array.isArray(payload.prEntries) ? payload.prEntries.length : 0;
-      dbg("push payload", { sinceMs, prefs, movements: mov, prEntries: prs, clientTimeMs: payload.clientTimeMs });
+      const mov = Array.isArray(payload.movements)
+        ? payload.movements.length
+        : 0;
+      const prs = Array.isArray(payload.prEntries)
+        ? payload.prEntries.length
+        : 0;
+      dbg("push payload", {
+        sinceMs,
+        prefs,
+        movements: mov,
+        prEntries: prs,
+        clientTimeMs: payload.clientTimeMs,
+      });
     }
 
     const res: SyncPushResponse = await withSelfHeal(auth, "push", async () => {
@@ -360,7 +391,10 @@ export async function initSync() {
     { passive: true },
   );
 
-  window.setInterval(() => {
-    doPull(auth).catch(() => {});
-  }, 30 * 60 * 1000);
+  window.setInterval(
+    () => {
+      doPull(auth).catch(() => {});
+    },
+    30 * 60 * 1000,
+  );
 }

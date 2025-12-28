@@ -299,3 +299,23 @@
 .supportIdDots {
   opacity: 0.5;
 }
+
+/* compact segmented control */
+.seg {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--card-bg) 92%, var(--bg));
+}
+
+.segBtn {
+  min-width: 44px;
+  padding-inline: 10px;
+}
+
+.segBtn[data-active="true"] {
+  background: color-mix(in oklab, var(--accent) 18%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent) 35%, var(--border));
+}

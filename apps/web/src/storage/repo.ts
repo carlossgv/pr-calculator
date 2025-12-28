@@ -31,28 +31,33 @@ function isDeleted(row: { deletedAt?: string | null } | null | undefined) {
 }
 
 export const repo = {
-  async getPreferences(): Promise<UserPreferences> {
-    const row = await db.preferences.get("prefs");
-    const value = (row as any)?.value;
+async getPreferences(): Promise<UserPreferences> {
+  const row = await db.preferences.get("prefs");
+  const value = (row as any)?.value;
 
-    if (isNewPrefsShape(value)) {
-      const contexts = value.contexts ?? { kg: "olympic", lb: "crossfit" };
-      const theme = value.theme ?? "dark";
+  if (isNewPrefsShape(value)) {
+    const contexts = value.contexts ?? { kg: "olympic", lb: "crossfit" };
+    const theme = value.theme ?? "dark";
 
-      if (!value.contexts || !value.theme) {
-        const next: UserPreferences = { ...value, contexts, theme };
-        await db.preferences.put({ id: "prefs", value: next });
-        markDirty();
-        return next;
-      }
+    // ✅ NEW: backfill language
+    const language = value.language === "es" || value.language === "en"
+      ? value.language
+      : "en";
 
-      return value;
+    if (!value.contexts || !value.theme || !value.language) {
+      const next: UserPreferences = { ...value, contexts, theme, language };
+      await db.preferences.put({ id: "prefs", value: next });
+      markDirty();
+      return next;
     }
 
-    await db.preferences.put({ id: "prefs", value: DEFAULT_PREFS });
-    markDirty();
-    return DEFAULT_PREFS;
-  },
+    return value;
+  }
+
+  await db.preferences.put({ id: "prefs", value: DEFAULT_PREFS });
+  markDirty();
+  return DEFAULT_PREFS;
+},
 
   async setPreferences(prefs: UserPreferences): Promise<void> {
     await db.preferences.put({ id: "prefs", value: prefs });

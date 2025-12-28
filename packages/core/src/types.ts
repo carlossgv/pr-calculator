@@ -1,5 +1,6 @@
 // packages/core/src/types.ts
 export type Unit = "kg" | "lb";
+export type Language = "en" | "es";
 
 export type Weight = {
   value: number;
@@ -45,6 +46,7 @@ export type UnitContext = "olympic" | "crossfit" | "custom";
 export type ThemePreference = "light" | "dark";
 
 export type UserPreferences = {
+  language: Language;
   defaultUnit: Unit;
   contexts: Record<Unit, UnitContext>;
 

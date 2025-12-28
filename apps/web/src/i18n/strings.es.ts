@@ -1,0 +1,198 @@
+/* FILE: apps/web/src/i18n/strings.es.ts */
+export const es = {
+  appName: "Calculadora de PR",
+  nav: {
+    home: "Inicio",
+    movements: "Movimientos",
+    preferences: "Preferencias",
+  },
+  home: {
+    loading: "Cargando…",
+    maxWeight: "Máx (100%)",
+    unit: "Unidad",
+    range: "Rango de porcentajes",
+    from: "Desde",
+    to: "Hasta",
+    step: "Paso",
+    platesPerSide: "Discos / lado",
+    perSideTotal: "Total por lado",
+    bar: "Barra",
+    achieved: "Logrado",
+
+    customPercent: "% Personalizado",
+    customPercentPlaceholder: "ej. 87.5",
+    customPercentAdd: "Agregar",
+    customPercentAddAria: "Agregar porcentaje personalizado",
+    customPercentAdded: "Porcentajes agregados",
+    customPercentRemove: "Quitar",
+    customPercentHint: "Agrega un % puntual para esta sesión.",
+
+    snapTitle: "Ajustar a discos",
+    snapAria: "Alternar ajuste a discos",
+    snapHintOff: "Mantiene resultados cargables",
+    snapDelta: "Δ",
+    snapStep: "paso",
+  },
+  prefs: {
+    // ✅ NEW SECTION (la añadiremos en en también)
+    language: {
+      title: "Idioma",
+      aria: "Cambiar idioma",
+    },
+
+    unit: "Unidad",
+    barWeight: "Peso de la barra",
+    rounding: "Redondeo",
+    plates: "Discos disponibles (por lado, separados por coma)",
+    save: "Guardar",
+    saved: "✅ Guardado",
+    contexts: {
+      title: "Contextos",
+      kg: "Contexto KG",
+      lb: "Contexto LB",
+      olympic: "Olímpico",
+      crossfit: "CrossFit",
+      custom: "Personalizado (usa mis discos)",
+    },
+    presets: {
+      title: "Presets de discos",
+      olympicKg: "Olímpico (KG)",
+      crossfitLb: "CrossFit (LB + discos de cambio en KG)",
+      applied: "Preset aplicado",
+      selectedTitle: "Seleccionado",
+      olympicHint: "Barra {bar}{unit}, discos {unit}",
+      crossfitHint: "Barra {bar}{unit}, discos {unit} + cambios en kg",
+    },
+    theme: {
+      title: "Tema",
+      current: "Actual",
+      toggleRowAria: "Cambiar tema",
+      switchToLightAria: "Cambiar a tema claro",
+      switchToDarkAria: "Cambiar a tema oscuro",
+      lightTitle: "Claro",
+      darkTitle: "Oscuro",
+    },
+    bar: {
+      title: "Barra",
+      genderTitle: "Tipo de barra",
+      genderHint: "Selecciona la barra usada para los cálculos",
+      genderToggleAria: "Seleccionar tipo de barra",
+      male: "Barra de hombre",
+      female: "Barra de mujer",
+      currentTitle: "Actual",
+      currentHint: "Peso actual de la barra",
+    },
+    backup: {
+      title: "Backup",
+      exportTitle: "Exportar",
+      exportHint: "Guarda un backup JSON.",
+      exportAria: "Exportar backup",
+      importTitle: "Importar",
+      importHint: "Restaura desde un JSON backup.",
+      importAria: "Importar backup",
+      exportError: "No se pudo exportar el backup",
+      importError: "No se pudo importar el backup (archivo inválido?)",
+    },
+    support: {
+      title: "Soporte",
+      idTitle: "ID",
+      copyFullTitle: "Copiar ID completo",
+      copyAria: "Copiar ID de soporte",
+      unknownId: "desconocido",
+    },
+    contact: {
+      title: "Contacto",
+      name: "Carlos G",
+      email: "contact@carlosgv.dev",
+      subject: "PR Calc — Soporte",
+      body: "Hola {name},\n\nNecesito ayuda con PR Calc.\n\nSupport ID: {supportId}\n\nDescribe el problema:\n- \n\nGracias!",
+      aria: "Abrir email para contactar soporte",
+    },
+  },
+  movements: {
+    placeholder: "ej. Sentadilla trasera",
+    filterPlaceholder: "Filtrar movimientos…",
+    clearFilterAria: "Limpiar filtro",
+    closeAria: "Cerrar",
+
+    emptyHint: "Aún no hay movimientos. Agrega el primero 👇",
+    noMatches: "No hay coincidencias para",
+    showing: "Mostrando",
+    of: "de",
+    tapHint: "Toca Abrir calculadora para empezar desde tu mejor lift.",
+    noPrYet: "Aún sin PR — toca Gestionar PRs para agregar uno",
+
+    openCalculator: "Abrir calculadora",
+    managePrs: "Gestionar PRs",
+
+    delete: "borrar",
+
+    sort: {
+      title: "Ordenar",
+      aria: "Ordenar movimientos",
+      recentActivity: "Actividad reciente",
+      createdNewest: "Creación (más nuevo)",
+      createdOldest: "Creación (más viejo)",
+      nameAZ: "Nombre (A–Z)",
+      nameZA: "Nombre (Z–A)",
+      bestPrWeight: "Mejor PR (peso)",
+    },
+
+    create: {
+      aria: "Agregar movimiento",
+      title: "Nuevo movimiento",
+      nameLabel: "Nombre",
+      createCta: "Crear",
+      cancelCta: "Cancelar",
+      errorEmpty: "Por favor ingresa un nombre",
+    },
+  },
+  movement: {
+    title: "Movimiento",
+    prs: "Entradas de PR",
+    prsTitle: "PRs",
+
+    weight: "Peso",
+    reps: "Reps",
+    date: "Fecha",
+
+    add: "Agregar PR",
+    save: "Guardar",
+    cancel: "Cancelar",
+
+    delete: "borrar",
+    back: "← Volver",
+    loading: "Cargando…",
+    empty: "Aún no hay entradas de PR.",
+    savedIn: "Guardado en",
+
+    editAria: "Editar PR",
+    deleteAria: "Borrar PR",
+
+    errors: {
+      invalidWeight: "Peso inválido",
+      invalidReps: "Reps inválidas",
+      invalidDate: "Fecha inválida",
+      saveFailed: "No se pudo guardar el PR",
+      updateFailed: "No se pudieron guardar los cambios",
+    },
+
+    confirm: {
+      deleteEntryTitle: "¿Borrar PR?",
+      deleteEntryBody: "¿Borrar PR {date} · {weight} × {reps}?",
+      deleteEntryCta: "Borrar PR",
+
+      deleteMovementTitle: "¿Borrar movimiento?",
+      deleteMovementBody: "¿Borrar “{name}”? Esto también borrará sus PRs.",
+      deleteMovementCta: "Borrar movimiento",
+
+      cancelCta: "Cancelar",
+    },
+  },
+  context: {
+    label: "Contexto",
+    olympic: "Olímpico",
+    crossfit: "CrossFit",
+    custom: "Personalizado",
+  },
+} as const;

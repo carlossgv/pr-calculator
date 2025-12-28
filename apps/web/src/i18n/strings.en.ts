@@ -99,16 +99,17 @@ export const en = {
       copyAria: "Copy support ID",
       unknownId: "unknown",
     },
-
-    // ✅ NEW: simple contact row
     contact: {
       title: "Contact",
       name: "Carlos G",
       email: "contact@carlosgv.dev",
       subject: "PR Calc — Support",
-      body:
-        "Hi {name},\n\nI need help with PR Calc.\n\nSupport ID: {supportId}\n\nDescribe the issue:\n- \n\nThanks!",
+      body: "Hi {name},\n\nI need help with PR Calc.\n\nSupport ID: {supportId}\n\nDescribe the issue:\n- \n\nThanks!",
       aria: "Open email to contact support",
+    },
+    language: {
+      title: "Language",
+      aria: "Change language",
     },
   },
   movements: {

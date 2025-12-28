@@ -1,4 +1,5 @@
 /* FILE: apps/web/src/pages/PreferencesPage.tsx */
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   Plate,
@@ -6,10 +7,11 @@ import type {
   UnitContext,
   UserPreferences,
   Weight,
+  Language,
 } from "@repo/core";
 import { DEFAULT_PREFS, CROSSFIT_LB_WITH_KG_CHANGES } from "@repo/core";
 import { repo } from "../storage/repo";
-import { t } from "../i18n/strings";
+import { setLanguage, t } from "../i18n/strings";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
 import { Mars, Venus, ChevronRight, Check } from "lucide-react";
@@ -49,6 +51,15 @@ function ensurePrefs(
 ): UserPreferences {
   const unit: Unit = p.defaultUnit ?? fallback.defaultUnit;
 
+  // ✅ NEW: language safe default
+  const lang: Language =
+    (p as any).language === "es" || (p as any).language === "en"
+      ? (p as any).language
+      : (fallback as any).language === "es" ||
+          (fallback as any).language === "en"
+        ? (fallback as any).language
+        : "en";
+
   const barValue =
     typeof p.bar?.value === "number"
       ? p.bar.value
@@ -68,6 +79,10 @@ function ensurePrefs(
   return {
     ...(fallback as UserPreferences),
     ...(p as UserPreferences),
+
+    // ✅ NEW
+    language: lang,
+
     defaultUnit: unit,
     bar: {
       ...(fallback.bar ?? {}),
@@ -149,6 +164,7 @@ export function PreferencesPage() {
   useEffect(() => {
     repo.getPreferences().then((p) => {
       const safe = ensurePrefs(p, p);
+      setLanguage(safe.language);
       setPrefs(safe);
       setBarGender(inferGenderFromPrefs(safe));
       repo.setPreferences(safe);
@@ -324,9 +340,56 @@ export function PreferencesPage() {
       ? t.prefs.support.unknownId
       : supportId.slice(0, 8);
 
-
   return (
     <div className={styles.page}>
+{/* LANGUAGE (compact) */}
+<section className={styles.section} aria-label={t.prefs.language.title}>
+  <div className={styles.sectionTitle}>{t.prefs.language.title}</div>
+
+  <div className={styles.card}>
+    <div className={styles.row}>
+      <div className={styles.rowLeft}>
+        <div className={styles.rowTitle}>{t.prefs.language.title}</div>
+      </div>
+
+      <div className={styles.rowRight}>
+        <div className={styles.seg}>
+          <Button
+            size="sm"
+            variant="ghost"
+            shape="pill"
+            className={styles.segBtn}
+            data-active={prefs.language === "en"}
+            aria-pressed={prefs.language === "en"}
+            onClick={() => {
+              const next: Language = "en";
+              setLanguage(next);
+              save({ ...prefs, language: next });
+            }}
+          >
+            EN
+          </Button>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            shape="pill"
+            className={styles.segBtn}
+            data-active={prefs.language === "es"}
+            aria-pressed={prefs.language === "es"}
+            onClick={() => {
+              const next: Language = "es";
+              setLanguage(next);
+              save({ ...prefs, language: next });
+            }}
+          >
+            ES
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
       {/* THEME */}
       <section className={styles.section} aria-label={t.prefs.theme.title}>
         <div className={styles.sectionTitle}>{t.prefs.theme.title}</div>

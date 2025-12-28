@@ -46,21 +46,8 @@ add_file () {
 # Output
 # ------------------------------------------------------------
 
-add_file "apps/web/src/ui/Modal.tsx"
-add_file "apps/web/src/ui/Modal.module.css"
-add_file "apps/web/src/pages/PreferencesPage.tsx"
-add_file "apps/web/src/pages/PreferencesPage.module.css"
-add_file "apps/web/src/pages/MovementsPage.tsx"
-add_file "apps/web/src/pages/MovementsPage.module.css"
-add_file "apps/web/src/pages/MovementDetailsPage.tsx"
-add_file "apps/web/src/pages/MovementDetailsPage.module.css"
-add_file "apps/web/src/components/Switch.tsx"
-add_file "apps/web/src/components/ThemeToggle.tsx"
-add_file "apps/web/src/components/PwaUpdateBanner.tsx"
-add_file "apps/web/src/components/UnitSwitch.tsx"
-add_file "apps/web/src/components/UnitPill.tsx"
-add_file "apps/web/src/components/PercentCards.tsx"
-add_file "apps/web/src/components/PercentCards.module.css"
+add_file "apps/web/src/storage/repo.ts"
+add_file "apps/web/src/main.tsx"
 
 # If running interactively (no pipe), give a hint
 if [[ -t 1 ]]; then

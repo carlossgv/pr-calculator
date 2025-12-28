@@ -1,4 +1,3 @@
-
 /* FILE: apps/web/src/main.tsx */
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -7,16 +6,29 @@ import { router } from "./router";
 import "./global.css";
 import { initPwa } from "./pwa";
 import { initSync } from "./sync/sync";
+import { repo } from "./storage/repo";
+import { setLanguage } from "./i18n/strings";
 
-// 👇 registra SW + callbacks (needRefresh/offlineReady)
-initPwa();
+async function bootstrap() {
+  // SW + callbacks
+  initPwa();
 
-// 👇 sync auto (cloud backup) — best effort (offline ok)
-initSync().catch(() => {});
+  // set language ASAP (before first render)
+  try {
+    const prefs = await repo.getPreferences();
+    setLanguage(prefs.language);
+  } catch {
+    setLanguage("en");
+  }
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <RouterProvider router={router} future={{ v7_startTransition: true }} />
-  </React.StrictMode>,
-);
-;
+  // sync auto (best effort)
+  initSync().catch(() => {});
+
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+    </React.StrictMode>,
+  );
+}
+
+bootstrap();

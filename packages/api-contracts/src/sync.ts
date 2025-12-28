@@ -1,3 +1,4 @@
+import { UserPreferences } from "../../core/src/types";
 
 /* FILE: packages/api-contracts/src/sync.ts */
 export type IsoEpochMs = number;
@@ -26,7 +27,7 @@ export type SyncPushRequest = {
   // opcional: cursor local para debugging
   sinceMs?: IsoEpochMs;
 
-  preferences?: SyncEntityEnvelope<any>; // 1 doc
+  preferences?: SyncEntityEnvelope<UserPreferences>; 
   movements?: SyncEntityEnvelope<any>[];
   prEntries?: SyncEntityEnvelope<any>[];
 };
