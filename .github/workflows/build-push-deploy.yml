@@ -108,7 +108,7 @@ jobs:
   #           VITE_DEBUG_IDENTITY=${{ github.ref_name == 'main' && '0' || '1' }}
 
   deploy_main:
-    needs: build_and_push
+    # needs: build_and_push
     runs-on: ubuntu-latest
     environment: production
     if: >
