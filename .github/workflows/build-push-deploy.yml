@@ -189,9 +189,7 @@ jobs:
 
       - name: Sanity check deploy key exists
         run: |
-          ls -l /github/home/.ssh
-          head -n 2 /github/home/.ssh/deploy_key
-
+          ls -l "$HOME/.ssh"
 
       - name: Deploy PR Calculator (staging)
         uses: appleboy/ssh-action@v1.0.0
