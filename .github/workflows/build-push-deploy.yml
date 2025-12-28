@@ -117,10 +117,11 @@ jobs:
 
     steps:
       - name: Connect to Tailscale
-        uses: tailscale/github-action@v2
+        uses: tailscale/github-action@v4
         with:
-          authkey: ${{ secrets.TS_AUTHKEY }}   
+          authkey: ${{ secrets.TS_AUTHKEY }}
           args: --accept-dns=false
+          ping: ${{ vars.DEPLOY_HOST_TS }}
 
 
       - name: Deploy PR Calculator (production) via docker compose over Tailscale SSH
@@ -161,10 +162,11 @@ jobs:
 
     steps:
       - name: Connect to Tailscale
-        uses: tailscale/github-action@v2
+        uses: tailscale/github-action@v4
         with:
-          authkey: ${{ secrets.TS_AUTHKEY }}   
+          authkey: ${{ secrets.TS_AUTHKEY }}
           args: --accept-dns=false
+          ping: ${{ vars.DEPLOY_HOST_TS }}
       - name: Debug connectivity
         run: |
           tailscale status
