@@ -170,7 +170,7 @@ jobs:
             --accept-dns=false
             --timeout=45s
           # Esto evita depender de /dev/net/tun del runner
-          tailscaled-args: --tun=userspace-networking
+          # tailscaled-args: --tun=userspace-networking
           # Espera a que el runner "aparezca" y el dockervm lo acepte
           ping: ${{ vars.DEPLOY_HOST_TS }}
 
