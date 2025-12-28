@@ -8,6 +8,7 @@ import { WeightCalculatorPanel } from "../components/WeightCalculatorPanel";
 import { ArrowLeft, Settings2 } from "lucide-react";
 import { Button } from "../ui/Button";
 import styles from "./MovementCalculatorPage.module.css";
+import { WarmupPanel } from "../components/WarmupPanel";
 
 function parseUnit(raw: string | undefined): Unit {
   return raw === "lb" ? "lb" : "kg";
@@ -20,7 +21,11 @@ function parseWeight(raw: string | undefined): number {
 
 export function MovementCalculatorPage() {
   const navigate = useNavigate();
-  const { movementId, unit: unitParam, weight: weightParam } = useParams<{
+  const {
+    movementId,
+    unit: unitParam,
+    weight: weightParam,
+  } = useParams<{
     movementId: string;
     unit: string;
     weight: string;
@@ -34,6 +39,9 @@ export function MovementCalculatorPage() {
 
   const initialUnit = useMemo(() => parseUnit(unitParam), [unitParam]);
   const initialWeight = useMemo(() => parseWeight(weightParam), [weightParam]);
+
+  const [currentUnit, setCurrentUnit] = useState<Unit>(initialUnit);
+  const [currentWeight, setCurrentWeight] = useState<number>(initialWeight);
 
   useEffect(() => {
     if (!id) return;
@@ -96,16 +104,29 @@ export function MovementCalculatorPage() {
 
       <WeightCalculatorPanel
         mode="editable"
-        title={undefined /* el título ya va arriba */}
+        title={undefined}
         initialUnit={initialUnit}
         initialWeight={initialWeight}
+        lockWeightInput={!!movement?.name}
         onChange={(payload) => {
-          // Mantiene la URL sincronizada (útil para compartir / refresh)
-          const u = payload.unit;
-          const w = payload.weight;
-          navigate(`/movements/${id}/calc/${u}/${w}`, { replace: true });
+          setCurrentUnit(payload.unit);
+          setCurrentWeight(payload.weight);
+          navigate(`/movements/${id}/calc/${payload.unit}/${payload.weight}`, {
+            replace: true,
+          });
         }}
       />
+
+      {prefs ? (
+        <WarmupPanel
+          unit={currentUnit}
+          prefs={prefs}
+          targetWeight={currentWeight}
+          onPickWeight={(w) => {
+            navigate(`/movements/${id}/calc/${currentUnit}/${w}`, { replace: true });
+          }}
+        />
+      ) : null}
     </div>
   );
 }

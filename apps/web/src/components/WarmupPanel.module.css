@@ -1,0 +1,134 @@
+/* FILE: apps/web/src/components/WarmupPanel.module.css */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* NEW: pill selector row */
+.templateRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.templateBtn {
+  /* keeps them from looking tiny */
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--input-bg) 86%, transparent);
+  border-radius: 16px;
+  padding: 12px;
+
+  text-align: left;
+}
+
+.row:active {
+  transform: translateY(0.5px);
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.line1 {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.pct {
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.dot {
+  color: var(--muted);
+}
+
+.reps {
+  font-weight: 700;
+}
+
+.line2 {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.weight {
+  font-weight: 900;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.delta {
+  color: color-mix(in oklab, var(--accent) 70%, var(--muted));
+  font-weight: 700;
+}
+
+.breakdown {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.breakdownLabel {
+  font-weight: 700;
+  color: color-mix(in oklab, var(--fg) 60%, var(--muted));
+}
+
+.breakdownText {
+  color: var(--muted);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+}
+
+.chev {
+  color: color-mix(in oklab, var(--accent) 70%, var(--muted));
+}

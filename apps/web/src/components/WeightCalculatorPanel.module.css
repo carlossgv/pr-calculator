@@ -285,3 +285,41 @@
   font-size: 13px;
   color: var(--muted);
 }
+
+
+/* FILE: apps/web/src/components/WeightCalculatorPanel.module.css */
+
+/* =========================
+   Locked state (hero input)
+   ========================= */
+
+.weightInputLocked {
+  cursor: not-allowed;
+  opacity: 0.92;
+  /* se siente "readonly" sin parecer disabled gris feo */
+  background: color-mix(in oklab, var(--input-bg) 78%, var(--card-bg));
+  box-shadow: none;
+}
+
+.weightInputWrapLocked {
+  /* sutil “freeze” look */
+  background: color-mix(in oklab, var(--fg) 1.5%, var(--card-bg));
+  border-color: color-mix(in oklab, var(--fg) 12%, var(--border));
+}
+
+.weightInputWrapLocked:focus-within {
+  /* si está locked, no queremos ring de foco */
+  box-shadow: none;
+  border-color: color-mix(in oklab, var(--fg) 12%, var(--border));
+}
+
+/* Dark theme */
+:global([data-theme="dark"]) .weightInputLocked {
+  background: color-mix(in oklab, var(--fg) 4%, var(--input-bg));
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:global([data-theme="dark"]) .weightInputWrapLocked:focus-within {
+  box-shadow: none;
+  border-color: rgba(255, 255, 255, 0.12);
+}

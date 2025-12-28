@@ -187,4 +187,20 @@ export const en = {
     crossfit: "CrossFit",
     custom: "Custom",
   },
+  warmup: {
+    title: "Warm-up",
+    subtitle:
+      "Suggested sets based on your target (snapped to plates when possible).",
+    target: "Target",
+    template: "Template",
+    reps: "{reps} reps",
+    roundedFrom: "from {w}",
+    deltaLabel: "Δ",
+    templates: {
+      crossfit: "CrossFit (simple)",
+      strength: "Strength (gradual)",
+      olympic: "Olympic (quick)",
+    },
+    platesPerSide: "Plates/side:",
+  },
 } as const;

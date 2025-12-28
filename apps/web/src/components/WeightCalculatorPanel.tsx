@@ -1,5 +1,5 @@
 // FILE: apps/web/src/components/WeightCalculatorPanel.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Unit, UserPreferences } from "@repo/core";
 import { convertWeightValue } from "@repo/core";
 import { repo } from "../storage/repo";
@@ -7,7 +7,7 @@ import { t } from "../i18n/strings";
 import { PercentCards } from "../components/PercentCards";
 import { prefsForUnit } from "../utils/equipment";
 import { UnitSwitch } from "./UnitSwitch";
-import { Plus } from "lucide-react";
+import { Lock, Unlock, Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
 import { Button } from "../ui/Button";
 import { Surface } from "../ui/Surface";
@@ -69,6 +69,12 @@ type Props = {
   toPct?: number;
   stepPct?: number;
 
+  /**
+   * NEW: if true, hero weight starts LOCKED.
+   * User can unlock locally (no "save" behavior, just state + URL sync via onChange).
+   */
+  lockWeightInput?: boolean;
+
   onChange?: (payload: ChangePayload) => void;
 };
 
@@ -105,6 +111,7 @@ export function WeightCalculatorPanel({
   fromPct = 125,
   toPct = 40,
   stepPct = 5,
+  lockWeightInput = false,
   onChange,
 }: Props) {
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
@@ -119,6 +126,10 @@ export function WeightCalculatorPanel({
   const [customPctInput, setCustomPctInput] = useState<string>("");
   const [customPcts, setCustomPcts] = useState<number[]>([]);
 
+  // NEW: lock/unlock state
+  const [unlocked, setUnlocked] = useState<boolean>(() => !lockWeightInput);
+  const weightInputRef = useRef<HTMLInputElement | null>(null);
+
   useEffect(() => {
     if (initialUnit) setUnit(initialUnit);
     if (typeof initialWeight === "number" && Number.isFinite(initialWeight)) {
@@ -126,6 +137,11 @@ export function WeightCalculatorPanel({
       setWeightText(formatWeight(initialWeight));
     }
   }, [initialUnit, initialWeight]);
+
+  useEffect(() => {
+    // When lockWeightInput changes (e.g. movement loaded), reset unlock state
+    setUnlocked(!lockWeightInput);
+  }, [lockWeightInput]);
 
   useEffect(() => {
     repo.getPreferences().then((p) => {
@@ -179,6 +195,7 @@ export function WeightCalculatorPanel({
   if (!prefs || !effectivePrefs) return <p>{t.home.loading}</p>;
 
   const contextWord = contextChipWord(prefs.contexts?.[unit]);
+  const isLocked = mode === "editable" && lockWeightInput && !unlocked;
 
   return (
     <div className={styles.root}>
@@ -197,16 +214,50 @@ export function WeightCalculatorPanel({
 
         <div className={styles.topRow}>
           <UnitSwitch value={unit} onChange={switchUnit} />
+
+          {mode === "editable" && lockWeightInput ? (
+            <Button
+              variant={isLocked ? "neutral" : "primary"}
+              size="md"
+              shape="round"
+              iconOnly
+              onClick={() => {
+                setUnlocked((v) => {
+                  const next = !v;
+                  if (!v) queueMicrotask(() => weightInputRef.current?.focus());
+                  return next;
+                });
+              }}
+              ariaLabel={isLocked ? "Unlock weight input" : "Lock weight input"}
+              title={isLocked ? "Unlock" : "Lock"}
+            >
+              {isLocked ? (
+                <Lock size={18} aria-hidden="true" />
+              ) : (
+                <Unlock size={18} aria-hidden="true" />
+              )}
+            </Button>
+          ) : null}
         </div>
 
         {mode === "editable" ? (
-          <div className={styles.weightInputWrap}>
-            <input
-              className={styles.weightInput}
-              type="text"
-              inputMode="decimal"
-              value={weightText}
+<div
+  className={[
+    styles.weightInputWrap,
+    isLocked ? styles.weightInputWrapLocked : "",
+  ].join(" ")}
+>
+  <input
+    ref={weightInputRef}
+    className={[
+      styles.weightInput,
+      isLocked ? styles.weightInputLocked : "",
+    ].join(" ")}
+    readOnly={isLocked}
+    aria-readonly={isLocked}
               onChange={(e) => {
+                if (isLocked) return;
+
                 const nextText = sanitizeWeightText(e.target.value);
                 setWeightText(nextText);
 
@@ -216,6 +267,8 @@ export function WeightCalculatorPanel({
                 if (Number.isFinite(n)) setRawWeight(n);
               }}
               onBlur={() => {
+                if (isLocked) return;
+
                 if (weightText.trim() === "") {
                   setWeightText("0");
                   setRawWeight(0);
