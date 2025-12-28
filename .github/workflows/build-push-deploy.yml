@@ -161,13 +161,21 @@ jobs:
       || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main')
 
     steps:
+      - name: Debug runner sudo
+        run: |
+          whoami
+          id
+          command -v sudo
+          sudo -n true && echo "sudo ok" || (echo "sudo failed" && exit 1)
       - name: Connect to Tailscale
         uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
+          args: >
+            --login-server=https://hs.carlosgv.dev
+            --accept-dns=false
+            --ssh=false
           ping: ${{ vars.DEPLOY_HOST_TS }}
-          # No pases hostname por ahora
-          # No pases args por ahora
 
       - name: Deploy PR Calculator (staging) via docker compose over Tailscale SSH
         uses: appleboy/ssh-action@v1.0.0
