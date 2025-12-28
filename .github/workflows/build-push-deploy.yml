@@ -161,20 +161,25 @@ jobs:
       || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main')
 
     steps:
-      - name: Debug runner sudo
+      - name: Preflight can reach headscale
         run: |
-          whoami
-          id
-          command -v sudo
-          sudo -n true && echo "sudo ok" || (echo "sudo failed" && exit 1)
-      - name: Connect to Tailscale
+          set -euo pipefail
+          # cambia por tu URL real de headscale
+          curl -fsSIL --max-time 10 https://vpn.carlosgv.dev/health || true
+          curl -fsSIL --max-time 10 https://vpn.carlosgv.dev || true
+
+      - name: Connect to Tailscale (Headscale)
         uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
+          # IMPORTANT: Headscale necesita login-server explícito
           args: >
-            --login-server=https://hs.carlosgv.dev
+            --login-server=https://vpn.carlosgv.dev
             --accept-dns=false
-            --ssh=false
+            --timeout=45s
+          # Esto evita depender de /dev/net/tun del runner
+          tailscaled-args: --tun=userspace-networking
+          # Espera a que el runner "aparezca" y el dockervm lo acepte
           ping: ${{ vars.DEPLOY_HOST_TS }}
 
       - name: Deploy PR Calculator (staging) via docker compose over Tailscale SSH
