@@ -173,6 +173,11 @@ jobs:
           tailscaled-args: --tun=userspace-networking
           # Espera a que el runner "aparezca" y el dockervm lo acepte
           ping: ${{ vars.DEPLOY_HOST_TS }}
+      - name: Debug TCP/22 to dockervm
+        run: |
+          set -euo pipefail
+          nc -vz -w 5 ${{ vars.DEPLOY_HOST_TS }} 22
+
 
       - name: Deploy PR Calculator (staging) via docker compose over Tailscale SSH
         uses: appleboy/ssh-action@v1.0.0
