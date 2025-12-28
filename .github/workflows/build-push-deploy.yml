@@ -161,6 +161,13 @@ jobs:
       || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main')
 
     steps:
+      - name: Sanity check secrets presence
+        run: |
+          if [ -z "${{ secrets.TS_AUTHKEY }}" ]; then
+            echo "::error::TS_AUTHKEY is empty / not available in this job scope"
+            exit 1
+          fi
+          echo "TS_AUTHKEY is present (not empty)"
       - name: Connect to Tailscale
         uses: tailscale/github-action@v4
         with:
