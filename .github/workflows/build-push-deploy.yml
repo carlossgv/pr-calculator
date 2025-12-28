@@ -116,13 +116,22 @@ jobs:
       || (github.event_name == 'workflow_dispatch' && github.ref_name == 'main')
 
     steps:
-      - name: Deploy PR Calculator (production) via docker compose
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
         with:
-          host: ${{ vars.SERVER_HOST }}
+          host: ${{ vars.DEPLOY_HOST_TS }}
           username: ${{ vars.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 2222
+          port: 22
+
+
+      - name: Deploy PR Calculator (production) via docker compose over Tailscale SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ vars.DEPLOY_HOST_TS }}   # ej: 100.64.0.3
+          username: ${{ vars.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
           script: |
             set -euo pipefail
             cd /home/carlos/homelab/pr-calculator-web
@@ -153,13 +162,21 @@ jobs:
       || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main')
 
     steps:
-      - name: Deploy PR Calculator (staging) via docker compose
-        uses: appleboy/ssh-action@v1.0.0
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v2
         with:
-          host: ${{ vars.SERVER_HOST }}
+          host: ${{ vars.DEPLOY_HOST_TS }}
           username: ${{ vars.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 2222
+          port: 22
+
+      - name: Deploy PR Calculator (staging) via docker compose over Tailscale SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ vars.DEPLOY_HOST_TS }}
+          username: ${{ vars.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
           script: |
             set -euo pipefail
             cd /home/carlos/homelab/pr-calculator-web
@@ -168,15 +185,3 @@ jobs:
             docker compose up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
 
             docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" | (rg -n "pr-calculator-(db-dev|api-dev|web-dev)(\s|$)" || true)
-
-      - name: Notify ntfy about deploy (staging)
-        env:
-          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
-        run: |
-          curl -sS -X POST \
-            -u :"${NTFY_TOKEN}" \
-            -H "Title: PR Calculator deployed (staging)" \
-            -H "Tags: rocket,staging" \
-            -H "Priority: default" \
-            -d "Env: staging | Services: pr-calculator-api-dev, pr-calculator-web-dev | Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
-            https://ntfy.carlosgv.dev/deployments >/dev/null 2>&1 || true
