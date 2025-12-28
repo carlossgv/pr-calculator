@@ -179,13 +179,19 @@ jobs:
       #     set -euo pipefail
       #     nc -vz -w 5 ${{ vars.DEPLOY_HOST_TS }} 22
       #
-      - name: Write SSH key
+      - name: Write SSH key for appleboy
         run: |
           set -euo pipefail
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p 22 ${{ vars.DEPLOY_HOST_TS }} >> ~/.ssh/known_hosts
+          mkdir -p /github/home/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY_B64 }}" | base64 -d > /github/home/.ssh/deploy_key
+          chmod 600 /github/home/.ssh/deploy_key
+          ssh-keyscan -p 22 ${{ vars.DEPLOY_HOST_TS }} >> /github/home/.ssh/known_hosts
+
+      - name: Sanity check deploy key exists
+        run: |
+          ls -l /github/home/.ssh
+          head -n 2 /github/home/.ssh/deploy_key
+
 
       - name: Deploy PR Calculator (staging)
         uses: appleboy/ssh-action@v1.0.0
