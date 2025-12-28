@@ -165,13 +165,9 @@ jobs:
         uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-          args: --accept-dns=false
           ping: ${{ vars.DEPLOY_HOST_TS }}
-      - name: Debug connectivity
-        run: |
-          tailscale status
-          ping -c 2 ${{ vars.DEPLOY_HOST_TS }}
-          nc -vz ${{ vars.DEPLOY_HOST_TS }} 22
+          # No pases hostname por ahora
+          # No pases args por ahora
 
       - name: Deploy PR Calculator (staging) via docker compose over Tailscale SSH
         uses: appleboy/ssh-action@v1.0.0
