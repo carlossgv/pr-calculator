@@ -197,7 +197,7 @@ jobs:
           host: ${{ vars.DEPLOY_HOST_TS }}
           username: ${{ vars.SERVER_USER }}
           port: 22
-          key_path: /github/home/.ssh/deploy_key
+          key_path: $HOME/.ssh/deploy_key
           script: |
             set -euo pipefail
             cd /home/carlos/homelab/pr-calculator-web
