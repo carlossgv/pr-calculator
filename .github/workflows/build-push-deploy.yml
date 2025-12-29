@@ -15,10 +15,10 @@ env:
   IMAGE_NAME_API: ghcr.io/${{ github.repository }}-api
   IMAGE_NAME_WEB: ghcr.io/${{ github.repository }}-web
 
-# =========================
-# BUILD & PUSH
-# =========================
 jobs:
+  # =========================
+  # BUILD & PUSH
+  # =========================
   build_and_push:
     runs-on: ubuntu-latest
 
@@ -50,14 +50,33 @@ jobs:
             echo "value=linux/amd64" >> $GITHUB_OUTPUT
           fi
 
+      - name: Compute deploy flavor
+        id: flavor
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "is_prod=true" >> $GITHUB_OUTPUT
+            echo "is_staging=false" >> $GITHUB_OUTPUT
+          else
+            # staging branch OR ANY manual dispatch on non-main behaves as staging
+            if [ "${{ github.ref_name }}" = "staging" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              echo "is_prod=false" >> $GITHUB_OUTPUT
+              echo "is_staging=true" >> $GITHUB_OUTPUT
+            else
+              echo "is_prod=false" >> $GITHUB_OUTPUT
+              echo "is_staging=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Docker meta (API)
         id: meta_api
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE_NAME_API }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
-            type=raw,value=staging,enable=${{ github.ref_name == 'staging' }}
+            type=raw,value=latest,enable=${{ steps.flavor.outputs.is_prod == 'true' }}
+            type=raw,value=staging,enable=${{ steps.flavor.outputs.is_staging == 'true' }}
             type=ref,event=branch
             type=sha,format=short
             type=ref,event=tag
@@ -68,8 +87,8 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME_WEB }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
-            type=raw,value=staging,enable=${{ github.ref_name == 'staging' }}
+            type=raw,value=latest,enable=${{ steps.flavor.outputs.is_prod == 'true' }}
+            type=raw,value=staging,enable=${{ steps.flavor.outputs.is_staging == 'true' }}
             type=ref,event=branch
             type=sha,format=short
             type=ref,event=tag
@@ -102,19 +121,21 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           build-args: |
-            VITE_APP_ENV=${{ github.ref_name == 'main' && 'prod' || 'dev' }}
-            VITE_APP_TITLE=${{ github.ref_name == 'main' && 'PR Calculator' || 'PR Calculator Dev' }}
-            VITE_API_BASE=${{ github.ref_name == 'main' && 'https://prcalc-api.carlosgv.dev' || 'https://prcalc-api-dev.carlosgv.dev' }}
+            VITE_APP_ENV=${{ steps.flavor.outputs.is_prod == 'true' && 'prod' || 'dev' }}
+            VITE_APP_TITLE=${{ steps.flavor.outputs.is_prod == 'true' && 'PR Calculator' || 'PR Calculator Dev' }}
+            VITE_API_BASE=${{ steps.flavor.outputs.is_prod == 'true' && 'https://prcalc-api.carlosgv.dev' || 'https://prcalc-api-dev.carlosgv.dev' }}
             VITE_APP_VERSION=${{ github.sha }}
 
-# =========================
-# DEPLOY STAGING
-# =========================
+  # =========================
+  # DEPLOY STAGING
+  # - staging branch pushes
+  # - OR manual workflow_dispatch on ANY non-main branch
+  # =========================
   deploy_staging:
     needs: build_and_push
     runs-on: ubuntu-latest
     environment: staging
-    if: github.ref_name == 'staging'
+    if: github.ref_name == 'staging' || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main')
 
     steps:
       - name: Connect to Tailscale (Headscale)
@@ -144,9 +165,11 @@ jobs:
             docker compose up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
           EOF
 
-# =========================
-# DEPLOY PRODUCTION
-# =========================
+  # =========================
+  # DEPLOY PRODUCTION
+  # - main branch pushes
+  # - OR manual workflow_dispatch on main
+  # =========================
   deploy_production:
     needs: build_and_push
     runs-on: ubuntu-latest
