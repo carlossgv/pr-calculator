@@ -68,6 +68,25 @@ function sanitizeQuickDraft(x: any): QuickCalcDraft | null {
   };
 }
 
+type LastRouteRow = {
+  v: 1;
+  path: string; // "/movements/..../calc/kg/100?x=y#hash"
+  updatedAt: string;
+};
+
+function sanitizeLastRoute(x: any): LastRouteRow | null {
+  if (!x || typeof x !== "object") return null;
+  if (x.v !== 1) return null;
+  const path = String(x.path ?? "");
+  if (!path.startsWith("/")) return null;
+  if (path.length > 500) return null; // safety
+  return {
+    v: 1,
+    path,
+    updatedAt: typeof x.updatedAt === "string" ? x.updatedAt : nowIso(),
+  };
+}
+
 export const repo = {
   async getPreferences(): Promise<UserPreferences> {
     const row = await db.preferences.get("prefs");
@@ -77,7 +96,6 @@ export const repo = {
       const contexts = value.contexts ?? { kg: "olympic", lb: "crossfit" };
       const theme = value.theme ?? "dark";
 
-      // ✅ NEW: backfill language
       const language =
         value.language === "es" || value.language === "en" ? value.language : "en";
 
@@ -125,7 +143,6 @@ export const repo = {
     draft: { unit: Unit; weight: number; customPcts: number[] } | null,
   ): Promise<void> {
     if (!draft) {
-      // delete = reset
       await db.meta.delete("quickCalcDraft");
       return;
     }
@@ -138,7 +155,10 @@ export const repo = {
         ? draft.customPcts
             .map((x) => Math.round(Number(x) * 10) / 10)
             .filter((x) => Number.isFinite(x) && x > 0 && x <= 300)
-            .filter((x, i, arr) => arr.findIndex((y) => Math.abs(y - x) < 0.0001) === i)
+            .filter(
+              (x, i, arr) =>
+                arr.findIndex((y) => Math.abs(y - x) < 0.0001) === i,
+            )
             .sort((a, b) => b - a)
             .slice(0, 8)
         : [],
@@ -146,6 +166,25 @@ export const repo = {
     };
 
     await db.meta.put({ id: "quickCalcDraft", value: next });
+  },
+
+  // ============================================================
+  // Last route (LOCAL ONLY, used for "resume where you were")
+  // ============================================================
+
+  async getLastRoute(): Promise<string | null> {
+    const row = await db.meta.get("lastRoute");
+    const v = sanitizeLastRoute((row as any)?.value);
+    return v?.path ?? null;
+  },
+
+  async setLastRoute(path: string): Promise<void> {
+    const p = String(path ?? "");
+    if (!p.startsWith("/")) return;
+    if (p.length > 500) return;
+
+    const next: LastRouteRow = { v: 1, path: p, updatedAt: nowIso() };
+    await db.meta.put({ id: "lastRoute", value: next });
   },
 
   async listMovements(): Promise<Movement[]> {
@@ -162,7 +201,6 @@ export const repo = {
   async upsertMovement(m: Movement): Promise<void> {
     const now = nowIso();
 
-    // backfill para callers viejos
     const next: Movement = {
       ...(m as any),
       updatedAt: (m as any).updatedAt ?? now,
@@ -178,10 +216,8 @@ export const repo = {
     const m = await db.movements.get(id);
     if (!m) return;
 
-    // tombstone movimiento
     await db.movements.put({ ...(m as any), deletedAt: now, updatedAt: now });
 
-    // tombstone PRs del movimiento
     const prs = await db.prEntries.where("movementId").equals(id).toArray();
     if (prs.length) {
       await db.prEntries.bulkPut(
