@@ -46,8 +46,15 @@ add_file () {
 # Output
 # ------------------------------------------------------------
 
+add_file "apps/web/src/components/WeightCalculatorPanel.tsx"
+add_file "apps/web/src/pages/HomePage.tsx"
+add_file "apps/web/src/pages/MovementCalculatorPage.tsx"
+add_file "apps/web/src/router.tsx"
 add_file "apps/web/src/storage/repo.ts"
-add_file "apps/web/src/main.tsx"
+add_file "apps/web/src/storage/db.ts"
+add_file "apps/web/src/utils/context.ts"
+add_file "apps/web/src/ui/AppLayout.tsx"
+add_file "apps/web/src/storage/changes.ts"
 
 # If running interactively (no pipe), give a hint
 if [[ -t 1 ]]; then

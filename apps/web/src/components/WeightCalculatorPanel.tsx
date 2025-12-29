@@ -65,6 +65,10 @@ type Props = {
   initialUnit?: Unit;
   initialWeight?: number;
 
+  /** Quick-mode extras (local-only persistence lives in the page) */
+  initialCustomPcts?: number[];
+  onCustomPctsChange?: (pcts: number[]) => void;
+
   fromPct?: number;
   toPct?: number;
   stepPct?: number;
@@ -97,11 +101,27 @@ function parsePctInput(s: string): number | null {
   return Math.round(v * 10) / 10;
 }
 
+function sanitizePcts(pcts: unknown): number[] {
+  if (!Array.isArray(pcts)) return [];
+  const out: number[] = [];
+  for (const x of pcts) {
+    const n = Number(x);
+    if (!Number.isFinite(n)) continue;
+    const v = Math.round(n * 10) / 10;
+    if (v <= 0 || v > 300) continue;
+    if (out.some((k) => Math.abs(k - v) < 0.0001)) continue;
+    out.push(v);
+  }
+  return out.sort((a, b) => b - a).slice(0, 8);
+}
+
 export function WeightCalculatorPanel({
   mode,
   title,
   initialUnit,
   initialWeight,
+  initialCustomPcts,
+  onCustomPctsChange,
   fromPct = 125,
   toPct = 40,
   stepPct = 5,
@@ -117,7 +137,9 @@ export function WeightCalculatorPanel({
   );
 
   const [customPctInput, setCustomPctInput] = useState<string>("");
-  const [customPcts, setCustomPcts] = useState<number[]>([]);
+  const [customPcts, setCustomPcts] = useState<number[]>(
+    sanitizePcts(initialCustomPcts),
+  );
 
   useEffect(() => {
     if (initialUnit) setUnit(initialUnit);
@@ -126,6 +148,11 @@ export function WeightCalculatorPanel({
       setWeightText(formatWeight(initialWeight));
     }
   }, [initialUnit, initialWeight]);
+
+  useEffect(() => {
+    setCustomPcts(sanitizePcts(initialCustomPcts));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(initialCustomPcts ?? [])]);
 
   useEffect(() => {
     repo.getPreferences().then((p) => {
@@ -156,6 +183,11 @@ export function WeightCalculatorPanel({
     emit(unit, rawWeight);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unit, rawWeight]);
+
+  useEffect(() => {
+    onCustomPctsChange?.(customPcts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(customPcts)]);
 
   function addCustomPct() {
     const v = parsePctInput(customPctInput);
