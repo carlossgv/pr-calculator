@@ -1,4 +1,4 @@
-// FILE: apps/web/src/pages/MovementCalculatorPage.tsx
+/* FILE: apps/web/src/pages/MovementCalculatorPage.tsx */
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Movement, Unit, UserPreferences } from "@repo/core";
@@ -48,7 +48,13 @@ export function MovementCalculatorPage() {
   }, [id]);
 
   function goBack() {
-    navigate(-1);
+    // Si la app fue restaurada con navigate(..., { replace: true }),
+    // es común que no exista historial real y navigate(-1) no haga nada.
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/movements", { replace: true });
   }
 
   function goManage() {

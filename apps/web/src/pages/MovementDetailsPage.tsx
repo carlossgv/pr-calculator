@@ -261,9 +261,13 @@ export function MovementDetailsPage() {
     navigate(`/movements/${id}/calc/${unit}/${targetWeight}`);
   }
 
-  function goBack() {
+function goBack() {
+  if (window.history.length > 1) {
     navigate(-1);
+    return;
   }
+  navigate("/movements", { replace: true });
+}
 
   if (loading) return <p>{t.movement.loading}</p>;
 

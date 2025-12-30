@@ -46,11 +46,10 @@ add_file () {
 # Output
 # ------------------------------------------------------------
 
-add_file "apps/api/prisma/schema.prisma"
-add_file "apps/api/prisma/migrations/20251219160410_init/migration.sql"
-add_file "apps/api/src/sync.controller.ts"
-add_file "apps/api/src/auth/device-auth.guard.ts"
-add_file "apps/api/src/prisma.ts"
+add_file "apps/web/src/pages/MovementCalculatorPage.tsx"
+add_file "apps/web/src/ui/Surface.tsx"
+add_file "apps/web/src/pages/MovementsPage.tsx"
+add_file "apps/web/src/pages/MovementDetailsPage.tsx"
 
 # If running interactively (no pipe), give a hint
 if [[ -t 1 ]]; then
