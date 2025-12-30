@@ -1,5 +1,5 @@
 // FILE: apps/web/src/pages/MovementDetailsPage.tsx
-import { ArrowLeft, Calculator, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Calculator, Pencil, Trash2, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { Movement, PrEntry, Unit, UserPreferences } from "@repo/core";
@@ -56,6 +56,13 @@ function parsePositiveInt(raw: string): number | null {
   const n = Number(trimmed);
   if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) return null;
   return n;
+}
+
+// Theoretical 1RM (Epley)
+function estimate1rmEpley(weight: number, reps: number) {
+  if (!Number.isFinite(weight) || weight <= 0) return 0;
+  if (!Number.isFinite(reps) || reps <= 1) return weight;
+  return weight * (1 + reps / 30);
 }
 
 type ConfirmState =
@@ -261,13 +268,25 @@ export function MovementDetailsPage() {
     navigate(`/movements/${id}/calc/${unit}/${targetWeight}`);
   }
 
-function goBack() {
-  if (window.history.length > 1) {
-    navigate(-1);
-    return;
+  function goCalcTheoretical(e: PrEntry) {
+    const unit: Unit = (prefs?.defaultUnit ?? "kg") as Unit;
+    const est = round1(estimate1rmEpley(e.weight, e.reps));
+
+    const qs = new URLSearchParams();
+    qs.set("theoretical", "1");
+    qs.set("baseWeight", String(e.weight));
+    qs.set("baseReps", String(e.reps));
+
+    navigate(`/movements/${id}/calc/${unit}/${est}?${qs.toString()}`);
   }
-  navigate("/movements", { replace: true });
-}
+
+  function goBack() {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/movements", { replace: true });
+  }
 
   if (loading) return <p>{t.movement.loading}</p>;
 
@@ -416,6 +435,7 @@ function goBack() {
           ) : (
             sorted.map((e) => {
               const isEditing = editingEntryId === e.id;
+              const canEstimate = e.reps > 1;
 
               return (
                 <Surface key={e.id} variant="card" className={styles.item}>
@@ -505,6 +525,21 @@ function goBack() {
                         >
                           <Calculator size={18} />
                         </Button>
+
+                        {canEstimate ? (
+                          <Button
+                            variant="outline"
+                            size="md"
+                            shape="round"
+                            iconOnly
+                            className={styles.iconBtnMd}
+                            ariaLabel={t.movement.theoretical1rmAria}
+                            title={t.movement.theoretical1rmTitle}
+                            onClick={() => goCalcTheoretical(e)}
+                          >
+                            <TrendingUp size={18} />
+                          </Button>
+                        ) : null}
 
                         <Button
                           variant="neutral"

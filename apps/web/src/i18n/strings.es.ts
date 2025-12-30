@@ -169,6 +169,11 @@ export const es = {
     editAria: "Editar PR",
     deleteAria: "Borrar PR",
 
+        theoretical1rmTitle: "1RM teórico",
+    theoretical1rmAria: "Abrir calculadora con 1RM teórico",
+    theoreticalModeTitle: "PR teórico (estimado)",
+theoreticalModeFrom: "Basado en PR guardado: {weight} × {reps} {unit}",
+
     errors: {
       invalidWeight: "Peso inválido",
       invalidReps: "Reps inválidas",

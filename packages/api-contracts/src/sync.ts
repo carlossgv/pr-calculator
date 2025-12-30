@@ -27,7 +27,7 @@ export type SyncPushRequest = {
   // opcional: cursor local para debugging
   sinceMs?: IsoEpochMs;
 
-  preferences?: SyncEntityEnvelope<UserPreferences>; 
+  preferences?: SyncEntityEnvelope<UserPreferences>; // 1 doc
   movements?: SyncEntityEnvelope<any>[];
   prEntries?: SyncEntityEnvelope<any>[];
 };

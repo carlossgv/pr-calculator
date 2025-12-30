@@ -46,10 +46,8 @@ add_file () {
 # Output
 # ------------------------------------------------------------
 
-add_file "apps/web/src/pages/MovementCalculatorPage.tsx"
-add_file "apps/web/src/ui/Surface.tsx"
-add_file "apps/web/src/pages/MovementsPage.tsx"
-add_file "apps/web/src/pages/MovementDetailsPage.tsx"
+add_file "apps/web/src/ui/Button.tsx"
+add_file "apps/web/src/ui/Button.module.css"
 
 # If running interactively (no pipe), give a hint
 if [[ -t 1 ]]; then

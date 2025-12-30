@@ -130,6 +130,9 @@ export const en = {
 
     delete: "delete",
 
+    theoretical1rmTitle: "Theoretical 1RM",
+    theoretical1rmAria: "Open calculator with theoretical 1RM",
+
     sort: {
       title: "Sort",
       aria: "Sort movements",
@@ -171,6 +174,10 @@ export const en = {
 
     editAria: "Edit PR",
     deleteAria: "Delete PR",
+theoretical1rmTitle: "Theoretical 1RM",
+theoretical1rmAria: "Open calculator with theoretical 1RM",
+    theoreticalModeTitle: "Theoretical PR (estimated)",
+    theoreticalModeFrom: "Based on saved PR: {weight} × {reps} {unit}",
 
     errors: {
       invalidWeight: "Invalid weight",

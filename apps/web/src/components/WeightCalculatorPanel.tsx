@@ -17,20 +17,16 @@ function round1(n: number) {
 }
 
 function formatWeight(n: number) {
-  // Evita "100.0" visual; mantiene decimales reales
   return Number.isFinite(n) ? String(n) : "0";
 }
 
 function sanitizeWeightText(input: string) {
-  // Permite vacío para poder borrar completo
   if (input === "") return "";
 
-  // Normaliza coma decimal
   let s = input.replace(",", ".");
-
-  // Sólo dígitos y un punto
   let out = "";
   let sawDot = false;
+
   for (const ch of s) {
     if (ch >= "0" && ch <= "9") out += ch;
     else if (ch === "." && !sawDot) {
@@ -39,18 +35,13 @@ function sanitizeWeightText(input: string) {
     }
   }
 
-  // Si empieza con ".", lo convertimos en "0."
   if (out.startsWith(".")) out = `0${out}`;
 
-  // Quita ceros a la izquierda sólo si hay más dígitos después y NO es "0.".
-  // Ej: "02" -> "2", "00012" -> "12", pero "0.5" se queda.
   if (!out.startsWith("0.")) {
     out = out.replace(/^0+(?=\d)/, "");
   }
 
-  // Si quedó vacío por limpieza, dejamos "0"
   if (out === "") out = "0";
-
   return out;
 }
 
@@ -58,8 +49,6 @@ type ChangePayload = { unit: Unit; weight: number };
 
 type Props = {
   mode: "editable" | "readonly";
-
-  /** Title to show above the calculator (usually the Movement name). */
   title?: string;
 
   initialUnit?: Unit;
@@ -74,6 +63,12 @@ type Props = {
   stepPct?: number;
 
   onChange?: (payload: ChangePayload) => void;
+
+  /** NEW: if present, we're in "theoretical PR" mode and we show a hint/banner */
+  theoreticalFrom?: {
+    baseWeight: number;
+    baseReps: number;
+  };
 };
 
 function contextChipWord(ctx: unknown): string {
@@ -126,12 +121,12 @@ export function WeightCalculatorPanel({
   toPct = 40,
   stepPct = 5,
   onChange,
+  theoreticalFrom,
 }: Props) {
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [rawWeight, setRawWeight] = useState<number>(initialWeight ?? 100);
 
-  // 👇 el input se controla como string (para permitir borrar todo)
   const [weightText, setWeightText] = useState<string>(
     formatWeight(initialWeight ?? 100),
   );
@@ -212,6 +207,17 @@ export function WeightCalculatorPanel({
 
   const contextWord = contextChipWord(prefs.contexts?.[unit]);
 
+  const theoreticalHint =
+    theoreticalFrom && theoreticalFrom.baseWeight > 0 && theoreticalFrom.baseReps > 0
+      ? {
+          label: t.movement.theoreticalModeTitle,
+          sub: t.movement.theoreticalModeFrom
+            .replace("{weight}", String(theoreticalFrom.baseWeight))
+            .replace("{reps}", String(theoreticalFrom.baseReps))
+            .replace("{unit}", unit),
+        }
+      : null;
+
   return (
     <div className={styles.root}>
       {title ? <h2 style={{ margin: 0 }}>{title}</h2> : null}
@@ -219,11 +225,38 @@ export function WeightCalculatorPanel({
       <Surface variant="panel" className={styles.panel}>
         <div className={styles.header}>
           <span className={styles.utilLabel}>
-            PR CALC <span className={styles.stamp}>LIVE</span>
+            PR CALC{" "}
+            <span className={styles.stamp}>
+              {theoreticalHint ? "THEORY" : "LIVE"}
+            </span>
           </span>
 
           <span className={styles.contextChip}>{contextWord}</span>
         </div>
+
+        {theoreticalHint ? (
+          <div
+            style={{
+              marginTop: 10,
+              padding: "10px 12px",
+              borderRadius: 14,
+              border: "1px solid color-mix(in oklab, var(--accent) 35%, var(--border))",
+              background:
+                "color-mix(in oklab, var(--accent) 8%, var(--card-bg))",
+              display: "grid",
+              gap: 4,
+            }}
+            role="note"
+            aria-label={theoreticalHint.label}
+          >
+            <div style={{ fontWeight: 950, letterSpacing: 0.2 }}>
+              {theoreticalHint.label}
+            </div>
+            <div style={{ opacity: 0.85, fontSize: 13 }}>
+              {theoreticalHint.sub}
+            </div>
+          </div>
+        ) : null}
 
         <div className={styles.barcodeRule} />
 
@@ -267,13 +300,7 @@ export function WeightCalculatorPanel({
             </span>
           </div>
         ) : (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 12,
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
             <div style={{ fontSize: 34, fontWeight: 950 }}>
               {rawWeight}{" "}
               <span style={{ fontSize: 14, opacity: 0.9 }}>{unit}</span>
@@ -316,10 +343,7 @@ export function WeightCalculatorPanel({
         </div>
 
         {customPcts.length ? (
-          <div
-            className={styles.customPctChips}
-            aria-label={t.home.customPercentAdded}
-          >
+          <div className={styles.customPctChips} aria-label={t.home.customPercentAdded}>
             {customPcts.map((p) => (
               <Button
                 key={p}

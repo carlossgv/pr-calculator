@@ -1,6 +1,6 @@
-/* FILE: apps/web/src/pages/MovementCalculatorPage.tsx */
+// FILE: apps/web/src/pages/MovementCalculatorPage.tsx
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { Movement, Unit, UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
@@ -18,8 +18,21 @@ function parseWeight(raw: string | undefined): number {
   return Number.isFinite(n) ? n : 100;
 }
 
+function parseNumberParam(v: string | null): number | null {
+  if (v == null) return null;
+  const n = Number(String(v).replace(",", "."));
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseIntParam(v: string | null): number | null {
+  if (v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) && Number.isInteger(n) ? n : null;
+}
+
 export function MovementCalculatorPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { movementId, unit: unitParam, weight: weightParam } = useParams<{
     movementId: string;
     unit: string;
@@ -35,6 +48,19 @@ export function MovementCalculatorPage() {
   const initialUnit = useMemo(() => parseUnit(unitParam), [unitParam]);
   const initialWeight = useMemo(() => parseWeight(weightParam), [weightParam]);
 
+  const theoretical = useMemo(() => {
+    const qs = new URLSearchParams(location.search);
+    const isTheo = qs.get("theoretical") === "1";
+    if (!isTheo) return null;
+
+    const baseWeight = parseNumberParam(qs.get("baseWeight"));
+    const baseReps = parseIntParam(qs.get("baseReps"));
+    if (baseWeight == null || baseReps == null || baseWeight <= 0 || baseReps <= 0)
+      return null;
+
+    return { baseWeight, baseReps };
+  }, [location.search]);
+
   useEffect(() => {
     if (!id) return;
 
@@ -48,8 +74,6 @@ export function MovementCalculatorPage() {
   }, [id]);
 
   function goBack() {
-    // Si la app fue restaurada con navigate(..., { replace: true }),
-    // es común que no exista historial real y navigate(-1) no haga nada.
     if (window.history.length > 1) {
       navigate(-1);
       return;
@@ -105,11 +129,17 @@ export function MovementCalculatorPage() {
         title={undefined /* el título ya va arriba */}
         initialUnit={initialUnit}
         initialWeight={initialWeight}
+        theoreticalFrom={theoretical ?? undefined}
         onChange={(payload) => {
-          // Mantiene la URL sincronizada (útil para compartir / refresh)
           const u = payload.unit;
           const w = payload.weight;
-          navigate(`/movements/${id}/calc/${u}/${w}`, { replace: true });
+
+          // Mantiene la URL sincronizada (útil para compartir / refresh)
+          // ✅ preserva querystring (para no perder modo teórico)
+          navigate(
+            `/movements/${id}/calc/${u}/${w}${location.search}`,
+            { replace: true },
+          );
         }}
       />
     </div>
