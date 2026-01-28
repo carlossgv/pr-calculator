@@ -15,6 +15,7 @@ export const en = {
     to: "To",
     step: "Step",
     platesPerSide: "Plates / side",
+    platesVisual: "Plate stack",
     perSideTotal: "Per side total",
     bar: "Bar",
     achieved: "Achieved",
