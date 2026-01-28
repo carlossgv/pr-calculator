@@ -145,28 +145,30 @@ jobs:
     if: github.ref_name == 'staging' || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main')
 
     steps:
+      - name: Validate Tailscale auth key
+        env:
+          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
+        run: |
+          if [ -z "${TS_AUTHKEY:-}" ]; then
+            echo "TS_AUTHKEY is missing. Add it under repo Settings → Secrets and variables → Actions → Environments → staging." >&2
+            exit 1
+          fi
+
       - name: Connect to Tailscale (Headscale)
         uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
+          tags: tag:github-actions
           args: >
             --login-server=https://vpn.carlosgv.dev
             --accept-dns=false
             --timeout=45s
           ping: ${{ vars.DEPLOY_HOST_TS }}
 
-      - name: Setup SSH
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p 22 ${{ vars.DEPLOY_HOST_TS }} >> ~/.ssh/known_hosts
-
       - name: Deploy (staging)
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/deploy_key ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
+          tailscale ssh ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
             cd /home/carlos/homelab/pr-calculator-web
             docker compose pull pr-calculator-api-dev pr-calculator-web-dev
             docker compose up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
@@ -184,28 +186,30 @@ jobs:
     if: github.ref_name == 'main'
 
     steps:
+      - name: Validate Tailscale auth key
+        env:
+          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
+        run: |
+          if [ -z "${TS_AUTHKEY:-}" ]; then
+            echo "TS_AUTHKEY is missing. Add it under repo Settings → Secrets and variables → Actions → Environments → production." >&2
+            exit 1
+          fi
+
       - name: Connect to Tailscale (Headscale)
         uses: tailscale/github-action@v4
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
+          tags: tag:github-actions
           args: >
             --login-server=https://vpn.carlosgv.dev
             --accept-dns=false
             --timeout=45s
           ping: ${{ vars.DEPLOY_HOST_TS }}
 
-      - name: Setup SSH
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY_B64 }}" | base64 -d > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p 22 ${{ vars.DEPLOY_HOST_TS }} >> ~/.ssh/known_hosts
-
       - name: Deploy (production)
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/deploy_key ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
+          tailscale ssh ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
             cd /home/carlos/homelab/pr-calculator-web
             docker compose pull pr-calculator-api pr-calculator-web
             docker compose up -d pr-calculator-db pr-calculator-api pr-calculator-web
