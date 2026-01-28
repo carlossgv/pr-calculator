@@ -74,6 +74,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE_NAME_API }}
+          flavor: |
+            latest=false
           tags: |
             type=raw,value=latest,enable=${{ steps.flavor.outputs.is_prod == 'true' }}
             type=raw,value=staging,enable=${{ steps.flavor.outputs.is_staging == 'true' }}
@@ -86,6 +88,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE_NAME_WEB }}
+          flavor: |
+            latest=false
           tags: |
             type=raw,value=latest,enable=${{ steps.flavor.outputs.is_prod == 'true' }}
             type=raw,value=staging,enable=${{ steps.flavor.outputs.is_staging == 'true' }}
