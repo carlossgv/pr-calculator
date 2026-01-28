@@ -44,11 +44,14 @@ jobs:
       - name: Select platforms
         id: platforms
         run: |
-          if [ "${{ github.ref_name }}" = "main" ] || [ "${{ github.ref_type }}" = "tag" ]; then
-            echo "value=linux/amd64,linux/arm64" >> $GITHUB_OUTPUT
-          else
-            echo "value=linux/amd64" >> $GITHUB_OUTPUT
-          fi
+          # Single-arch for now (amd64 only).
+          # To re-enable multi-arch for main/tags, swap in the conditional below:
+          # if [ "${{ github.ref_name }}" = "main" ] || [ "${{ github.ref_type }}" = "tag" ]; then
+          #   echo "value=linux/amd64,linux/arm64" >> $GITHUB_OUTPUT
+          # else
+          #   echo "value=linux/amd64" >> $GITHUB_OUTPUT
+          # fi
+          echo "value=linux/amd64" >> $GITHUB_OUTPUT
 
       - name: Compute deploy flavor
         id: flavor
