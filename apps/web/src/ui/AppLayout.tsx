@@ -63,6 +63,19 @@ function isRestorablePath(path: string) {
   return true;
 }
 
+function getNavigationType(): string | null {
+  if (typeof performance === "undefined") return null;
+  const entries = performance.getEntriesByType?.("navigation") ?? [];
+  const entry = entries[0] as PerformanceNavigationTiming | undefined;
+  if (entry?.type) return entry.type;
+
+  const legacy = (performance as any).navigation?.type;
+  if (legacy === 1) return "reload";
+  if (legacy === 2) return "back_forward";
+  if (legacy === 0) return "navigate";
+  return null;
+}
+
 export function AppLayout() {
   useLanguage(); // ✅ fuerza re-render cuando cambia el idioma
   const [, setPrefs] = useState<UserPreferences | null>(null);
@@ -93,6 +106,12 @@ export function AppLayout() {
   useEffect(() => {
     if (didRestoreRef.current) return;
     if (location.pathname !== "/") return;
+
+    const navType = getNavigationType();
+    if (navType === "reload") {
+      didRestoreRef.current = true;
+      return;
+    }
 
     didRestoreRef.current = true;
 
