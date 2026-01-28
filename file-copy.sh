@@ -46,8 +46,35 @@ add_file () {
 # Output
 # ------------------------------------------------------------
 
+add_file "apps/web/src/storage/changes.ts"
+add_file "apps/web/src/i18n/strings.ts"
+
+add_file "apps/web/src/ui/AppLayout.tsx"
+add_file "apps/web/src/ui/ThemeToggle.tsx"
+add_file "apps/web/src/ui/PwaUpdateToast.tsx"
+
+add_file "apps/web/src/pages/HomePage.tsx"
+add_file "apps/web/src/pages/PreferencesPage.tsx"
+add_file "apps/web/src/pages/MovementsPage.tsx"
+add_file "apps/web/src/pages/MovementDetailsPage.tsx"
+add_file "apps/web/src/pages/MovementCalculatorPage.tsx"
+
+add_file "apps/web/src/components/UnitSwitch.tsx"
+add_file "apps/web/src/components/WeightCalculatorPanel.tsx"
+add_file "apps/web/src/components/PercentCards.tsx"
+
 add_file "apps/web/src/ui/Button.tsx"
-add_file "apps/web/src/ui/Button.module.css"
+add_file "apps/web/src/ui/Surface.tsx"
+add_file "apps/web/src/ui/Card.tsx"
+
+add_file "apps/web/src/utils/equipment.ts"
+add_file "apps/web/src/utils/format.ts"
+
+add_file "apps/web/public/pwa/icon-192.png"
+add_file "apps/web/public/pwa/icon-512.png"
+
+add_file "docker-compose.deploy.yml"
+
 
 # If running interactively (no pipe), give a hint
 if [[ -t 1 ]]; then

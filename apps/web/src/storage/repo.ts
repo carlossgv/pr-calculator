@@ -31,6 +31,12 @@ function isDeleted(row: { deletedAt?: string | null } | null | undefined) {
 }
 
 type Unit = "kg" | "lb";
+type PercentOrder = "asc" | "desc";
+
+function sortPcts(pcts: number[], order: PercentOrder): number[] {
+  const dir = order === "asc" ? 1 : -1;
+  return [...pcts].sort((a, b) => (a - b) * dir);
+}
 
 type QuickCalcDraft = {
   v: 1;
@@ -47,7 +53,6 @@ function sanitizeQuickDraft(x: any): QuickCalcDraft | null {
   const unit: Unit = x.unit === "lb" ? "lb" : "kg";
   const weight = Number(x.weight);
   const safeWeight = Number.isFinite(weight) ? weight : 100;
-
   const customPctsRaw = Array.isArray(x.customPcts) ? x.customPcts : [];
   const customPcts: number[] = [];
   for (const v of customPctsRaw) {
@@ -63,7 +68,24 @@ function sanitizeQuickDraft(x: any): QuickCalcDraft | null {
     v: 1,
     unit,
     weight: safeWeight,
-    customPcts: customPcts.sort((a, b) => b - a).slice(0, 8),
+    customPcts: sortPcts(customPcts, "desc").slice(0, 8),
+    updatedAt: typeof x.updatedAt === "string" ? x.updatedAt : nowIso(),
+  };
+}
+
+type PercentOrderRow = {
+  v: 1;
+  order: PercentOrder;
+  updatedAt: string;
+};
+
+function sanitizePercentOrder(x: any): PercentOrderRow | null {
+  if (!x || typeof x !== "object") return null;
+  if (x.v !== 1) return null;
+  const order: PercentOrder = x.order === "asc" ? "asc" : "desc";
+  return {
+    v: 1,
+    order,
     updatedAt: typeof x.updatedAt === "string" ? x.updatedAt : nowIso(),
   };
 }
@@ -152,15 +174,16 @@ export const repo = {
       unit: draft.unit === "lb" ? "lb" : "kg",
       weight: Number.isFinite(Number(draft.weight)) ? Number(draft.weight) : 100,
       customPcts: Array.isArray(draft.customPcts)
-        ? draft.customPcts
-            .map((x) => Math.round(Number(x) * 10) / 10)
-            .filter((x) => Number.isFinite(x) && x > 0 && x <= 300)
-            .filter(
-              (x, i, arr) =>
-                arr.findIndex((y) => Math.abs(y - x) < 0.0001) === i,
-            )
-            .sort((a, b) => b - a)
-            .slice(0, 8)
+        ? sortPcts(
+            draft.customPcts
+              .map((x) => Math.round(Number(x) * 10) / 10)
+              .filter((x) => Number.isFinite(x) && x > 0 && x <= 300)
+              .filter(
+                (x, i, arr) =>
+                  arr.findIndex((y) => Math.abs(y - x) < 0.0001) === i,
+              ),
+            "desc",
+          ).slice(0, 8)
         : [],
       updatedAt: nowIso(),
     };
@@ -176,6 +199,21 @@ export const repo = {
     const row = await db.meta.get("lastRoute");
     const v = sanitizeLastRoute((row as any)?.value);
     return v?.path ?? null;
+  },
+
+  async getPercentOrder(): Promise<PercentOrder> {
+    const row = await db.meta.get("percentOrder");
+    const v = sanitizePercentOrder((row as any)?.value);
+    return v?.order ?? "desc";
+  },
+
+  async setPercentOrder(order: PercentOrder): Promise<void> {
+    const next: PercentOrderRow = {
+      v: 1,
+      order: order === "asc" ? "asc" : "desc",
+      updatedAt: nowIso(),
+    };
+    await db.meta.put({ id: "percentOrder", value: next });
   },
 
   async setLastRoute(path: string): Promise<void> {

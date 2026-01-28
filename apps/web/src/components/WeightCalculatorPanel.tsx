@@ -1,13 +1,13 @@
 // FILE: apps/web/src/components/WeightCalculatorPanel.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Unit, UserPreferences } from "@repo/core";
 import { convertWeightValue } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
-import { PercentCards } from "../components/PercentCards";
+import { PercentCards, type PercentOrder } from "../components/PercentCards";
 import { prefsForUnit } from "../utils/equipment";
 import { UnitSwitch } from "./UnitSwitch";
-import { Plus } from "lucide-react";
+import { ArrowUpDown, Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
 import { Button } from "../ui/Button";
 import { Surface } from "../ui/Surface";
@@ -58,6 +58,9 @@ type Props = {
   initialCustomPcts?: number[];
   onCustomPctsChange?: (pcts: number[]) => void;
 
+  initialPctOrder?: PercentOrder;
+  onPctOrderChange?: (order: PercentOrder) => void;
+
   fromPct?: number;
   toPct?: number;
   stepPct?: number;
@@ -96,7 +99,12 @@ function parsePctInput(s: string): number | null {
   return Math.round(v * 10) / 10;
 }
 
-function sanitizePcts(pcts: unknown): number[] {
+function sortPcts(pcts: number[], order: PercentOrder): number[] {
+  const dir = order === "asc" ? 1 : -1;
+  return [...pcts].sort((a, b) => (a - b) * dir);
+}
+
+function sanitizePcts(pcts: unknown, order: PercentOrder): number[] {
   if (!Array.isArray(pcts)) return [];
   const out: number[] = [];
   for (const x of pcts) {
@@ -107,7 +115,7 @@ function sanitizePcts(pcts: unknown): number[] {
     if (out.some((k) => Math.abs(k - v) < 0.0001)) continue;
     out.push(v);
   }
-  return out.sort((a, b) => b - a).slice(0, 8);
+  return sortPcts(out, order).slice(0, 8);
 }
 
 export function WeightCalculatorPanel({
@@ -117,6 +125,8 @@ export function WeightCalculatorPanel({
   initialWeight,
   initialCustomPcts,
   onCustomPctsChange,
+  initialPctOrder,
+  onPctOrderChange,
   fromPct = 125,
   toPct = 40,
   stepPct = 5,
@@ -132,9 +142,19 @@ export function WeightCalculatorPanel({
   );
 
   const [customPctInput, setCustomPctInput] = useState<string>("");
-  const [customPcts, setCustomPcts] = useState<number[]>(
-    sanitizePcts(initialCustomPcts),
+  const [pctOrder, setPctOrder] = useState<PercentOrder>(
+    initialPctOrder ?? "desc",
   );
+  const [customPcts, setCustomPcts] = useState<number[]>(
+    sanitizePcts(initialCustomPcts, initialPctOrder ?? "desc"),
+  );
+  const onPctOrderChangeRef = useRef(onPctOrderChange);
+  const orderReadyRef = useRef(false);
+  const manualOrderRef = useRef(false);
+
+  useEffect(() => {
+    onPctOrderChangeRef.current = onPctOrderChange;
+  }, [onPctOrderChange]);
 
   useEffect(() => {
     if (initialUnit) setUnit(initialUnit);
@@ -145,7 +165,26 @@ export function WeightCalculatorPanel({
   }, [initialUnit, initialWeight]);
 
   useEffect(() => {
-    setCustomPcts(sanitizePcts(initialCustomPcts));
+    let cancelled = false;
+    if (initialPctOrder) {
+      orderReadyRef.current = true;
+      setPctOrder(initialPctOrder);
+      return;
+    }
+
+    repo.getPercentOrder().then((order) => {
+      if (cancelled || manualOrderRef.current) return;
+      orderReadyRef.current = true;
+      setPctOrder(order);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [initialPctOrder]);
+
+  useEffect(() => {
+    setCustomPcts(sanitizePcts(initialCustomPcts, pctOrder));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(initialCustomPcts ?? [])]);
 
@@ -184,13 +223,19 @@ export function WeightCalculatorPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(customPcts)]);
 
+  useEffect(() => {
+    setCustomPcts((prev) => sortPcts(prev, pctOrder));
+    onPctOrderChangeRef.current?.(pctOrder);
+    if (orderReadyRef.current) repo.setPercentOrder(pctOrder);
+  }, [pctOrder]);
+
   function addCustomPct() {
     const v = parsePctInput(customPctInput);
     if (v == null) return;
 
     setCustomPcts((prev) => {
       if (prev.some((x) => Math.abs(x - v) < 0.0001)) return prev;
-      const next = [...prev, v].sort((a, b) => b - a);
+      const next = sortPcts([...prev, v], pctOrder);
       return next.slice(0, 8);
     });
 
@@ -262,6 +307,27 @@ export function WeightCalculatorPanel({
 
         <div className={styles.topRow}>
           <UnitSwitch value={unit} onChange={switchUnit} />
+          <div className={styles.topActions}>
+            <Button
+              variant="ghost"
+              size="sm"
+              shape="round"
+              iconOnly
+              onClick={() => {
+                manualOrderRef.current = true;
+                orderReadyRef.current = true;
+                setPctOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+              }}
+              ariaLabel={t.home.percentOrderAria}
+              title={`${t.home.percentOrderTitle}: ${
+                pctOrder === "asc"
+                  ? t.home.percentOrderAsc
+                  : t.home.percentOrderDesc
+              }`}
+            >
+              <ArrowUpDown size={16} aria-hidden="true" />
+            </Button>
+          </div>
         </div>
 
         {mode === "editable" ? (
@@ -374,6 +440,7 @@ export function WeightCalculatorPanel({
         fromPct={fromPct}
         toPct={toPct}
         stepPct={stepPct}
+        order={pctOrder}
         extraPcts={customPcts}
       />
     </div>

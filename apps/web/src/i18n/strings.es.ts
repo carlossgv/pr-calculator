@@ -27,6 +27,11 @@ export const es = {
     customPercentRemove: "Quitar",
     customPercentHint: "Agrega un % puntual para esta sesión.",
 
+    percentOrderTitle: "Orden de porcentajes",
+    percentOrderAsc: "Ascendente",
+    percentOrderDesc: "Descendente",
+    percentOrderAria: "Cambiar orden de porcentajes",
+
     snapTitle: "Ajustar a discos",
     snapAria: "Alternar ajuste a discos",
     snapHintOff: "Mantiene resultados cargables",

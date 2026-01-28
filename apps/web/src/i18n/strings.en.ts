@@ -28,6 +28,11 @@ export const en = {
     customPercentRemove: "Remove",
     customPercentHint: "Add a one-off % for this session.",
 
+    percentOrderTitle: "Percent order",
+    percentOrderAsc: "Ascending",
+    percentOrderDesc: "Descending",
+    percentOrderAria: "Toggle percent order",
+
     // NEW: snap / rounding
     snapTitle: "Snap to plates",
     snapAria: "Toggle snap to plates",
