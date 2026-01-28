@@ -5,6 +5,8 @@ import { t } from "../i18n/strings";
 import styles from "./PercentCards.module.css";
 import { ChevronRight } from "lucide-react";
 
+export type PercentOrder = "asc" | "desc";
+
 type Props = {
   maxWeight: number;
   unit: Unit;
@@ -12,6 +14,7 @@ type Props = {
   fromPct?: number;
   toPct?: number;
   stepPct?: number;
+  order?: PercentOrder;
 
   /** Extra %s (ephemeral) injected by the parent (not persisted). */
   extraPcts?: number[];
@@ -59,7 +62,7 @@ function normalizeExtraPcts(extraPcts: number[] | undefined) {
     if (!out.some((v) => Math.abs(v - p) < 0.0001)) out.push(p);
   }
 
-  return out.slice(0, 8).sort((a, b) => b - a);
+  return out.slice(0, 8);
 }
 
 export function PercentCards({
@@ -69,6 +72,7 @@ export function PercentCards({
   fromPct = 125,
   toPct = 40,
   stepPct = 5,
+  order = "desc",
   extraPcts,
 }: Props) {
   const [selectedPct, setSelectedPct] = useState<number | null>(null);
@@ -116,7 +120,8 @@ export function PercentCards({
     for (const p of extras) pushUnique(p);
     for (const p of basePcts) pushUnique(p);
 
-    merged.sort((a, b) => b - a);
+    const dir = order === "asc" ? 1 : -1;
+    merged.sort((a, b) => (a - b) * dir);
 
     for (const p of merged) {
       const target = (maxWeight * p) / 100;
@@ -125,7 +130,7 @@ export function PercentCards({
     }
 
     return out;
-  }, [fromPct, toPct, stepPct, maxWeight, unit, prefs, extraPcts]);
+  }, [fromPct, toPct, stepPct, maxWeight, unit, prefs, extraPcts, order]);
 
   const selected = useMemo(() => {
     if (selectedPct == null) return null;
