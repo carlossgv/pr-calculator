@@ -34,6 +34,15 @@ jobs:
             --timeout=45s
           ping: ${{ vars.DEPLOY_HOST_TS }}
 
+      - name: Validate Tailscale auth key
+        env:
+          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
+        run: |
+          if [ -z "${TS_AUTHKEY:-}" ]; then
+            echo "TS_AUTHKEY is missing. Add it under repo Settings → Secrets and variables → Actions." >&2
+            exit 1
+          fi
+
       - name: Tailscale SSH test
         run: |
           set -euo pipefail
