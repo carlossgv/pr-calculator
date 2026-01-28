@@ -12,7 +12,10 @@ const DEFAULT_KG_PLATES: Plate[] = [
   plate(10, "kg"),
   plate(5, "kg"),
   plate(2.5, "kg"),
-  plate(1.25, "kg"),
+  plate(2, "kg"),
+  plate(1.5, "kg"),
+  plate(1, "kg"),
+  plate(0.5, "kg"),
 ];
 
 const DEFAULT_LB_PLATES_NO_5: Plate[] = [

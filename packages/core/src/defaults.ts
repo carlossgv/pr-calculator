@@ -19,7 +19,10 @@ export const DEFAULT_PREFS: UserPreferences = {
     plate(10, "kg"),
     plate(5, "kg"),
     plate(2.5, "kg"),
-    plate(1.25, "kg"),
+    plate(2, "kg"),
+    plate(1.5, "kg"),
+    plate(1, "kg"),
+    plate(0.5, "kg"),
   ],
 };
 
@@ -40,5 +43,6 @@ export const CROSSFIT_LB_WITH_KG_CHANGES: UserPreferences = {
     plate(2, "kg", "2 kg"),
     plate(1.5, "kg", "1.5 kg"),
     plate(1, "kg", "1 kg"),
+    plate(0.5, "kg", "0.5 kg"),
   ],
 };

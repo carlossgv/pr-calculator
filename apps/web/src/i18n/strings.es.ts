@@ -15,6 +15,7 @@ export const es = {
     to: "Hasta",
     step: "Paso",
     platesPerSide: "Discos / lado",
+    platesVisual: "Stack de discos",
     perSideTotal: "Total por lado",
     bar: "Barra",
     achieved: "Logrado",

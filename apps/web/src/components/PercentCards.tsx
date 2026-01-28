@@ -1,5 +1,5 @@
 // FILE: apps/web/src/components/PercentCards.tsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { calculateLoad, type Unit, type UserPreferences } from "@repo/core";
 import { t } from "../i18n/strings";
 import styles from "./PercentCards.module.css";
@@ -48,6 +48,68 @@ function platesPerSideLabel(load: ReturnType<typeof calculateLoad>, unit: Unit) 
       formatPickLabel(p.plate.label, p.plate.unit, p.valueInUnit, unit),
     )
     .join(" + ");
+}
+
+const KG_PLATE_COLORS: Array<{
+  value: number;
+  color: string;
+  text: string;
+}> = [
+  { value: 25, color: "#e53935", text: "#fefefe" },
+  { value: 20, color: "#1e88e5", text: "#fefefe" },
+  { value: 15, color: "#fdd835", text: "#1a1a1a" },
+  { value: 10, color: "#43a047", text: "#fefefe" },
+  { value: 5, color: "#f5f5f5", text: "#1a1a1a" },
+  { value: 2.5, color: "#d32f2f", text: "#fefefe" },
+  { value: 2, color: "#1e88e5", text: "#fefefe" },
+  { value: 1.5, color: "#fdd835", text: "#1a1a1a" },
+  { value: 1, color: "#111111", text: "#f5f5f5" },
+  { value: 0.5, color: "#1e88e5", text: "#fefefe" },
+];
+
+function getKgPlateColor(valueKg: number) {
+  let best = KG_PLATE_COLORS[0];
+  for (const c of KG_PLATE_COLORS) {
+    if (Math.abs(valueKg - c.value) < Math.abs(valueKg - best.value)) best = c;
+  }
+  return { color: best.color, text: best.text };
+}
+
+function getLbPlateColor(valueLb: number, maxLb: number) {
+  const t = maxLb > 0 ? Math.min(1, valueLb / maxLb) : 0;
+  const lightness = Math.round(78 - t * 38);
+  const text = lightness > 60 ? "#1a1a1a" : "#f7f7f7";
+  return { color: `hsl(0 0% ${lightness}%)`, text };
+}
+
+function getPlateDiameter(unit: Unit, value: number) {
+  if (unit === "lb") return 72;
+  if (value >= 10) return 74;
+  if (value >= 5) return 62;
+  if (value >= 1.5) return 52;
+  if (value >= 1) return 44;
+  return 36;
+}
+
+function getPlateThickness(unit: Unit, value: number) {
+  if (unit === "lb") {
+    if (value >= 45) return 18;
+    if (value >= 35) return 16;
+    if (value >= 25) return 14;
+    if (value >= 10) return 12;
+    if (value >= 5) return 10;
+    return 9;
+  }
+
+  if (value >= 25) return 18;
+  if (value >= 20) return 17;
+  if (value >= 15) return 16;
+  if (value >= 10) return 14;
+  if (value >= 5) return 12;
+  if (value >= 2) return 9;
+  if (value >= 1.5) return 8;
+  if (value >= 1) return 7;
+  return 6;
 }
 
 function normalizeExtraPcts(extraPcts: number[] | undefined) {
@@ -137,6 +199,41 @@ export function PercentCards({
     return cards.find((c) => Math.abs(c.pct - selectedPct) < 0.0001) ?? null;
   }, [cards, selectedPct]);
 
+  const plateVisuals = useMemo(() => {
+    if (!selected?.load.platesPerSide.length) return [];
+
+    const maxLbValue = selected.load.platesPerSide.reduce(
+      (max, p) =>
+        p.plate.unit === "lb" ? Math.max(max, p.plate.value) : max,
+      0,
+    );
+
+    return selected.load.platesPerSide.map((p, index) => {
+      const palette =
+        p.plate.unit === "kg"
+          ? getKgPlateColor(p.plate.value)
+          : getLbPlateColor(p.plate.value, maxLbValue);
+
+      const size = getPlateDiameter(p.plate.unit, p.plate.value);
+      const thickness = getPlateThickness(p.plate.unit, p.plate.value);
+
+      return {
+        id: `${p.plate.unit}-${p.plate.value}-${index}`,
+        size,
+        thickness,
+        color: palette.color,
+        textColor: palette.text,
+        text: `${p.plate.value}`,
+        label: formatPickLabel(
+          p.plate.label,
+          p.plate.unit,
+          p.valueInUnit,
+          unit,
+        ),
+      };
+    });
+  }, [selected, unit]);
+
   function selectPct(pct: number) {
     setSelectedPct((prev) =>
       prev != null && Math.abs(prev - pct) < 0.0001 ? null : pct,
@@ -166,8 +263,46 @@ export function PercentCards({
 
       <div className={styles.detailKpi}>
         <div className={styles.detailKpiLabel}>{t.home.platesPerSide}</div>
-        <div className={[styles.detailKpiValue, styles.detailClamp].join(" ")}>
-          {platesPerSideLabel(selected.load, unit)}
+        <div className={styles.plateCombo}>
+          <div
+            className={[styles.detailKpiValue, styles.detailClamp].join(" ")}
+          >
+            {platesPerSideLabel(selected.load, unit)}
+          </div>
+          {plateVisuals.length ? (
+            <div
+              className={styles.plateBar}
+              role="img"
+              aria-label={platesPerSideLabel(selected.load, unit)}
+            >
+              <span className={styles.barShaft} aria-hidden="true" />
+              <span className={styles.barSleeve} aria-hidden="true" />
+              <div className={styles.barPlates}>
+                {plateVisuals.map((plate) => (
+                  <span
+                    key={plate.id}
+                    className={styles.plateBlock}
+                    style={
+                      {
+                        "--plate-size": `${plate.size}px`,
+                        "--plate-thickness": `${plate.thickness}px`,
+                        "--plate-color": plate.color,
+                        "--plate-text": plate.textColor,
+                      } as CSSProperties
+                    }
+                    title={plate.label}
+                    aria-label={plate.label}
+                  >
+                    <span className={styles.plateLabel} aria-hidden="true">
+                      {plate.text}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className={styles.plateEmpty}>—</div>
+          )}
         </div>
       </div>
 
