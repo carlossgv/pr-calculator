@@ -318,7 +318,11 @@
   flex-wrap: nowrap;
   overflow-x: auto;
   padding: 6px 0 10px;
-  --plate-scale: 1.62;
+}
+
+.plateBarGrouped {
+  height: var(--plate-diagram-height, 150px);
+  padding: 6px 24px 10px;
 }
 
 .barCore {
@@ -357,38 +361,31 @@
   flex: 0 0 auto;
 }
 
-.plateBlock {
-  width: calc(var(--plate-thickness, 12px) * var(--plate-scale, 1));
-  height: calc(var(--plate-size, 40px) * var(--plate-scale, 1));
-  border-radius: calc(3px * var(--plate-scale, 1));
+.barPlatesGrouped {
+  height: 100%;
+  align-items: center;
+  gap: 3px;
+}
+
+.plateGroupBlock {
+  width: var(--plate-group-width, 36px);
+  height: var(--plate-group-height, 120px);
+  border-radius: 6px;
   background: var(--plate-color, #9e9e9e);
   box-shadow:
     inset 0 0 0 2px color-mix(in oklab, var(--fg) 16%, transparent),
     0 6px 12px rgba(0, 0, 0, 0.2);
   position: relative;
+  display: grid;
+  place-items: center;
   flex: 0 0 auto;
 }
 
-.plateBlock::after {
-  content: "";
-  position: absolute;
-  inset: 18%;
-  border-radius: calc(2px * var(--plate-scale, 1));
-  background: color-mix(in oklab, var(--fg) 14%, transparent);
-  opacity: 0.45;
-}
-
-.plateLabel {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: calc(12px * var(--plate-scale, 1));
-  font-weight: 900;
-  letter-spacing: 0.04em;
+.plateGroupText {
+  font-size: 14px;
+  font-weight: 800;
   color: var(--plate-text, #1a1a1a);
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
-  user-select: none;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
 }
 
 .plateEmpty {

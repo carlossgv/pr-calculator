@@ -15,7 +15,6 @@ type Props = {
   toPct?: number;
   stepPct?: number;
   order?: PercentOrder;
-
   /** Extra %s (ephemeral) injected by the parent (not persisted). */
   extraPcts?: number[];
 };
@@ -60,11 +59,11 @@ const KG_PLATE_COLORS: Array<{
   { value: 15, color: "#fdd835", text: "#1a1a1a" },
   { value: 10, color: "#43a047", text: "#fefefe" },
   { value: 5, color: "#f5f5f5", text: "#1a1a1a" },
-  { value: 2.5, color: "#d32f2f", text: "#fefefe" },
+  { value: 2.5, color: "#e53935", text: "#fefefe" },
   { value: 2, color: "#1e88e5", text: "#fefefe" },
   { value: 1.5, color: "#fdd835", text: "#1a1a1a" },
-  { value: 1, color: "#111111", text: "#f5f5f5" },
-  { value: 0.5, color: "#1e88e5", text: "#fefefe" },
+  { value: 1, color: "#43a047", text: "#fefefe" },
+  { value: 0.5, color: "#f5f5f5", text: "#1a1a1a" },
 ];
 
 function getKgPlateColor(valueKg: number) {
@@ -75,41 +74,80 @@ function getKgPlateColor(valueKg: number) {
   return { color: best.color, text: best.text };
 }
 
+const LB_PLATE_COLORS: Array<{
+  value: number;
+  color: string;
+  text: string;
+}> = [
+  { value: 45, color: "#1e88e5", text: "#fefefe" },
+  { value: 35, color: "#fdd835", text: "#1a1a1a" },
+  { value: 25, color: "#43a047", text: "#fefefe" },
+  { value: 10, color: "#f5f5f5", text: "#1a1a1a" },
+];
+
 function getLbPlateColor(valueLb: number, maxLb: number) {
+  const mapped = LB_PLATE_COLORS.find((plate) => plate.value === valueLb);
+  if (mapped) return { color: mapped.color, text: mapped.text };
   const t = maxLb > 0 ? Math.min(1, valueLb / maxLb) : 0;
   const lightness = Math.round(78 - t * 38);
   const text = lightness > 60 ? "#1a1a1a" : "#f7f7f7";
   return { color: `hsl(0 0% ${lightness}%)`, text };
 }
 
-function getPlateDiameter(unit: Unit, value: number) {
-  if (unit === "lb") return 72;
-  if (value >= 10) return 74;
-  if (value >= 5) return 62;
-  if (value >= 1.5) return 52;
-  if (value >= 1) return 44;
-  return 36;
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
 
-function getPlateThickness(unit: Unit, value: number) {
-  if (unit === "lb") {
-    if (value >= 45) return 18;
-    if (value >= 35) return 16;
-    if (value >= 25) return 14;
-    if (value >= 10) return 12;
-    if (value >= 5) return 10;
-    return 9;
+function getGroupedPlateWidth(
+  unit: Unit,
+  plateUnit: Unit,
+  valueInUnit: number,
+  plateValue: number,
+) {
+  if (plateUnit === "kg") {
+    if (plateValue === 25) return 46;
+    if (plateValue === 20) return 42;
+    if (plateValue === 10) return 35;
+    if (plateValue === 5) return 26;
   }
 
-  if (value >= 25) return 18;
-  if (value >= 20) return 17;
-  if (value >= 15) return 16;
-  if (value >= 10) return 14;
-  if (value >= 5) return 12;
-  if (value >= 2) return 9;
-  if (value >= 1.5) return 8;
-  if (value >= 1) return 7;
-  return 6;
+  if (unit === "lb" && plateUnit === "lb") {
+    if (valueInUnit === 45) return 46;
+    if (valueInUnit === 25) return 35;
+    if (valueInUnit === 10) return 26;
+  }
+
+  return clamp(valueInUnit * 1.4, 26, 46);
+}
+
+function getGroupedPlateHeight(unit: Unit, valueInUnit: number) {
+  const isFractional = unit === "lb" ? valueInUnit <= 10 : valueInUnit < 5;
+  if (isFractional) {
+    const minHeight = 72;
+    const maxHeight = 98;
+    const minWeight = unit === "lb" ? 2.5 : 0.5;
+    const maxWeight = unit === "lb" ? 10 : 5;
+    const t = clamp(
+      (valueInUnit - minWeight) / (maxWeight - minWeight),
+      0,
+      1,
+    );
+    return minHeight + t * (maxHeight - minHeight);
+  }
+
+  const minHeight = 110;
+  const maxHeight = 140;
+  const [minWeight, maxWeight] = unit === "lb" ? [10, 45] : [5, 25];
+  const t = clamp(
+    (valueInUnit - minWeight) / (maxWeight - minWeight),
+    0,
+    1,
+  );
+  const mapped =
+    unit === "lb"
+      ? minHeight + t * (maxHeight - minHeight)
+      : 115 + t * (maxHeight - 115);
+  return clamp(mapped, minHeight, maxHeight);
 }
 
 function normalizeExtraPcts(extraPcts: number[] | undefined) {
@@ -199,7 +237,7 @@ export function PercentCards({
     return cards.find((c) => Math.abs(c.pct - selectedPct) < 0.0001) ?? null;
   }, [cards, selectedPct]);
 
-  const plateVisuals = useMemo(() => {
+  const groupedStylePlates = useMemo(() => {
     if (!selected?.load.platesPerSide.length) return [];
 
     const maxLbValue = selected.load.platesPerSide.reduce(
@@ -208,30 +246,42 @@ export function PercentCards({
       0,
     );
 
-    return selected.load.platesPerSide.map((p, index) => {
-      const palette =
-        p.plate.unit === "kg"
-          ? getKgPlateColor(p.plate.value)
-          : getLbPlateColor(p.plate.value, maxLbValue);
-
-      const size = getPlateDiameter(p.plate.unit, p.plate.value);
-      const thickness = getPlateThickness(p.plate.unit, p.plate.value);
-
-      return {
-        id: `${p.plate.unit}-${p.plate.value}-${index}`,
-        size,
-        thickness,
-        color: palette.color,
-        textColor: palette.text,
-        text: `${p.plate.value}`,
-        label: formatPickLabel(
-          p.plate.label,
+    return selected.load.platesPerSide
+      .map((p, index) => {
+        const palette =
+          p.plate.unit === "kg"
+            ? getKgPlateColor(p.plate.value)
+            : getLbPlateColor(p.plate.value, maxLbValue);
+        const width = getGroupedPlateWidth(
+          unit,
           p.plate.unit,
           p.valueInUnit,
-          unit,
-        ),
-      };
-    });
+          p.plate.value,
+        );
+        const height =
+          unit === "lb" && p.plate.unit === "lb"
+            ? 140
+            : getGroupedPlateHeight(
+                p.plate.unit === "kg" ? "kg" : unit,
+                p.plate.unit === "kg" ? p.plate.value : p.valueInUnit,
+              );
+        return {
+          id: `${p.plate.unit}-${p.plate.value}-${index}`,
+          width,
+          height,
+          valueInUnit: p.valueInUnit,
+          text: `${p.plate.value}`,
+          label: formatPickLabel(
+            p.plate.label,
+            p.plate.unit,
+            p.valueInUnit,
+            unit,
+          ),
+          color: palette.color,
+          textColor: palette.text,
+        };
+      })
+      .sort((a, b) => b.valueInUnit - a.valueInUnit);
   }, [selected, unit]);
 
   function selectPct(pct: number) {
@@ -269,9 +319,9 @@ export function PercentCards({
           >
             {platesPerSideLabel(selected.load, unit)}
           </div>
-          {plateVisuals.length ? (
+          {groupedStylePlates.length ? (
             <div
-              className={styles.plateBar}
+              className={[styles.plateBar, styles.plateBarGrouped].join(" ")}
               role="img"
               aria-label={platesPerSideLabel(selected.load, unit)}
             >
@@ -279,15 +329,15 @@ export function PercentCards({
                 <span className={styles.barShaft} />
                 <span className={styles.barSleeve} />
               </div>
-              <div className={styles.barPlates}>
-                {plateVisuals.map((plate) => (
+              <div className={[styles.barPlates, styles.barPlatesGrouped].join(" ")}>
+                {groupedStylePlates.map((plate) => (
                   <span
                     key={plate.id}
-                    className={styles.plateBlock}
+                    className={styles.plateGroupBlock}
                     style={
                       {
-                        "--plate-size": `${plate.size}px`,
-                        "--plate-thickness": `${plate.thickness}px`,
+                        "--plate-group-width": `${plate.width}px`,
+                        "--plate-group-height": `${plate.height}px`,
                         "--plate-color": plate.color,
                         "--plate-text": plate.textColor,
                       } as CSSProperties
@@ -295,7 +345,7 @@ export function PercentCards({
                     title={plate.label}
                     aria-label={plate.label}
                   >
-                    <span className={styles.plateLabel} aria-hidden="true">
+                    <span className={styles.plateGroupText} aria-hidden="true">
                       {plate.text}
                     </span>
                   </span>
