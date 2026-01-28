@@ -275,8 +275,10 @@ export function PercentCards({
               role="img"
               aria-label={platesPerSideLabel(selected.load, unit)}
             >
-              <span className={styles.barShaft} aria-hidden="true" />
-              <span className={styles.barSleeve} aria-hidden="true" />
+              <div className={styles.barCore} aria-hidden="true">
+                <span className={styles.barShaft} />
+                <span className={styles.barSleeve} />
+              </div>
               <div className={styles.barPlates}>
                 {plateVisuals.map((plate) => (
                   <span
