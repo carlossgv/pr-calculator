@@ -225,4 +225,4 @@ jobs:
             -H "Title: PR Calculator deployed (production)" \
             -H "Tags: rocket,production" \
             -d "Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
-            https://ntfy.carlosgv.dev/pr-calculator || true
+            ${{ vars.NTFY_URL }} || true
