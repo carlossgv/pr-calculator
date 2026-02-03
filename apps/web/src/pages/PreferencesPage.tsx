@@ -668,6 +668,30 @@ export function PreferencesPage() {
               </Button>
             </div>
           </div>
+
+          <div className={styles.row}>
+            <div className={styles.rowLeft}>
+              <div className={styles.rowTitle}>{t.prefs.support.donateTitle}</div>
+              <div className={styles.rowHint}>{t.prefs.support.donateHint}</div>
+            </div>
+
+            <div className={styles.rowRight}>
+              <a
+                className={styles.kofiLink}
+                href="https://ko-fi.com/carlossgv"
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={t.prefs.support.donateAria}
+              >
+                <img
+                  className={styles.kofiImage}
+                  src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
+                  alt={t.prefs.support.donateAlt}
+                  height={36}
+                />
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 

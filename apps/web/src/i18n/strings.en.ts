@@ -103,6 +103,11 @@ export const en = {
       copyFullTitle: "Copy full ID",
       copyAria: "Copy support ID",
       unknownId: "unknown",
+      donateTitle: "Buy me a coffee",
+      donateHint: "If PR Calc helps you, a coffee keeps it going.",
+      donateCta: "Ko‑fi coffee",
+      donateAria: "Open Ko-fi coffee page",
+      donateAlt: "Buy me a coffee at ko-fi.com",
     },
     contact: {
       title: "Contact",

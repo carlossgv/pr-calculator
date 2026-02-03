@@ -104,6 +104,11 @@ export const es = {
       copyFullTitle: "Copiar ID completo",
       copyAria: "Copiar ID de soporte",
       unknownId: "desconocido",
+      donateTitle: "Invítame un café",
+      donateHint: "Si PR Calc te ayuda, un cafecito lo mantiene vivo.",
+      donateCta: "Café en Ko‑fi",
+      donateAria: "Abrir página de café en Ko-fi",
+      donateAlt: "Invítame un café en ko-fi.com",
     },
     contact: {
       title: "Contacto",
