@@ -21,5 +21,10 @@ Branch: main
 - Install help is OS-aware with inline CTA only when beforeinstallprompt is available.
 - Workflow now reads env-specific vars (API_URL, TS_LOGIN_SERVER, DEPLOY_PATH, NTFY_URL).
 
+## Workflow checklist
+- Environments: `staging`, `production`
+- Secrets (env-scoped): `TS_AUTHKEY`, `NTFY_TOKEN`
+- Vars (env-scoped): `API_URL`, `TS_LOGIN_SERVER`, `DEPLOY_HOST_TS`, `DEPLOY_PATH`, `SERVER_USER`, `NTFY_URL`
+
 ## TODO (next)
 - Debug Headscale/Tailscale SSH: confirm ACL allows `tag:github-actions` → deploy host tag, and `SERVER_USER` permissions; verify `DEPLOY_HOST_TS` and tags on the target host.
