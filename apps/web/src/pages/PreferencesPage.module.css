@@ -53,6 +53,15 @@
   border-top: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
 }
 
+.row + .rowPressable,
+.row + .actionRow {
+  border-top: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+}
+
+.rowDivider {
+  border-top: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+}
+
 .rowPressable {
   display: flex;
   align-items: center;
@@ -300,6 +309,54 @@
   opacity: 0.5;
 }
 
+/* ===== Install status ===== */
+
+.installStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--accent) 35%, var(--border));
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
+  color: var(--fg);
+
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.installStatusIcon {
+  opacity: 0.85;
+}
+
+/* ===== Ko-fi link ===== */
+
+.kofiLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+}
+
+.kofiImage {
+  display: block;
+  height: 36px;
+  width: auto;
+  border: 0;
+}
+
+.kofiLink:hover {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
 /* compact segmented control (Language) */
 .seg {
   display: inline-flex;
@@ -335,5 +392,3 @@
   color: var(--fg) !important;
   box-shadow: 0 10px 22px rgba(2, 6, 23, 0.18);
 }
-
-

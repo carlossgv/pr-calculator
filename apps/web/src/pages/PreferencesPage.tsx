@@ -22,6 +22,26 @@ import { Button } from "../ui/Button";
 
 type BarGender = "male" | "female";
 type PresetKey = "olympicKg" | "crossfitLb" | null;
+type InstallPlatform = "ios" | "android" | "desktop";
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
+function getInstallPlatform(): InstallPlatform {
+  if (typeof navigator === "undefined") return "desktop";
+
+  const ua = navigator.userAgent || "";
+  const isAndroid = /Android/i.test(ua);
+  const isIOS =
+    /iPhone|iPad|iPod/i.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  if (isIOS) return "ios";
+  if (isAndroid) return "android";
+  return "desktop";
+}
 
 function inferGenderFromPrefs(p: UserPreferences): BarGender {
   const unit = p.defaultUnit;
@@ -160,6 +180,11 @@ export function PreferencesPage() {
     null,
   );
   const [supportId, setSupportId] = useState<string>("…");
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  const installPlatform = useMemo(() => getInstallPlatform(), []);
 
   useEffect(() => {
     repo.getPreferences().then((p) => {
@@ -175,6 +200,33 @@ export function PreferencesPage() {
     getOrCreateIdentity()
       .then((id) => setSupportId(id.deviceId || t.prefs.support.unknownId))
       .catch(() => setSupportId(t.prefs.support.unknownId));
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const isStandalone =
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      (navigator as any).standalone === true;
+    setIsInstalled(Boolean(isStandalone));
+
+    const onBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+
+    const onAppInstalled = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    window.addEventListener("appinstalled", onAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", onAppInstalled);
+    };
   }, []);
 
   async function doExport() {
@@ -216,6 +268,16 @@ export function PreferencesPage() {
 
   async function doImportClick() {
     fileRef.current?.click();
+  }
+
+  async function onInstallClick() {
+    if (!installPrompt) return;
+    try {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      setInstallPrompt(null);
+      if (choice.outcome === "accepted") setIsInstalled(true);
+    } catch {}
   }
 
   const resolvedTheme = useMemo<ResolvedTheme>(() => {
@@ -342,9 +404,9 @@ export function PreferencesPage() {
 
   return (
     <div className={styles.page}>
-      {/* LANGUAGE (compact) */}
-      <section className={styles.section} aria-label={t.prefs.language.title}>
-        <div className={styles.sectionTitle}>{t.prefs.language.title}</div>
+      {/* UI */}
+      <section className={styles.section} aria-label={t.prefs.ui.title}>
+        <div className={styles.sectionTitle}>{t.prefs.ui.title}</div>
 
         <div className={styles.card}>
           <div className={styles.row}>
@@ -398,15 +460,9 @@ export function PreferencesPage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-      {/* THEME */}
-      <section className={styles.section} aria-label={t.prefs.theme.title}>
-        <div className={styles.sectionTitle}>{t.prefs.theme.title}</div>
 
-        <div className={styles.card}>
           <div
-            className={styles.rowPressable}
+            className={`${styles.rowPressable} ${styles.rowDivider}`}
             role="button"
             tabIndex={0}
             onClick={toggleTheme}
@@ -432,11 +488,9 @@ export function PreferencesPage() {
         </div>
       </section>
 
-      {/* BAR */}
-      <section className={styles.section} aria-label={t.prefs.bar.title}>
-        <div className={styles.sectionTitle}>
-          {t.prefs.bar.title} ({barUnit.toUpperCase()})
-        </div>
+      {/* PRESETS */}
+      <section className={styles.section} aria-label={t.prefs.presets.title}>
+        <div className={styles.sectionTitle}>{t.prefs.presets.title}</div>
 
         <div className={styles.card}>
           <div className={styles.row}>
@@ -494,11 +548,6 @@ export function PreferencesPage() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* PRESETS */}
-      <section className={styles.section} aria-label={t.prefs.presets.title}>
-        <div className={styles.sectionTitle}>{t.prefs.presets.title}</div>
 
         <div className={styles.card}>
           <Button
@@ -639,6 +688,57 @@ export function PreferencesPage() {
         </div>
       </section>
 
+      {/* INSTALL */}
+      <section className={styles.section} aria-label={t.prefs.install.title}>
+        <div className={styles.sectionTitle}>{t.prefs.install.title}</div>
+
+        <div className={styles.card}>
+          <div className={styles.row}>
+            <div className={styles.rowLeft}>
+              <div className={styles.rowTitle}>
+                {isInstalled
+                  ? t.prefs.install.installedTitle
+                  : installPlatform === "ios"
+                    ? t.prefs.install.iosTitle
+                    : installPlatform === "android"
+                      ? t.prefs.install.androidTitle
+                      : t.prefs.install.desktopTitle}
+              </div>
+              <div className={styles.rowHint}>
+                {isInstalled
+                  ? t.prefs.install.installedHint
+                  : installPrompt
+                    ? t.prefs.install.promptHint
+                    : installPlatform === "ios"
+                      ? t.prefs.install.iosHint
+                      : installPlatform === "android"
+                        ? t.prefs.install.androidHint
+                        : t.prefs.install.desktopHint}
+              </div>
+            </div>
+
+            <div className={styles.rowRight}>
+              {isInstalled ? (
+                <span className={styles.installStatus}>
+                  <Check size={14} className={styles.installStatusIcon} />
+                  {t.prefs.install.installedTitle}
+                </span>
+              ) : installPrompt ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  shape="pill"
+                  ariaLabel={t.prefs.install.installAria}
+                  onClick={onInstallClick}
+                >
+                  {t.prefs.install.installCta}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* SUPPORT */}
       <section className={styles.section} aria-label={t.prefs.support.title}>
         <div className={styles.sectionTitle}>{t.prefs.support.title}</div>
@@ -668,14 +768,7 @@ export function PreferencesPage() {
               </Button>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* CONTACT (simple) */}
-      <section className={styles.section} aria-label={t.prefs.contact.title}>
-        <div className={styles.sectionTitle}>{t.prefs.contact.title}</div>
-
-        <div className={styles.card}>
           <Button
             variant="row"
             className={styles.actionRow}
@@ -700,6 +793,39 @@ export function PreferencesPage() {
               />
             </div>
           </Button>
+        </div>
+      </section>
+
+      {/* SUPPORT PR CALC */}
+      <section className={styles.section} aria-label={t.prefs.donate.title}>
+        <div className={styles.sectionTitle}>{t.prefs.donate.title}</div>
+
+        <div className={styles.card}>
+          <div className={styles.row}>
+            <div className={styles.rowLeft}>
+              <div className={styles.rowTitle}>
+                {t.prefs.donate.donateTitle}
+              </div>
+              <div className={styles.rowHint}>{t.prefs.donate.donateHint}</div>
+            </div>
+
+            <div className={styles.rowRight}>
+              <a
+                className={styles.kofiLink}
+                href="https://ko-fi.com/carlossgv"
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={t.prefs.donate.donateAria}
+              >
+                <img
+                  className={styles.kofiImage}
+                  src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
+                  alt={t.prefs.donate.donateAlt}
+                  height={36}
+                />
+              </a>
+            </div>
+          </div>
         </div>
       </section>
     </div>

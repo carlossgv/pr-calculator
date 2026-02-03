@@ -21,6 +21,7 @@ jobs:
   # =========================
   build_and_push:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
 
     steps:
       - name: Checkout
@@ -130,7 +131,7 @@ jobs:
           build-args: |
             VITE_APP_ENV=${{ steps.flavor.outputs.is_prod == 'true' && 'prod' || 'dev' }}
             VITE_APP_TITLE=${{ steps.flavor.outputs.is_prod == 'true' && 'PR Calculator' || 'PR Calculator Dev' }}
-            VITE_API_BASE=${{ steps.flavor.outputs.is_prod == 'true' && 'https://prcalc-api.carlosgv.dev' || 'https://prcalc-api-dev.carlosgv.dev' }}
+            VITE_API_BASE=${{ vars.API_URL }}
             VITE_APP_VERSION=${{ github.sha }}
 
   # =========================
@@ -160,7 +161,7 @@ jobs:
           authkey: ${{ secrets.TS_AUTHKEY }}
           tags: tag:github-actions
           args: >
-            --login-server=https://vpn.carlosgv.dev
+            --login-server=${{ vars.TS_LOGIN_SERVER }}
             --accept-dns=false
             --timeout=45s
           ping: ${{ vars.DEPLOY_HOST_TS }}
@@ -169,9 +170,9 @@ jobs:
         run: |
           set -euo pipefail
           tailscale ssh ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
-            cd /home/carlos/homelab/pr-calculator-web
-            docker compose pull pr-calculator-api-dev pr-calculator-web-dev
-            docker compose up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
+            cd ${{ vars.DEPLOY_PATH }}
+            docker compose --env-file .env.dev -f docker-compose.dev.yml pull pr-calculator-api-dev pr-calculator-web-dev
+            docker compose --env-file .env.dev -f docker-compose.dev.yml up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
           EOF
 
   # =========================
@@ -201,7 +202,7 @@ jobs:
           authkey: ${{ secrets.TS_AUTHKEY }}
           tags: tag:github-actions
           args: >
-            --login-server=https://vpn.carlosgv.dev
+            --login-server=${{ vars.TS_LOGIN_SERVER }}
             --accept-dns=false
             --timeout=45s
           ping: ${{ vars.DEPLOY_HOST_TS }}
@@ -210,9 +211,9 @@ jobs:
         run: |
           set -euo pipefail
           tailscale ssh ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
-            cd /home/carlos/homelab/pr-calculator-web
-            docker compose pull pr-calculator-api pr-calculator-web
-            docker compose up -d pr-calculator-db pr-calculator-api pr-calculator-web
+            cd ${{ vars.DEPLOY_PATH }}
+            docker compose --env-file .env.prod -f docker-compose.prod.yml pull pr-calculator-api pr-calculator-web
+            docker compose --env-file .env.prod -f docker-compose.prod.yml up -d pr-calculator-db pr-calculator-api pr-calculator-web
           EOF
 
       - name: Notify ntfy
@@ -224,4 +225,4 @@ jobs:
             -H "Title: PR Calculator deployed (production)" \
             -H "Tags: rocket,production" \
             -d "Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
-            https://ntfy.carlosgv.dev/pr-calculator || true
+            ${{ vars.NTFY_URL }} || true
