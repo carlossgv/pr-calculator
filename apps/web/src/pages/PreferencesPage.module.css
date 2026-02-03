@@ -53,6 +53,15 @@
   border-top: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
 }
 
+.row + .rowPressable,
+.row + .actionRow {
+  border-top: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+}
+
+.rowDivider {
+  border-top: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+}
+
 .rowPressable {
   display: flex;
   align-items: center;
@@ -298,6 +307,29 @@
 
 .supportIdDots {
   opacity: 0.5;
+}
+
+/* ===== Install status ===== */
+
+.installStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--accent) 35%, var(--border));
+  background: color-mix(in oklab, var(--accent) 10%, transparent);
+  color: var(--fg);
+
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.installStatusIcon {
+  opacity: 0.85;
 }
 
 /* ===== Ko-fi link ===== */
