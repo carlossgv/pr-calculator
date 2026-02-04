@@ -8,10 +8,12 @@ import { initPwa } from "./pwa";
 import { initSync } from "./sync/sync";
 import { repo } from "./storage/repo";
 import { setLanguage } from "./i18n/strings";
+import { initNativeSafeArea } from "./utils/native-safe-area";
 
 async function bootstrap() {
   // SW + callbacks
   initPwa();
+  initNativeSafeArea();
 
   // set language ASAP (before first render)
   try {

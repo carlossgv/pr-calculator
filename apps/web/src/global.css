@@ -53,6 +53,11 @@
     color-mix(in oklab, var(--fg) 46%, transparent) 0 2px,
     transparent 2px 5px
   );
+
+  /* Safe areas */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --native-bottom-inset: 0px;
 }
 
 :root[data-theme="dark"] {
@@ -184,7 +189,8 @@ select:focus-visible {
   max-width: 720px;
   margin: 0 auto;
   padding: 16px;
-  padding-bottom: 84px; /* espacio para bottom nav */
+  padding-top: calc(16px + var(--safe-top));
+  padding-bottom: calc(84px + var(--safe-bottom) + var(--native-bottom-inset));
 }
 
 .topHeader {
@@ -352,6 +358,7 @@ select:focus-visible {
     margin: 0;
     padding-left: 14px;
     padding-right: 14px;
+    padding-top: calc(14px + var(--safe-top));
   }
 
   .bottomNav {
@@ -361,10 +368,10 @@ select:focus-visible {
     right: 0;
     bottom: 0;
 
-    height: 68px;
+    height: calc(68px + var(--safe-bottom) + var(--native-bottom-inset));
     padding-left: 10px;
     padding-right: 10px;
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: calc(var(--safe-bottom) + var(--native-bottom-inset));
 
     justify-content: space-around;
     align-items: center;

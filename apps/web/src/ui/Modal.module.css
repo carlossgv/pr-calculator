@@ -9,7 +9,7 @@
   align-items: end;
   justify-items: stretch;
 
-  padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  padding: 10px 10px calc(10px + var(--safe-bottom) + var(--native-bottom-inset));
 
   /* ✅ blur + dim (PercentCards style) */
   background: color-mix(in oklab, var(--fg) 12%, transparent);
