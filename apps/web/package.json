@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:native": "tsc -b && vite build --mode native",
     "typecheck": "tsc -b"
   },
   "dependencies": {
+    "@repo/app-config": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/api-contracts": "workspace:*",
     "dexie": "^4.0.10",

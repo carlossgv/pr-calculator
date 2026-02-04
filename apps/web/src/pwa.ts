@@ -1,5 +1,6 @@
 // apps/web/src/pwa.ts
 import { registerSW } from "virtual:pwa-register";
+import { IS_NATIVE_APP } from "./utils/app-envs";
 
 export type PwaUpdateSnapshot = {
   offlineReady: boolean;
@@ -58,6 +59,7 @@ function setupForegroundUpdateCheck() {
 }
 
 export function initPwa() {
+  if (IS_NATIVE_APP) return;
   if (initialized) return;
   initialized = true;
 
