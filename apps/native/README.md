@@ -21,3 +21,5 @@ This app wraps `apps/web` in a native shell for iOS/Android.
 - Native build uses `apps/web/.env.native` with `VITE_API_BASE`.
 - Service worker is disabled in native builds.
 - Sync runs while the app is open; on resume it triggers a pull.
+- Android builds expect JDK 17. If you see Java home errors, check `~/.gradle/gradle.properties`
+  and Android Studio’s Gradle JDK setting.
