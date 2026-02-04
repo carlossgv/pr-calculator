@@ -26,6 +26,10 @@ function applyInset() {
 }
 
 export function initNativeSafeArea() {
+  if (typeof document !== "undefined" && IS_NATIVE_APP) {
+    document.documentElement.classList.add("is-native");
+  }
+
   if (typeof window === "undefined") return;
   if (!IS_NATIVE_APP) return;
   if (!isAndroid()) return;

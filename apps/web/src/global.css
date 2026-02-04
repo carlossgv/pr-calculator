@@ -57,6 +57,7 @@
   /* Safe areas */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --native-top-inset: 0px;
   --native-bottom-inset: 0px;
 }
 
@@ -133,6 +134,24 @@ body {
     Roboto,
     Helvetica,
     Arial;
+}
+
+:root.is-native {
+  --native-top-inset: max(var(--safe-top), 24px);
+}
+
+:root.is-native body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--native-top-inset);
+  background: color-mix(in oklab, var(--bg) 72%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  pointer-events: none;
+  z-index: 1000;
 }
 
 /* Links: content links get accent */
