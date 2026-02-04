@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PR Calculator</string>
+    <string name="title_activity_main">PR Calculator</string>
+    <string name="package_name">dev.carlosgv.prcalculator</string>
+    <string name="custom_url_scheme">dev.carlosgv.prcalculator</string>
+</resources>

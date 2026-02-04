@@ -12,6 +12,7 @@
     "@repo/app-config": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/api-contracts": "workspace:*",
+    "@capacitor/app": "^6.0.0",
     "dexie": "^4.0.10",
     "lucide-react": "^0.561.0",
     "react": "^18.3.1",

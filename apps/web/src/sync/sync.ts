@@ -17,6 +17,7 @@ import {
 } from "./identity";
 import { repo } from "../storage/repo";
 import { setLanguage } from "../i18n/strings";
+import { IS_NATIVE_APP } from "../utils/app-envs";
 
 const DEBUG_SYNC = (import.meta as any).env?.VITE_DEBUG_SYNC === "1";
 
@@ -357,6 +358,22 @@ function schedulePush(auth: { deviceId: string; deviceToken: string }) {
   }, 2500);
 }
 
+async function setupNativeResumePull(auth: {
+  deviceId: string;
+  deviceToken: string;
+}) {
+  if (!IS_NATIVE_APP) return;
+
+  try {
+    const mod = await import("@capacitor/app");
+    mod.App.addListener("appStateChange", ({ isActive }) => {
+      if (isActive) doPull(auth).catch(() => {});
+    });
+  } catch {
+    // no-op
+  }
+}
+
 export async function initSync() {
   if (started) return;
   started = true;
@@ -382,6 +399,7 @@ export async function initSync() {
   await doPull(auth);
 
   subscribeChanges(() => schedulePush(auth));
+  setupNativeResumePull(auth).catch(() => {});
 
   document.addEventListener(
     "visibilitychange",
