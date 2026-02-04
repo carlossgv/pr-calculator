@@ -7,8 +7,8 @@ android {
         applicationId "dev.carlosgv.prcalculator"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +16,32 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    def keystorePropsFile = rootProject.file("keystore.properties")
+    def keystoreProps = new Properties()
+    if (keystorePropsFile.exists()) {
+        keystoreProps.load(new FileInputStream(keystorePropsFile))
+    }
+
+    def hasReleaseSigning = keystoreProps["RELEASE_STORE_FILE"] &&
+        keystoreProps["RELEASE_STORE_PASSWORD"] &&
+        keystoreProps["RELEASE_KEY_ALIAS"] &&
+        keystoreProps["RELEASE_KEY_PASSWORD"]
+
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile file(keystoreProps["RELEASE_STORE_FILE"])
+                storePassword keystoreProps["RELEASE_STORE_PASSWORD"]
+                keyAlias keystoreProps["RELEASE_KEY_ALIAS"]
+                keyPassword keystoreProps["RELEASE_KEY_PASSWORD"]
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

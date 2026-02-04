@@ -36,4 +36,8 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+*.keystore
+*.jks
+apps/native/android/keystore.properties
+**/.idea/
 **/*/export.json
