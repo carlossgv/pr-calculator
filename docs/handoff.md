@@ -28,3 +28,8 @@ Branch: main
 
 ## TODO (next)
 - Debug Headscale/Tailscale SSH: confirm ACL allows `tag:github-actions` → deploy host tag, and `SERVER_USER` permissions; verify `DEPLOY_HOST_TS` and tags on the target host.
+
+## User feedback (2026-02-05)
+- Add an explicit close “X” button to modals; some users don’t realize they can tap outside to close.
+- On some Android devices there is a visible empty gap between the bottom button bar and the system keyboard/navigation area.
+- Creating and adding new PRs and movements is confusing; improve the flow and clarity.
