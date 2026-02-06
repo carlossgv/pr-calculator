@@ -1,4 +1,4 @@
-// packages/app-config/src/index.ts
+// packages/app-config/src/index.js
 export const APP_ID = "dev.carlosgv.prcalculator";
 
 export const APP_BRANDING = {
@@ -9,14 +9,7 @@ export const APP_BRANDING = {
   backgroundColor: "#0b1220",
 };
 
-export type AppBranding = typeof APP_BRANDING;
-
-export function getBrandingForEnv(appEnv?: string): AppBranding & {
-  name: string;
-  shortName: string;
-  description: string;
-  themeColor: string;
-} {
+export function getBrandingForEnv(appEnv) {
   const isDev = appEnv === "dev";
   return {
     ...APP_BRANDING,
