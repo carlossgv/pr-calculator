@@ -335,9 +335,10 @@ export function PreferencesPage() {
     applyTheme(nextTheme);
   }
 
-  function applyPreset(preset: UserPreferences) {
+  async function applyPreset(preset: UserPreferences) {
     if (!prefs) return;
 
+    const prevUnit = prefs.defaultUnit;
     const unit: Unit = preset.defaultUnit;
     const v = barValueFor(unit, barGender);
 
@@ -356,7 +357,12 @@ export function PreferencesPage() {
       prefs,
     );
 
-    save(next);
+    setPrefs(next);
+    await repo.setPreferences(next);
+
+    if (prevUnit !== next.defaultUnit) {
+      await repo.convertPrEntriesUnit(prevUnit, next.defaultUnit);
+    }
   }
 
   function setGender(nextGender: BarGender) {
