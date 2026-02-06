@@ -227,8 +227,8 @@ export function WeightCalculatorPanel({
     check();
 
     if (typeof window === "undefined" || !("ResizeObserver" in window)) {
-      const id = window.setTimeout(check, 0);
-      return () => window.clearTimeout(id);
+      const id = setTimeout(check, 0);
+      return () => clearTimeout(id);
     }
 
     const ro = new ResizeObserver(check);
