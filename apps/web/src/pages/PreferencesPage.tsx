@@ -14,7 +14,7 @@ import { repo } from "../storage/repo";
 import { setLanguage, t } from "../i18n/strings";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
-import { Mars, Venus, ChevronRight, Check } from "lucide-react";
+import { Mars, Venus, ChevronRight } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
 import { downloadJson, exportBackup, importBackup } from "../storage/backup";
 import { getOrCreateIdentity } from "../sync/identity";
@@ -22,27 +22,6 @@ import { Button } from "../ui/Button";
 
 type BarGender = "male" | "female";
 type PresetKey = "olympicKg" | "crossfitLb" | null;
-type InstallPlatform = "ios" | "android" | "desktop";
-
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
-};
-
-function getInstallPlatform(): InstallPlatform {
-  if (typeof navigator === "undefined") return "desktop";
-
-  const ua = navigator.userAgent || "";
-  const isAndroid = /Android/i.test(ua);
-  const isIOS =
-    /iPhone|iPad|iPod/i.test(ua) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-  if (isIOS) return "ios";
-  if (isAndroid) return "android";
-  return "desktop";
-}
-
 function inferGenderFromPrefs(p: UserPreferences): BarGender {
   const unit = p.defaultUnit;
   const v = p.bar?.value ?? 0;
@@ -180,11 +159,6 @@ export function PreferencesPage() {
     null,
   );
   const [supportId, setSupportId] = useState<string>("…");
-  const [installPrompt, setInstallPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-
-  const installPlatform = useMemo(() => getInstallPlatform(), []);
 
   useEffect(() => {
     repo.getPreferences().then((p) => {
@@ -200,33 +174,6 @@ export function PreferencesPage() {
     getOrCreateIdentity()
       .then((id) => setSupportId(id.deviceId || t.prefs.support.unknownId))
       .catch(() => setSupportId(t.prefs.support.unknownId));
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const isStandalone =
-      window.matchMedia?.("(display-mode: standalone)")?.matches ||
-      (navigator as any).standalone === true;
-    setIsInstalled(Boolean(isStandalone));
-
-    const onBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-    };
-
-    const onAppInstalled = () => {
-      setIsInstalled(true);
-      setInstallPrompt(null);
-    };
-
-    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-    window.addEventListener("appinstalled", onAppInstalled);
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-      window.removeEventListener("appinstalled", onAppInstalled);
-    };
   }, []);
 
   async function doExport() {
@@ -268,16 +215,6 @@ export function PreferencesPage() {
 
   async function doImportClick() {
     fileRef.current?.click();
-  }
-
-  async function onInstallClick() {
-    if (!installPrompt) return;
-    try {
-      await installPrompt.prompt();
-      const choice = await installPrompt.userChoice;
-      setInstallPrompt(null);
-      if (choice.outcome === "accepted") setIsInstalled(true);
-    } catch {}
   }
 
   const resolvedTheme = useMemo<ResolvedTheme>(() => {
@@ -691,57 +628,6 @@ export function PreferencesPage() {
               {backupErr}
             </div>
           ) : null}
-        </div>
-      </section>
-
-      {/* INSTALL */}
-      <section className={styles.section} aria-label={t.prefs.install.title}>
-        <div className={styles.sectionTitle}>{t.prefs.install.title}</div>
-
-        <div className={styles.card}>
-          <div className={styles.row}>
-            <div className={styles.rowLeft}>
-              <div className={styles.rowTitle}>
-                {isInstalled
-                  ? t.prefs.install.installedTitle
-                  : installPlatform === "ios"
-                    ? t.prefs.install.iosTitle
-                    : installPlatform === "android"
-                      ? t.prefs.install.androidTitle
-                      : t.prefs.install.desktopTitle}
-              </div>
-              <div className={styles.rowHint}>
-                {isInstalled
-                  ? t.prefs.install.installedHint
-                  : installPrompt
-                    ? t.prefs.install.promptHint
-                    : installPlatform === "ios"
-                      ? t.prefs.install.iosHint
-                      : installPlatform === "android"
-                        ? t.prefs.install.androidHint
-                        : t.prefs.install.desktopHint}
-              </div>
-            </div>
-
-            <div className={styles.rowRight}>
-              {isInstalled ? (
-                <span className={styles.installStatus}>
-                  <Check size={14} className={styles.installStatusIcon} />
-                  {t.prefs.install.installedTitle}
-                </span>
-              ) : installPrompt ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  shape="pill"
-                  ariaLabel={t.prefs.install.installAria}
-                  onClick={onInstallClick}
-                >
-                  {t.prefs.install.installCta}
-                </Button>
-              ) : null}
-            </div>
-          </div>
         </div>
       </section>
 
