@@ -132,6 +132,7 @@
 
 .weightInput {
   width: 100%;
+  min-width: 0;
   font-size: 56px;
   font-weight: 950;
   letter-spacing: -0.03em;
@@ -145,9 +146,21 @@
 
   box-shadow: 0 10px 24px rgba(2, 6, 23, 0.1);
 
-  padding: 16px 70px 16px 18px;
+  padding: 16px 56px 16px 18px;
   outline: none;
   appearance: textfield;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weightInput[data-size="md"] {
+  font-size: 48px;
+}
+
+.weightInput[data-size="sm"] {
+  font-size: 40px;
 }
 
 .weightInput::-webkit-outer-spin-button,
@@ -163,7 +176,13 @@
 @media (max-width: 380px) {
   .weightInput {
     font-size: 46px;
-    padding-right: 62px;
+    padding-right: 50px;
+  }
+  .weightInput[data-size="md"] {
+    font-size: 40px;
+  }
+  .weightInput[data-size="sm"] {
+    font-size: 34px;
   }
 }
 

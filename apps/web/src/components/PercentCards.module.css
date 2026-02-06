@@ -132,6 +132,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 
   /* asegura que el contenido quede centrado verticalmente */
   min-height: 36px;
@@ -147,6 +148,21 @@
   letter-spacing: -0.01em;
 }
 
+.target {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.target[data-size="md"] {
+  font-size: 14px;
+}
+
+.target[data-size="sm"] {
+  font-size: 12px;
+}
+
 .pctHint {
   font-size: 12px;
   opacity: 0.92;
@@ -159,6 +175,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .chevronPill {
