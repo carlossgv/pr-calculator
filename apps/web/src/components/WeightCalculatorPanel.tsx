@@ -1,5 +1,5 @@
 // FILE: apps/web/src/components/WeightCalculatorPanel.tsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Unit, UserPreferences } from "@repo/core";
 import { convertWeightValue } from "@repo/core";
 import { repo } from "../storage/repo";
@@ -41,8 +41,23 @@ function sanitizeWeightText(input: string) {
     out = out.replace(/^0+(?=\d)/, "");
   }
 
-  if (out === "") out = "0";
-  return out;
+  const hadDot = out.includes(".");
+  const endsWithDot = out.endsWith(".");
+  const parts = out.replace(/\.$/, "").split(".");
+  let intPart = parts[0] ?? "";
+  let fracPart = parts[1] ?? "";
+
+  if (intPart.length > 4) intPart = intPart.slice(0, 4);
+  if (fracPart.length > 1) fracPart = fracPart.slice(0, 1);
+
+  let next = intPart;
+  if (hadDot && (endsWithDot || fracPart.length)) {
+    next = `${intPart}.${fracPart}`;
+    if (endsWithDot && fracPart.length === 0) next = `${intPart}.`;
+  }
+
+  if (next === "") next = "0";
+  return next;
 }
 
 type ChangePayload = { unit: Unit; weight: number };
@@ -133,6 +148,8 @@ export function WeightCalculatorPanel({
   onChange,
   theoreticalFrom,
 }: Props) {
+  const weightInputRef = useRef<HTMLInputElement | null>(null);
+  const [weightSize, setWeightSize] = useState<"lg" | "md" | "sm">("lg");
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [rawWeight, setRawWeight] = useState<number>(initialWeight ?? 100);
@@ -195,6 +212,29 @@ export function WeightCalculatorPanel({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useLayoutEffect(() => {
+    const el = weightInputRef.current;
+    if (!el) return;
+
+    const check = () => {
+      const max = el.clientWidth;
+      const needed = el.scrollWidth;
+      const next = needed > max * 1.18 ? "sm" : needed > max * 1.02 ? "md" : "lg";
+      setWeightSize((prev) => (prev === next ? prev : next));
+    };
+
+    check();
+
+    if (typeof window === "undefined" || !("ResizeObserver" in window)) {
+      const id = window.setTimeout(check, 0);
+      return () => window.clearTimeout(id);
+    }
+
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [weightText, unit, mode]);
 
   const effectivePrefs = useMemo(() => {
     if (!prefs) return null;
@@ -334,6 +374,8 @@ export function WeightCalculatorPanel({
           <div className={styles.weightInputWrap}>
             <input
               className={styles.weightInput}
+              data-size={weightSize}
+              ref={weightInputRef}
               type="text"
               inputMode="decimal"
               value={weightText}

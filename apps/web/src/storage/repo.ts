@@ -1,5 +1,6 @@
 // FILE: apps/web/src/storage/repo.ts
 import {
+  convertWeightValue,
   DEFAULT_PREFS,
   type Movement,
   type PrEntry,
@@ -24,6 +25,10 @@ function isNewPrefsShape(p: unknown): p is UserPreferences {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function round1(n: number) {
+  return Math.round(n * 10) / 10;
 }
 
 function isDeleted(row: { deletedAt?: string | null } | null | undefined) {
@@ -138,6 +143,36 @@ export const repo = {
 
   async setPreferences(prefs: UserPreferences): Promise<void> {
     await db.preferences.put({ id: "prefs", value: prefs });
+    markDirty();
+  },
+
+  async convertPrEntriesUnit(from: Unit, to: Unit): Promise<void> {
+    if (from === to) return;
+
+    const rows = await db.prEntries.toArray();
+    if (!rows.length) return;
+
+    const now = nowIso();
+    let changed = false;
+
+    const next = rows.map((e) => {
+      const weight = Number(e.weight);
+      if (!Number.isFinite(weight)) return e;
+
+      const converted = round1(convertWeightValue(weight, from, to));
+      if (converted === weight) return e;
+
+      changed = true;
+      return {
+        ...(e as any),
+        weight: converted,
+        updatedAt: now,
+      } as PrEntry;
+    });
+
+    if (!changed) return;
+
+    await db.prEntries.bulkPut(next);
     markDirty();
   },
 

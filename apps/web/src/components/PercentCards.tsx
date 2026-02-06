@@ -420,6 +420,10 @@ export function PercentCards({
             .filter(Boolean)
             .join(" ");
 
+          const targetLabel = `${round1(target)}${unit}`;
+          const targetSize =
+            targetLabel.length >= 8 ? "sm" : targetLabel.length >= 7 ? "md" : "lg";
+
           return (
             <button
               key={pct}
@@ -429,15 +433,11 @@ export function PercentCards({
               aria-pressed={isSelected}
             >
               <div className={styles.tileRow}>
-                <div className={styles.pct}>
-                  {pct}%{" "}
-                  {is100 ? <span className={styles.pctHint}>(MAX)</span> : null}
-                </div>
+                <div className={styles.pct}>{pct}%</div>
 
                 <div className={styles.rightTop}>
-                  <div className={styles.target}>
-                    {round1(target)}
-                    {unit}
+                  <div className={styles.target} data-size={targetSize}>
+                    {targetLabel}
                   </div>
 
                   <span className={styles.chevronPill} aria-hidden="true">
