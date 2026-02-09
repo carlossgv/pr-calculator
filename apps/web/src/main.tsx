@@ -9,23 +9,11 @@ import { initSync } from "./sync/sync";
 import { repo } from "./storage/repo";
 import { setLanguage } from "./i18n/strings";
 import { initNativeSafeArea } from "./utils/native-safe-area";
-import { IS_NATIVE_APP } from "./utils/app-envs";
-
-async function initLiveUpdate() {
-  if (!IS_NATIVE_APP) return;
-  try {
-    const mod = await import("@capawesome/capacitor-live-update");
-    await mod.LiveUpdate.ready();
-  } catch {
-    // ignore
-  }
-}
 
 async function bootstrap() {
   // SW + callbacks
   initPwa();
   initNativeSafeArea();
-  initLiveUpdate().catch(() => {});
 
   // set language ASAP (before first render)
   try {
