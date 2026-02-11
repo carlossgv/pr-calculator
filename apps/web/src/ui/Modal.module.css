@@ -3,24 +3,23 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 60; /* above page content */
+  z-index: 1100; /* above fixed mobile bottom nav */
 
   display: grid;
-  align-items: end;
-  justify-items: stretch;
+  align-items: center;
+  justify-items: center;
 
-  padding: 10px 10px calc(10px + var(--safe-bottom) + var(--native-bottom-inset));
+  padding: 14px;
 
   background: color-mix(in oklab, var(--fg) 22%, transparent);
 }
 
 .modal {
+  width: min(520px, calc(100vw - 28px));
   background: var(--card-bg);
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
-  border-bottom: none;
   padding: 12px;
 
   max-height: min(70vh, 560px);
@@ -50,9 +49,8 @@
   padding: 0 !important;
   flex: 0 0 auto;
 
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--card-bg);
+  border: 0;
+  background: transparent;
   color: var(--muted);
 
   display: inline-flex;
@@ -76,7 +74,6 @@
   .modal {
     width: min(520px, calc(100vw - 28px));
     border-radius: var(--radius-lg);
-    border-bottom: 1px solid var(--border);
   }
 }
 
@@ -94,6 +91,5 @@
     width: 520px;
     max-height: min(70vh, 560px);
     border-radius: var(--radius-lg);
-    border-bottom: 1px solid var(--border);
   }
 }

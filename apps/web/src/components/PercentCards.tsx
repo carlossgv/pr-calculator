@@ -408,7 +408,7 @@ export function PercentCards({
               <div className={styles.detailTitle}>{detailTitle}</div>
               <Button
                 variant="ghost"
-                size="sm"
+                size="md"
                 shape="round"
                 iconOnly
                 className={styles.modalClose}

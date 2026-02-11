@@ -409,7 +409,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 120;
+  z-index: 1100;
 
   display: grid;
   place-items: center;
@@ -449,7 +449,18 @@
 }
 
 .modalClose {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 !important;
   flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :global([data-theme="dark"]) .modal {
