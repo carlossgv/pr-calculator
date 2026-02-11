@@ -172,7 +172,7 @@
 
 .searchInput:focus {
   border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
-  box-shadow: 0 0 0 6px var(--ring);
+  box-shadow: none;
 }
 
 .clearBtnPos {
@@ -306,7 +306,7 @@
 
 .modalInput:focus {
   border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
-  box-shadow: 0 0 0 6px var(--ring);
+  box-shadow: none;
 }
 
 .modalError {

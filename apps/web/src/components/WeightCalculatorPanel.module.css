@@ -83,7 +83,7 @@
 
 .weightInputWrap:focus-within {
   border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
-  box-shadow: 0 0 0 6px var(--ring);
+  box-shadow: none;
 }
 
 .weightInput {
@@ -95,12 +95,12 @@
   text-align: left;
 
   border-radius: var(--radius-md);
-  border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
+  border: 0;
 
-  background: var(--input-bg);
+  background: transparent;
   color: var(--fg);
 
-  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.12);
+  box-shadow: none;
 
   padding: 16px 56px 16px 18px;
   outline: none;
@@ -143,7 +143,7 @@
 }
 
 .weightInput:focus {
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+  box-shadow: none;
 }
 
 .weightInputUnit {
@@ -201,7 +201,7 @@
 
 :global([data-theme="dark"]) .weightInputWrap:focus-within {
   border-color: color-mix(in oklab, var(--accent) 62%, rgba(255, 255, 255, 0.12));
-  box-shadow: 0 0 0 6px var(--ring);
+  box-shadow: none;
 }
 
 :global([data-theme="dark"]) .weightInput {
@@ -279,7 +279,7 @@
 
 .customPctInput:focus {
   border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
-  box-shadow: 0 0 0 6px var(--ring);
+  box-shadow: none;
 }
 
 .customPctChips {
