@@ -419,8 +419,10 @@ textarea:focus-visible {
     position: absolute;
     inset: 0;
 
-    background: color-mix(in oklab, var(--nav-bg) 94%, transparent);
+    background: color-mix(in oklab, var(--nav-bg) 78%, transparent);
     box-shadow: 0 -1px 0 color-mix(in oklab, var(--fg) 12%, transparent);
+    -webkit-backdrop-filter: blur(5px) saturate(1.02);
+    backdrop-filter: blur(5px) saturate(1.02);
 
     z-index: -1;
   }

@@ -510,8 +510,8 @@
 }
 
 .modal {
-  width: min(720px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px - var(--safe-bottom) - var(--native-bottom-inset));
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px - var(--safe-bottom) - var(--native-bottom-inset));
   overflow: auto;
 
   border-radius: var(--radius-lg);
