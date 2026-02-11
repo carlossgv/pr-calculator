@@ -280,6 +280,64 @@
   line-height: 1.35;
 }
 
+.detailPrimary {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--accent) 12%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent) 48%, var(--border));
+}
+
+:global([data-theme="dark"]) .detailPrimary {
+  background: color-mix(in oklab, var(--accent) 16%, var(--card-bg));
+  border-color: color-mix(
+    in oklab,
+    var(--accent) 58%,
+    rgba(255, 255, 255, 0.1)
+  );
+}
+
+.detailFacts {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+}
+
+.detailFactRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  background: color-mix(in oklab, var(--fg) 3%, var(--card-bg));
+}
+
+.detailFactRowEmphasis {
+  border-color: color-mix(in oklab, var(--accent-2) 52%, var(--border));
+  background: color-mix(in oklab, var(--accent-2) 14%, var(--card-bg));
+}
+
+.detailFactLabel {
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.detailFactValue {
+  justify-self: end;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
 /* KPI blocks */
 .detailKpi {
   grid-column: 1 / -1;

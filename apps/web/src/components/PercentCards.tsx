@@ -311,7 +311,7 @@ export function PercentCards({
 
   const detailContent = selected ? (
     <>
-      <div className={styles.detailKpi}>
+      <div className={styles.detailPrimary}>
         <div className={styles.detailKpiLabel}>{t.home.platesPerSide}</div>
         <div className={styles.plateCombo}>
           <div
@@ -358,28 +358,35 @@ export function PercentCards({
         </div>
       </div>
 
-      <div className={styles.detailKpi}>
-        <div className={styles.detailKpiLabel}>{t.home.perSideTotal}</div>
-        <div className={styles.detailKpiValue}>
-          {round1(selected.load.perSide)}
-          {unit}
+      <div className={styles.detailFacts}>
+        <div className={styles.detailFactRow}>
+          <div className={styles.detailFactLabel}>{t.home.perSideTotal}</div>
+          <div className={styles.detailFactValue}>
+            {round1(selected.load.perSide)}
+            {unit}
+          </div>
         </div>
-      </div>
 
-      <div className={styles.detailRow}>
-        <b>{t.home.bar}:</b>{" "}
-        {formatPickLabel(
-          selected.load.bar.plate.label,
-          selected.load.bar.plate.unit,
-          selected.load.bar.valueInUnit,
-          unit,
-        )}
-      </div>
+        <div className={styles.detailFactRow}>
+          <div className={styles.detailFactLabel}>{t.home.bar}</div>
+          <div className={[styles.detailFactValue, styles.detailClamp].join(" ")}>
+            {formatPickLabel(
+              selected.load.bar.plate.label,
+              selected.load.bar.plate.unit,
+              selected.load.bar.valueInUnit,
+              unit,
+            )}
+          </div>
+        </div>
 
-      <div className={styles.detailAchieved}>
-        {t.home.achieved}: {round1(selected.load.achievedTotal)}
-        {unit} (Δ {round1(selected.load.delta)}
-        {unit})
+        <div className={`${styles.detailFactRow} ${styles.detailFactRowEmphasis}`}>
+          <div className={styles.detailFactLabel}>{t.home.achieved}</div>
+          <div className={styles.detailFactValue}>
+            {round1(selected.load.achievedTotal)}
+            {unit} (Δ {round1(selected.load.delta)}
+            {unit})
+          </div>
+        </div>
       </div>
     </>
   ) : null;
