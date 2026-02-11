@@ -11,7 +11,7 @@
 
 .panel {
   border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   padding: 12px;
 
   display: grid;
@@ -25,11 +25,7 @@
 
 :global([data-theme="dark"]) .panel {
   border-color: rgba(255, 255, 255, 0.12);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--fg) 7%, var(--card-bg)) 0%,
-    var(--card-bg) 78%
-  );
+  background: var(--card-bg);
 }
 
 .header {
@@ -67,7 +63,7 @@
   text-transform: uppercase;
 
   padding: 6px 10px;
-  border-radius: 10px;
+  border-radius: var(--radius-xs);
 
   background: color-mix(in oklab, var(--accent-2) 24%, var(--card-bg));
   border: 1px dashed color-mix(in oklab, var(--accent-2) 72%, var(--border));
@@ -119,7 +115,7 @@
   position: relative;
   width: 100%;
   padding: 8px;
-  border-radius: 22px;
+  border-radius: var(--radius-md);
 
   background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
   border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
@@ -138,13 +134,13 @@
   letter-spacing: -0.03em;
   text-align: left;
 
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
 
   background: var(--input-bg);
   color: var(--fg);
 
-  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.1);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.12);
 
   padding: 16px 56px 16px 18px;
   outline: none;
@@ -187,7 +183,7 @@
 }
 
 .weightInput:focus {
-  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.12);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
 }
 
 .weightInputUnit {
@@ -240,7 +236,7 @@
 
 .customPct {
   border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   padding: 12px;
 
   background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
@@ -273,7 +269,7 @@
 
 .customPctInput {
   height: 44px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   padding: 0 12px;
 
   border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));

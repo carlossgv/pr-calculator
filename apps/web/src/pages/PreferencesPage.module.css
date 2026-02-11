@@ -24,12 +24,8 @@
 
 .card {
   border: 1px solid var(--border);
-  border-radius: 16px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--card-bg) 92%, var(--bg)),
-    var(--card-bg)
-  );
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
   overflow: hidden;
   box-shadow: var(--shadow);
 }
@@ -190,7 +186,7 @@
 .genderIconBtn[data-active="true"] {
   background: color-mix(in oklab, var(--accent) 14%, transparent) !important;
   color: var(--fg) !important;
-  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.18);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.14);
 }
 
 /* ===== Value pill ===== */
@@ -218,13 +214,13 @@
 /* ===== Presets / Backup rows ===== */
 
 .actionRow:first-child {
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
 }
 
 .actionRow:last-child {
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
 }
 
 .actionRow + .actionRow {
@@ -340,7 +336,7 @@
   justify-content: center;
 
   padding: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   border: 0;
   background: transparent;
 }
@@ -390,5 +386,5 @@
 .segBtn[data-active="true"] {
   background: color-mix(in oklab, var(--accent) 14%, transparent) !important;
   color: var(--fg) !important;
-  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.18);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.14);
 }

@@ -1,7 +1,7 @@
 /* FILE: apps/web/src/global.css */
 
 :root {
-  /* THEME: Coastal Lift – Amber Primary */
+  /* THEME: Flat Material */
 
   /* Light */
   --bg: #f4f0ee; /* parchment base */
@@ -15,16 +15,16 @@
   --input-bg: rgba(255, 255, 255, 0.96);
 
   /* Accents */
-  --accent: #db00b6; /* PRIMARY */
-  --accent-2: #16697a; /* stormy-teal */
-  --accent-3: #489fb5; /* pacific-blue */
-  --accent-contrast: #0b1220;
+  --accent: #3b6ccf; /* PRIMARY */
+  --accent-2: #2f7d6d; /* SECONDARY */
+  --accent-3: #6a7f98; /* TERTIARY */
+  --accent-contrast: #ffffff;
 
   /* Primary button tuning (Light) */
-  --accent-solid: color-mix(in oklab, var(--accent) 76%, white);
-  --accent-solid-hover: color-mix(in oklab, var(--accent) 84%, white);
+  --accent-solid: color-mix(in oklab, var(--accent) 88%, white);
+  --accent-solid-hover: color-mix(in oklab, var(--accent) 94%, white);
   --accent-solid-contrast: #ffffff;
-  --accent-solid-border: color-mix(in oklab, var(--accent) 46%, var(--border));
+  --accent-solid-border: color-mix(in oklab, var(--accent) 56%, var(--border));
 
   /* Feedback */
   --danger: #d64545;
@@ -36,23 +36,26 @@
 
   /* Surfaces */
   --card-bg: #ffffff;
-  --shadow: 0 12px 26px rgba(2, 6, 23, 0.1);
+  --shadow: 0 2px 8px rgba(2, 6, 23, 0.08);
 
   /* Fancy */
-  --ring: color-mix(in oklab, var(--accent) 62%, transparent);
-  --selection: color-mix(in oklab, var(--accent) 26%, transparent);
+  --ring: color-mix(in oklab, var(--accent) 50%, transparent);
+  --selection: color-mix(in oklab, var(--accent) 22%, transparent);
 
   /* Utility */
   --sticker-bg: color-mix(in oklab, var(--accent) 10%, var(--card-bg));
   --sticker-border: color-mix(in oklab, var(--accent) 32%, var(--border));
-  --sticker-shadow: 0 10px 20px rgba(2, 6, 23, 0.1);
-  --hard-shadow: 0 10px 0 rgba(2, 6, 23, 0.1);
+  --sticker-shadow: 0 1px 3px rgba(2, 6, 23, 0.12);
+  --hard-shadow: 0 1px 0 rgba(2, 6, 23, 0.1);
 
-  --barcode: repeating-linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--fg) 46%, transparent) 0 2px,
-    transparent 2px 5px
-  );
+  --barcode: color-mix(in oklab, var(--fg) 14%, transparent);
+
+  /* Radius scale */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
 
   /* Safe areas */
   --safe-top: env(safe-area-inset-top, 0px);
@@ -62,7 +65,7 @@
 }
 
 :root[data-theme="dark"] {
-  /* Dark – Amber primary sobre graphite */
+  /* Dark - Flat Material */
 
   --bg: #0f1114; /* graphite neutral */
   --fg: #eef3f7;
@@ -76,13 +79,13 @@
   --input-bg: rgba(255, 255, 255, 0.07);
 
   /* Accents (lifted for dark) */
-  --accent: color-mix(in oklab, #db00b6 80%, white);
-  --accent-2: color-mix(in oklab, #16697a 76%, white);
-  --accent-3: color-mix(in oklab, #489fb5 72%, white);
+  --accent: color-mix(in oklab, #3b6ccf 82%, white);
+  --accent-2: color-mix(in oklab, #2f7d6d 80%, white);
+  --accent-3: color-mix(in oklab, #6a7f98 76%, white);
   --accent-contrast: #0f1114;
 
   --accent-solid: var(--accent);
-  --accent-solid-hover: color-mix(in oklab, var(--accent) 92%, white);
+  --accent-solid-hover: color-mix(in oklab, var(--accent) 96%, white);
   --accent-solid-contrast: var(--accent-contrast);
   --accent-solid-border: color-mix(in oklab, var(--accent) 82%, var(--border));
 
@@ -92,21 +95,17 @@
 
   --paper: color-mix(in oklab, var(--bg) 92%, black);
   --card-bg: #15181c;
-  --shadow: 0 18px 42px rgba(0, 0, 0, 0.7);
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
 
-  --ring: color-mix(in oklab, var(--accent) 58%, transparent);
-  --selection: color-mix(in oklab, var(--accent) 22%, transparent);
+  --ring: color-mix(in oklab, var(--accent) 48%, transparent);
+  --selection: color-mix(in oklab, var(--accent) 18%, transparent);
 
   --sticker-bg: color-mix(in oklab, var(--accent) 12%, var(--card-bg));
   --sticker-border: color-mix(in oklab, var(--accent) 38%, var(--border));
-  --sticker-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
-  --hard-shadow: 0 10px 0 rgba(0, 0, 0, 0.35);
+  --sticker-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  --hard-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 
-  --barcode: repeating-linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--fg) 32%, transparent) 0 2px,
-    transparent 2px 5px
-  );
+  --barcode: color-mix(in oklab, var(--fg) 20%, transparent);
 }
 
 /* =========================
@@ -147,9 +146,7 @@ body {
   left: 0;
   right: 0;
   height: var(--native-top-inset);
-  background: color-mix(in oklab, var(--bg) 72%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: color-mix(in oklab, var(--bg) 94%, transparent);
   pointer-events: none;
   z-index: 1000;
 }
@@ -180,7 +177,7 @@ input,
 select,
 button {
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   font-size: 16px;
   background: var(--input-bg);
@@ -328,7 +325,7 @@ select:focus-visible {
   min-width: 72px;
   padding: 8px 10px;
 
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   color: var(--muted);
 
   opacity: 1;
@@ -358,7 +355,7 @@ select:focus-visible {
   line-height: 12px;
 }
 
-/* ✅ Mobile: show + glass blur layer via ::before */
+/* Mobile bottom nav */
 @media (max-width: 520px) {
   .mainContent {
     margin-top: 0px;
@@ -407,28 +404,14 @@ select:focus-visible {
     position: absolute;
     inset: 0;
 
-    /* slightly more solid so text/icons are readable */
-    background: color-mix(in oklab, var(--nav-bg) 62%, transparent);
-
-    backdrop-filter: blur(18px) saturate(1.25);
-    -webkit-backdrop-filter: blur(18px) saturate(1.25);
-
-    box-shadow:
-      0 -8px 24px rgba(0, 0, 0, 0.25),
-      0 -1px 0 rgba(255, 255, 255, 0.06);
+    background: color-mix(in oklab, var(--nav-bg) 94%, transparent);
+    box-shadow: 0 -1px 0 color-mix(in oklab, var(--fg) 12%, transparent);
 
     z-index: -1;
   }
 
-  @supports not ((backdrop-filter: blur(1px))) {
-    .bottomNav::before {
-      background: var(--nav-bg);
-    }
-  }
-
-  /* optional: extra readability on busy backgrounds */
   .bottomNavLabel {
-    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+    text-shadow: none;
   }
 }
 
@@ -531,7 +514,7 @@ a:active,
 
   background: color-mix(in oklab, var(--card-bg) 86%, var(--accent) 14%);
   border: 1px solid color-mix(in oklab, var(--border) 60%, var(--accent));
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.14);
 
   z-index: 1;
 
@@ -595,7 +578,7 @@ a:active,
   height: 26px;
   border-radius: 999px;
   background: var(--card-bg);
-  box-shadow: var(--shadow);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.14);
 
   transform: translate(var(--switch-x), -50%);
   transition: transform 150ms ease;
@@ -623,13 +606,11 @@ a:active,
   gap: 12px;
 
   padding: 12px 12px;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
 
   background: color-mix(in oklab, var(--card-bg) 92%, var(--bg));
   border: 1px solid color-mix(in oklab, var(--border) 75%, var(--accent) 25%);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 
 .pwaToast__content {

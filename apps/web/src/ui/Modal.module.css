@@ -11,16 +11,13 @@
 
   padding: 10px 10px calc(10px + var(--safe-bottom) + var(--native-bottom-inset));
 
-  /* ✅ blur + dim (PercentCards style) */
-  background: color-mix(in oklab, var(--fg) 12%, transparent);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  background: color-mix(in oklab, var(--fg) 22%, transparent);
 }
 
 .modal {
   background: var(--card-bg);
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   border-bottom: none;
@@ -53,7 +50,7 @@
   padding: 0 !important;
   flex: 0 0 auto;
 
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--card-bg);
   color: var(--muted);
@@ -78,7 +75,7 @@
 
   .modal {
     width: min(520px, calc(100vw - 28px));
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
     border-bottom: 1px solid var(--border);
   }
 }
@@ -90,16 +87,13 @@
     justify-items: center;
     padding: 24px;
 
-    /* un poco más suave en desktop */
-    background: color-mix(in oklab, var(--fg) 10%, transparent);
-    backdrop-filter: blur(16px) saturate(1.15);
-    -webkit-backdrop-filter: blur(16px) saturate(1.15);
+    background: color-mix(in oklab, var(--fg) 20%, transparent);
   }
 
   .modal {
     width: 520px;
     max-height: min(70vh, 560px);
-    border-radius: 18px;
+    border-radius: var(--radius-lg);
     border-bottom: 1px solid var(--border);
   }
 }

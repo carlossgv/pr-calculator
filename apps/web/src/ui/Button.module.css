@@ -37,7 +37,7 @@
 .lg {
   height: 52px;
   padding: 0 18px;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   font-weight: 900;
   font-size: 15px;
 }
@@ -45,7 +45,7 @@
 .md {
   height: 44px;
   padding: 0 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   font-weight: 850;
   font-size: 14px;
 }
@@ -53,7 +53,7 @@
 .sm {
   height: 36px;
   padding: 0 10px;
-  border-radius: 12px;
+  border-radius: var(--radius-xs);
   font-weight: 850;
   font-size: 13px;
 }
