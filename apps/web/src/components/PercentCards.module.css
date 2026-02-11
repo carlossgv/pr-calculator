@@ -99,11 +99,15 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
+:global([data-theme="dark"]) .pct {
+  color: color-mix(in oklab, var(--accent) 86%, white);
+}
+
 .tileRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 
   /* asegura que el contenido quede centrado verticalmente */
@@ -113,11 +117,28 @@
   z-index: 1; /* sobre ::before */
 }
 
-.pct,
+.leftTop {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pct {
+  font-size: 19px;
+  font-weight: 950;
+  letter-spacing: -0.015em;
+  color: color-mix(in oklab, var(--accent) 84%, var(--fg));
+  min-width: 58px;
+  text-align: left;
+}
+
 .target {
   font-size: 16px;
-  font-weight: 950;
+  font-weight: 900;
   letter-spacing: -0.01em;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
 }
 
 .target {
@@ -132,7 +153,7 @@
 }
 
 .target[data-size="sm"] {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .pctHint {
@@ -146,8 +167,9 @@
 .rightTop {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
+  margin-left: auto;
 }
 
 .chevronPill {
@@ -187,20 +209,30 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* ✅ línea sutil, tipo “detalle” como tu listado (sin texto) */
-.tileRule {
-  height: 1px;
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--fg) 14%, transparent);
-  opacity: 0.95;
+@media (max-width: 520px) {
+  .tileRow {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
 
-  position: relative;
-  z-index: 1; /* sobre ::before */
-}
+  .leftTop {
+    display: grid;
+    gap: 2px;
+    width: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
 
-:global([data-theme="dark"]) .tileRule {
-  background: color-mix(in oklab, white 12%, transparent);
-  opacity: 0.8;
+  .pct {
+    font-size: 20px;
+    min-width: 0;
+  }
+
+  .target {
+    font-size: 15px;
+  }
 }
 
 /* =========================

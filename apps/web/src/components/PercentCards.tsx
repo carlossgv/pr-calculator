@@ -452,21 +452,17 @@ export function PercentCards({
               aria-pressed={isSelected}
             >
               <div className={styles.tileRow}>
-                <div className={styles.pct}>{pct}%</div>
-
-                <div className={styles.rightTop}>
+                <div className={styles.leftTop}>
+                  <div className={styles.pct}>{pct}%</div>
                   <div className={styles.target} data-size={targetSize}>
                     {targetLabel}
                   </div>
-
-                  <span className={styles.chevronPill} aria-hidden="true">
-                    <ChevronRight size={18} />
-                  </span>
                 </div>
-              </div>
 
-              {/* sin texto: solo “detalle” visual */}
-              <div className={styles.tileRule} aria-hidden="true" />
+                <span className={styles.chevronPill} aria-hidden="true">
+                  <ChevronRight size={18} />
+                </span>
+              </div>
             </button>
           );
         })}
