@@ -1,6 +1,6 @@
 /* FILE: apps/web/src/pages/PreferencesPage.tsx */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import type {
   Plate,
   Unit,
@@ -18,6 +18,7 @@ import styles from "./PreferencesPage.module.css";
 import { downloadJson, exportBackup, importBackup } from "../storage/backup";
 import { getOrCreateIdentity } from "../sync/identity";
 import { Button } from "../ui/Button";
+import { Modal } from "../ui/Modal";
 
 type BarGender = "male" | "female";
 type PresetKey = "olympicKg" | "crossfitLb" | null;
@@ -227,6 +228,22 @@ export function PreferencesPage() {
     if (!prefs) return "#2563eb";
     return resolveAccentColor(prefs.accentColor);
   }, [prefs]);
+
+  const accentOptions = useMemo(
+    () => [
+      { label: "Cobalt", value: "#2563eb" },
+      { label: "Teal", value: "#0f766e" },
+      { label: "Emerald", value: "#16a34a" },
+      { label: "Amber", value: "#f59e0b" },
+      { label: "Orange", value: "#f97316" },
+      { label: "Rose", value: "#e11d48" },
+      { label: "Violet", value: "#7c3aed" },
+      { label: "Slate", value: "#334155" },
+    ],
+    [],
+  );
+
+  const [isAccentModalOpen, setIsAccentModalOpen] = useState(false);
 
   const barUnit = useMemo<Unit>(() => {
     return prefs?.defaultUnit ?? "kg";
@@ -481,20 +498,85 @@ export function PreferencesPage() {
             </div>
 
             <div className={`${styles.rowRight} ${styles.rowRightWrap}`}>
-              <label className={styles.colorInputWrap}>
-                <input
-                  type="color"
-                  className={styles.colorInput}
-                  value={accentColor}
-                  aria-label={t.prefs.theme.primaryTitle}
-                  onChange={(e) => setAccentColor(e.target.value)}
-                />
-                <span className={styles.colorValue}>{accentColor}</span>
-              </label>
+              <button
+                type="button"
+                className={styles.accentSwatchTrigger}
+                aria-label={t.prefs.theme.primaryTitle}
+                title={t.prefs.theme.primaryTitle}
+                onClick={() => setIsAccentModalOpen(true)}
+                style={{ "--swatch-color": accentColor } as CSSProperties}
+              >
+                <span className={styles.srOnly}>
+                  {t.prefs.theme.primaryTitle}
+                </span>
+              </button>
+
+              <div
+                className={styles.accentSwatches}
+                role="radiogroup"
+                aria-label={t.prefs.theme.primaryTitle}
+              >
+                {accentOptions.map((option) => {
+                  const isActive =
+                    option.value.toLowerCase() === accentColor.toLowerCase();
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={styles.accentSwatchBtn}
+                      data-active={isActive}
+                      role="radio"
+                      aria-checked={isActive}
+                      aria-label={`${t.prefs.theme.primaryTitle}: ${option.label}`}
+                      title={option.label}
+                      style={{ "--swatch-color": option.value } as CSSProperties}
+                      onClick={() => setAccentColor(option.value)}
+                    />
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+      {isAccentModalOpen ? (
+        <Modal
+          title={t.prefs.theme.primaryTitle}
+          onClose={() => setIsAccentModalOpen(false)}
+          ariaLabel={t.prefs.theme.primaryTitle}
+          className={styles.accentModal}
+        >
+          <div className={styles.accentModalCard}>
+            <div
+              className={styles.accentModalSwatches}
+              role="radiogroup"
+              aria-label={t.prefs.theme.primaryTitle}
+            >
+              {accentOptions.map((option) => {
+                const isActive =
+                  option.value.toLowerCase() === accentColor.toLowerCase();
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={styles.accentSwatchBtn}
+                    data-active={isActive}
+                    role="radio"
+                    aria-checked={isActive}
+                    aria-label={`${t.prefs.theme.primaryTitle}: ${option.label}`}
+                    title={option.label}
+                  style={{ "--swatch-color": option.value } as CSSProperties}
+                  onClick={() => {
+                    setAccentColor(option.value);
+                  }}
+                />
+              );
+            })}
+            </div>
+          </div>
+        </Modal>
+      ) : null}
 
       {/* PRESETS */}
       <section className={styles.section} aria-label={t.prefs.presets.title}>

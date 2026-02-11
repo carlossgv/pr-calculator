@@ -230,47 +230,91 @@
 
 /* ===== Accent color picker ===== */
 
-.colorInputWrap {
+.accentSwatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.accentSwatchTrigger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
+  background: var(--swatch-color, var(--accent));
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+.accentSwatchBtn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 10px 6px 6px;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--card-bg) 86%, var(--bg));
-}
-
-.colorInput {
-  appearance: none;
-  width: 34px;
-  height: 34px;
-  border: none;
-  padding: 0;
-  border-radius: 999px;
-  background: transparent;
+  border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
+  background: var(--swatch-color, var(--accent));
+  position: relative;
   cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease;
 }
 
-.colorInput::-webkit-color-swatch-wrapper {
-  padding: 0;
+.accentSwatchBtn:active {
+  transform: translateY(0px);
 }
 
-.colorInput::-webkit-color-swatch {
-  border: 1px solid color-mix(in oklab, var(--fg) 12%, transparent);
-  border-radius: 999px;
+.accentSwatchBtn[data-active="true"] {
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, var(--card-bg) 90%, white),
+    0 0 0 3px color-mix(in oklab, var(--fg) 15%, transparent);
+  border-color: color-mix(in oklab, var(--card-bg) 90%, white);
 }
 
-.colorInput::-moz-color-swatch {
-  border: 1px solid color-mix(in oklab, var(--fg) 12%, transparent);
-  border-radius: 999px;
+.accentModalSwatches {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(44px, 1fr));
+  gap: 12px;
+  justify-items: center;
+  justify-content: center;
 }
 
-.colorValue {
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.4px;
-  color: var(--muted);
-  text-transform: uppercase;
+.accentModalCard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+
+.accentModal {
+  border: 2px solid color-mix(in oklab, var(--accent) 65%, var(--border));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
+}
+
+@media (max-width: 520px) {
+  .accentSwatchTrigger {
+    display: inline-flex;
+  }
+
+  .accentSwatches {
+    display: none;
+  }
+
+  .accentModalSwatches {
+    grid-template-columns: repeat(4, minmax(52px, 1fr));
+  }
 }
 
 /* ===== Value pill ===== */
