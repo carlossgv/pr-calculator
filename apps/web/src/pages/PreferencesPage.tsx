@@ -14,7 +14,7 @@ import { repo } from "../storage/repo";
 import { setLanguage, t } from "../i18n/strings";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
-import { Mars, Venus, ChevronRight } from "lucide-react";
+import { Mars, Venus, ChevronRight, Check } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
 import { downloadJson, exportBackup, importBackup } from "../storage/backup";
 import { getOrCreateIdentity } from "../sync/identity";
