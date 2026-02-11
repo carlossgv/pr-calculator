@@ -39,8 +39,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .topActions {
@@ -152,7 +151,13 @@
   right: 18px;
   top: 50%;
   transform: translateY(-50%);
+}
 
+.weightInputUnitBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 13px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -161,12 +166,31 @@
   padding: 6px 10px;
   border-radius: 999px;
 
-  background: color-mix(in oklab, var(--fg) 4%, var(--input-bg));
-  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  background: color-mix(in oklab, var(--accent) 12%, var(--input-bg));
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--border));
   color: var(--muted);
-
-  pointer-events: none;
+  cursor: pointer;
   user-select: none;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.weightInputUnitBtn:hover {
+  background: color-mix(in oklab, var(--accent) 18%, var(--input-bg));
+  border-color: color-mix(in oklab, var(--accent) 58%, var(--border));
+  color: var(--fg);
+}
+
+.weightInputUnitBtn:active {
+  transform: translateY(1px);
+}
+
+.weightInputUnitBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring);
 }
 
 :global([data-theme="dark"]) .weightInputWrap {
@@ -185,9 +209,13 @@
   background: color-mix(in oklab, var(--fg) 6%, var(--input-bg));
 }
 
-:global([data-theme="dark"]) .weightInputUnit {
-  background: color-mix(in oklab, var(--fg) 10%, var(--card-bg));
-  border-color: rgba(255, 255, 255, 0.14);
+:global([data-theme="dark"]) .weightInputUnitBtn {
+  background: color-mix(in oklab, var(--accent) 22%, var(--card-bg));
+  border-color: color-mix(
+    in oklab,
+    var(--accent) 52%,
+    rgba(255, 255, 255, 0.14)
+  );
   color: color-mix(in oklab, var(--fg) 80%, white);
 }
 

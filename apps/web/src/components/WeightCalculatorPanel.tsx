@@ -6,7 +6,6 @@ import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { PercentCards, type PercentOrder } from "../components/PercentCards";
 import { prefsForUnit } from "../utils/equipment";
-import { UnitSwitch } from "./UnitSwitch";
 import { ArrowUpDown, Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
 import { Button } from "../ui/Button";
@@ -238,6 +237,10 @@ export function WeightCalculatorPanel({
     setWeightText(formatWeight(converted));
   }
 
+  function toggleUnit() {
+    switchUnit(unit === "kg" ? "lb" : "kg");
+  }
+
   useEffect(() => {
     emit(unit, rawWeight);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -330,7 +333,6 @@ export function WeightCalculatorPanel({
         ) : null}
 
         <div className={styles.topRow}>
-          <UnitSwitch value={unit} onChange={switchUnit} />
           <div className={styles.topActions}>
             <Button
               variant="outline"
@@ -404,7 +406,17 @@ export function WeightCalculatorPanel({
               aria-label={t.home.maxWeight}
             />
             <span className={styles.weightInputUnit} aria-hidden="true">
-              {unit}
+              <button
+                type="button"
+                className={styles.weightInputUnitBtn}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={toggleUnit}
+                aria-label={t.home.unit}
+                title={t.home.unit}
+              >
+                <span>{unit}</span>
+                <ArrowUpDown size={12} aria-hidden="true" />
+              </button>
             </span>
           </div>
         ) : (
