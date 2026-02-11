@@ -105,6 +105,11 @@
   white-space: nowrap;
 }
 
+.rowRightWrap {
+  flex-wrap: wrap;
+  white-space: normal;
+}
+
 .rowTitle {
   font-weight: 800;
   font-size: 14px;
@@ -221,6 +226,51 @@
   background: color-mix(in oklab, var(--accent) 14%, transparent) !important;
   color: var(--fg) !important;
   box-shadow: 0 1px 3px rgba(2, 6, 23, 0.14);
+}
+
+/* ===== Accent color picker ===== */
+
+.colorInputWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card-bg) 86%, var(--bg));
+}
+
+.colorInput {
+  appearance: none;
+  width: 34px;
+  height: 34px;
+  border: none;
+  padding: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.colorInput::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.colorInput::-webkit-color-swatch {
+  border: 1px solid color-mix(in oklab, var(--fg) 12%, transparent);
+  border-radius: 999px;
+}
+
+.colorInput::-moz-color-swatch {
+  border: 1px solid color-mix(in oklab, var(--fg) 12%, transparent);
+  border-radius: 999px;
+}
+
+.colorValue {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+  text-transform: uppercase;
 }
 
 /* ===== Value pill ===== */

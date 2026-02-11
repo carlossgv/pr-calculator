@@ -43,6 +43,11 @@ function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
   return p.theme === "dark" ? "dark" : "light";
 }
 
+function resolveAccentColor(value: unknown, fallback?: string): string {
+  if (typeof value === "string" && value.trim().length) return value;
+  return fallback ?? "#2563eb";
+}
+
 function ensurePrefs(
   p: Partial<UserPreferences> & { defaultUnit?: Unit; bar?: any },
   fallback: UserPreferences,
@@ -80,6 +85,10 @@ function ensurePrefs(
 
     // ✅ NEW
     language: lang,
+    accentColor: resolveAccentColor(
+      (p as UserPreferences).accentColor,
+      fallback.accentColor,
+    ),
 
     defaultUnit: unit,
     bar: {
@@ -195,7 +204,7 @@ export function PreferencesPage() {
       // recargar prefs en pantalla (y aplicar theme)
       const nextPrefs = await repo.getPreferences();
       setPrefs(nextPrefs);
-      applyTheme(resolvePrefsTheme(nextPrefs));
+      applyTheme(resolvePrefsTheme(nextPrefs), nextPrefs.accentColor);
     } catch (e) {
       console.error(e);
       setBackupErr(t.prefs.backup.importError);
@@ -212,6 +221,11 @@ export function PreferencesPage() {
   const resolvedTheme = useMemo<ResolvedTheme>(() => {
     if (!prefs) return "light";
     return resolvePrefsTheme(prefs);
+  }, [prefs]);
+
+  const accentColor = useMemo<string>(() => {
+    if (!prefs) return "#2563eb";
+    return resolveAccentColor(prefs.accentColor);
   }, [prefs]);
 
   const barUnit = useMemo<Unit>(() => {
@@ -261,7 +275,16 @@ export function PreferencesPage() {
 
     setPrefs(next);
     await repo.setPreferences(next);
-    applyTheme(nextTheme);
+    applyTheme(nextTheme, next.accentColor);
+  }
+
+  async function setAccentColor(nextColor: string) {
+    if (!prefs) return;
+    if (prefs.accentColor === nextColor) return;
+    const next = ensurePrefs({ ...prefs, accentColor: nextColor }, prefs);
+    setPrefs(next);
+    await repo.setPreferences(next);
+    applyTheme(resolvePrefsTheme(next), next.accentColor);
   }
 
   async function applyPreset(preset: UserPreferences) {
@@ -275,6 +298,8 @@ export function PreferencesPage() {
       {
         ...preset,
         theme: prefs.theme,
+        accentColor: prefs.accentColor,
+        language: prefs.language,
         defaultUnit: unit,
         bar: {
           ...preset.bar,
@@ -349,7 +374,7 @@ export function PreferencesPage() {
               <div className={styles.rowTitle}>{t.prefs.language.title}</div>
             </div>
 
-            <div className={styles.rowRight}>
+            <div className={`${styles.rowRight} ${styles.rowRightWrap}`}>
               <div
                 className={styles.seg}
                 role="radiogroup"
@@ -446,6 +471,26 @@ export function PreferencesPage() {
                   <Moon size={18} />
                 </Button>
               </div>
+            </div>
+          </div>
+
+          <div className={styles.row}>
+            <div className={styles.rowLeft}>
+              <div className={styles.rowTitle}>{t.prefs.theme.primaryTitle}</div>
+              <div className={styles.rowHint}>{t.prefs.theme.primaryHint}</div>
+            </div>
+
+            <div className={`${styles.rowRight} ${styles.rowRightWrap}`}>
+              <label className={styles.colorInputWrap}>
+                <input
+                  type="color"
+                  className={styles.colorInput}
+                  value={accentColor}
+                  aria-label={t.prefs.theme.primaryTitle}
+                  onChange={(e) => setAccentColor(e.target.value)}
+                />
+                <span className={styles.colorValue}>{accentColor}</span>
+              </label>
             </div>
           </div>
         </div>

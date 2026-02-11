@@ -97,7 +97,7 @@ export function AppLayout() {
   useEffect(() => {
     repo.getPreferences().then((p) => {
       setPrefs(p);
-      applyTheme(toResolvedTheme(p.theme));
+      applyTheme(toResolvedTheme(p.theme), p.accentColor);
     });
   }, []);
 

@@ -75,6 +75,8 @@ export const en = {
       switchToDarkAria: "Switch to dark theme",
       lightTitle: "Light",
       darkTitle: "Dark",
+      primaryTitle: "Primary",
+      primaryHint: "Choose the primary accent color.",
     },
     bar: {
       title: "Bar",
