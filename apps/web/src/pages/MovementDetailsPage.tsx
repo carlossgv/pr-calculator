@@ -81,7 +81,7 @@ export function MovementDetailsPage() {
   const [loading, setLoading] = useState(true);
 
   // add form
-  const [weightText, setWeightText] = useState("100");
+  const [weightText, setWeightText] = useState("");
   const [weightUnit, setWeightUnit] = useState<Unit>("kg");
   const [repsText, setRepsText] = useState("1");
   const [date, setDate] = useState<string>(
@@ -291,6 +291,12 @@ export function MovementDetailsPage() {
   if (loading) return <p>{t.movement.loading}</p>;
 
   const unit = prefs?.defaultUnit ?? "kg";
+  const canAddEntry =
+    !!prefs &&
+    !!id &&
+    parsePositiveFloat(weightText) != null &&
+    parsePositiveInt(repsText) != null &&
+    !!date.trim();
 
   const confirmTitle =
     confirm?.kind === "deleteMovement"
@@ -419,11 +425,14 @@ export function MovementDetailsPage() {
             shape="pill"
             fullWidth
             onClick={addEntry}
+            disabled={!canAddEntry}
           >
             {t.movement.add}
           </Button>
         </div>
+      </Surface>
 
+      <section className={styles.prListSection} aria-label={t.movement.prsTitle}>
         <div className={styles.divider}>
           <div className={styles.dividerTitle}>{t.movement.prsTitle}</div>
           <div className={styles.count}>{sorted.length}</div>
@@ -574,7 +583,7 @@ export function MovementDetailsPage() {
             })
           )}
         </div>
-      </Surface>
+      </section>
 
       {confirm ? (
         <Modal
