@@ -3,7 +3,8 @@ import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react"
 import { calculateLoad, type Unit, type UserPreferences } from "@repo/core";
 import { t } from "../i18n/strings";
 import styles from "./PercentCards.module.css";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
+import { Button } from "../ui/Button";
 
 export type PercentOrder = "asc" | "desc";
 
@@ -304,13 +305,12 @@ export function PercentCards({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [selected]);
 
+  const detailTitle = selected
+    ? `${selected.pct}% · ${round1(selected.target)}${unit}`
+    : "";
+
   const detailContent = selected ? (
     <>
-      <div className={styles.detailTitle}>
-        {selected.pct}% · {round1(selected.target)}
-        {unit}
-      </div>
-
       <div className={styles.detailKpi}>
         <div className={styles.detailKpiLabel}>{t.home.platesPerSide}</div>
         <div className={styles.plateCombo}>
@@ -388,6 +388,7 @@ export function PercentCards({
     <div className={styles.root}>
       {selected ? (
         <section ref={detailRef as any} className={styles.detail}>
+          <div className={styles.detailTitle}>{detailTitle}</div>
           {detailContent}
         </section>
       ) : null}
@@ -402,7 +403,25 @@ export function PercentCards({
             if (e.target === e.currentTarget) close();
           }}
         >
-          <section className={styles.modal}>{detailContent}</section>
+          <section className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <div className={styles.detailTitle}>{detailTitle}</div>
+              <Button
+                variant="ghost"
+                size="sm"
+                shape="round"
+                iconOnly
+                className={styles.modalClose}
+                onClick={close}
+                ariaLabel={t.movements.closeAria}
+                title={t.movements.closeAria}
+              >
+                <X size={18} aria-hidden="true" />
+              </Button>
+            </div>
+
+            <div className={styles.modalBody}>{detailContent}</div>
+          </section>
         </div>
       ) : null}
 

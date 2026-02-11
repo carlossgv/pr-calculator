@@ -436,6 +436,22 @@
   gap: 10px;
 }
 
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modalBody {
+  display: grid;
+  gap: 10px;
+}
+
+.modalClose {
+  flex: 0 0 auto;
+}
+
 :global([data-theme="dark"]) .modal {
   border-color: color-mix(
     in oklab,
