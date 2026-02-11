@@ -11,6 +11,7 @@ import { ArrowUpDown, Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
 import { Button } from "../ui/Button";
 import { Surface } from "../ui/Surface";
+import { Modal } from "../ui/Modal";
 
 function round1(n: number) {
   return Math.round(n * 10) / 10;
@@ -149,10 +150,12 @@ export function WeightCalculatorPanel({
   theoreticalFrom,
 }: Props) {
   const weightInputRef = useRef<HTMLInputElement | null>(null);
+  const customPctInputRef = useRef<HTMLInputElement | null>(null);
   const [weightSize, setWeightSize] = useState<"lg" | "md" | "sm">("lg");
   const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [unit, setUnit] = useState<Unit>(initialUnit ?? "kg");
   const [rawWeight, setRawWeight] = useState<number>(initialWeight ?? 100);
+  const [customPctOpen, setCustomPctOpen] = useState(false);
 
   const [weightText, setWeightText] = useState<string>(
     formatWeight(initialWeight ?? 100),
@@ -269,6 +272,14 @@ export function WeightCalculatorPanel({
     if (orderReadyRef.current) repo.setPercentOrder(pctOrder);
   }, [pctOrder]);
 
+  useEffect(() => {
+    if (!customPctOpen) return;
+    const id = window.setTimeout(() => {
+      customPctInputRef.current?.focus();
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [customPctOpen]);
+
   function addCustomPct() {
     const v = parsePctInput(customPctInput);
     if (v == null) return;
@@ -349,6 +360,22 @@ export function WeightCalculatorPanel({
           <UnitSwitch value={unit} onChange={switchUnit} />
           <div className={styles.topActions}>
             <Button
+              variant="outline"
+              size="sm"
+              shape="pill"
+              className={styles.customPctTrigger}
+              onClick={() => setCustomPctOpen(true)}
+              ariaLabel={t.home.customPercent}
+              title={t.home.customPercent}
+            >
+              <Plus size={14} aria-hidden="true" />
+              <span>{t.home.customPercent}</span>
+              {customPcts.length ? (
+                <span className={styles.customPctCount}>{customPcts.length}</span>
+              ) : null}
+            </Button>
+
+            <Button
               variant="ghost"
               size="sm"
               shape="round"
@@ -417,63 +444,73 @@ export function WeightCalculatorPanel({
         )}
       </Surface>
 
-      <section className={styles.customPct} aria-label={t.home.customPercent}>
-        <div className={styles.customPctTop}>
-          <div className={styles.customPctTitle}>{t.home.customPercent}</div>
+      {customPctOpen ? (
+        <Modal
+          title={t.home.customPercent}
+          onClose={() => setCustomPctOpen(false)}
+          ariaLabel={t.home.customPercent}
+        >
+          <section className={styles.customPctModal} aria-label={t.home.customPercent}>
+            <div className={styles.customPctTop}>
+              <div className={styles.customPctInputRow}>
+                <input
+                  ref={customPctInputRef}
+                  className={styles.customPctInput}
+                  type="number"
+                  inputMode="decimal"
+                  placeholder={t.home.customPercentPlaceholder}
+                  value={customPctInput}
+                  onChange={(e) => setCustomPctInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") addCustomPct();
+                  }}
+                  aria-label={t.home.customPercent}
+                />
 
-          <div className={styles.customPctInputRow}>
-            <input
-              className={styles.customPctInput}
-              type="number"
-              inputMode="decimal"
-              placeholder={t.home.customPercentPlaceholder}
-              value={customPctInput}
-              onChange={(e) => setCustomPctInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") addCustomPct();
-              }}
-              aria-label={t.home.customPercent}
-            />
+                <Button
+                  variant="primary"
+                  size="lg"
+                  shape="round"
+                  iconOnly
+                  disabled={!canAdd}
+                  onClick={addCustomPct}
+                  ariaLabel={t.home.customPercentAddAria}
+                  title={t.home.customPercentAdd}
+                >
+                  <Plus size={18} aria-hidden="true" />
+                </Button>
+              </div>
+            </div>
 
-            <Button
-              variant="primary"
-              size="lg"
-              shape="round"
-              iconOnly
-              disabled={!canAdd}
-              onClick={addCustomPct}
-              ariaLabel={t.home.customPercentAddAria}
-              title={t.home.customPercentAdd}
-            >
-              <Plus size={18} aria-hidden="true" />
-            </Button>
-          </div>
-        </div>
-
-        {customPcts.length ? (
-          <div className={styles.customPctChips} aria-label={t.home.customPercentAdded}>
-            {customPcts.map((p) => (
-              <Button
-                key={p}
-                variant="ghost"
-                size="sm"
-                shape="pill"
-                className={styles.customPctChip}
-                onClick={() => removeCustomPct(p)}
-                title={t.home.customPercentRemove}
-                ariaLabel={`${t.home.customPercentRemove} ${p}%`}
+            {customPcts.length ? (
+              <div
+                className={styles.customPctChips}
+                aria-label={t.home.customPercentAdded}
               >
-                <span>{p}%</span>
-                <span className={styles.customPctChipX} aria-hidden="true">
-                  ×
-                </span>
-              </Button>
-            ))}
-          </div>
-        ) : (
-          <div className={styles.customPctHint}>{t.home.customPercentHint}</div>
-        )}
-      </section>
+                {customPcts.map((p) => (
+                  <Button
+                    key={p}
+                    variant="ghost"
+                    size="sm"
+                    shape="pill"
+                    className={styles.customPctChip}
+                    onClick={() => removeCustomPct(p)}
+                    title={t.home.customPercentRemove}
+                    ariaLabel={`${t.home.customPercentRemove} ${p}%`}
+                  >
+                    <span>{p}%</span>
+                    <span className={styles.customPctChipX} aria-hidden="true">
+                      ×
+                    </span>
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.customPctHint}>{t.home.customPercentHint}</div>
+            )}
+          </section>
+        </Modal>
+      ) : null}
 
       <PercentCards
         maxWeight={rawWeight}

@@ -107,6 +107,25 @@
   gap: 8px;
 }
 
+.customPctTrigger {
+  gap: 8px;
+}
+
+.customPctCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  border-radius: var(--radius-pill);
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 900;
+  background: color-mix(in oklab, var(--accent) 18%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent) 50%, var(--border));
+}
+
 /* =========================
    Weight input hero
    ========================= */
@@ -234,7 +253,7 @@
    Custom % (ephemeral)
    ========================= */
 
-.customPct {
+.customPctModal {
   border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
   border-radius: var(--radius-md);
   padding: 12px;
@@ -242,7 +261,7 @@
   background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
 }
 
-:global([data-theme="dark"]) .customPct {
+:global([data-theme="dark"]) .customPctModal {
   border-color: rgba(255, 255, 255, 0.12);
   background: color-mix(in oklab, var(--fg) 6%, var(--card-bg));
 }
@@ -276,6 +295,16 @@
   background: var(--input-bg);
   color: var(--fg);
   outline: none;
+}
+
+.customPctInput::-webkit-outer-spin-button,
+.customPctInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.customPctInput[type="number"] {
+  -moz-appearance: textfield;
 }
 
 .customPctInput:focus {
