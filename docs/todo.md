@@ -1,21 +1,23 @@
 # TODO
 
-Date: 2026-02-05
+Date: 2026-02-11
 
-## UX fixes from user feedback
-1. Add a visible close button ("X") on all modals.
-2. Fix Android bottom gap between the button bar and system keyboard/navigation area on some devices.
-3. Improve clarity of "create" vs "add" flows for PRs and movements.
+## Completed from recent UX feedback
+1. Added visible close controls (`X`) for modal flows while preserving outside-click close.
+2. Improved add/create clarity in key flows:
+   - Add PR now requires valid fields before enabling submit.
+   - Custom % flow moved from always-visible block to compact modal flow.
+3. Simplified high-noise header visuals on calculator/movement pages.
 
-## Notes / Ideas
-1. Modal close button
-   - Add a top-right icon button in `apps/web/src/ui/Modal.tsx`.
-   - Ensure `aria-label="Close"` and keyboard focusable.
-2. Android bottom gap
-   - Investigate safe area / insets in `apps/web/src/utils/native-safe-area.ts` and layout containers.
-   - Verify handling of `visualViewport` resize and `env(safe-area-inset-bottom)`.
-   - Test on at least one physical Android device and Chrome DevTools device emulation.
-3. Create vs add flows
-   - Movements: clarify "New movement" vs "Add PR" CTA placement and labeling.
-   - PRs: provide a single primary flow (e.g., "Add PR") with optional advanced entry.
-   - Consider a short inline helper text or first-run tooltip.
+## Remaining / next
+1. Android bottom gap between button bar and system keyboard/navigation area on some devices.
+2. Decide whether to merge/adapt the separate vibrant palette branch (`feature/theme-vibrant-palettes`).
+3. Optional UX polish pass for movement detail modal and percent detail wording (copy clarity only).
+
+## Notes
+1. Android bottom gap
+   - Re-test in native context with `native-safe-area` handling and keyboard open/scroll behavior.
+   - Verify behavior with fixed bottom nav in Android emulator and at least one physical device.
+2. Vibrant palette branch
+   - Branch: `feature/theme-vibrant-palettes`
+   - Includes persisted selector (`Electric`, `Sunset`, `Mint`) and high-contrast token overrides.
