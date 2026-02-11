@@ -1,7 +1,7 @@
 # Handoff
 
 Date: 2026-02-11
-Branch: spike/flat-theme
+Branch: spike/vibrant-themes
 
 ## Summary
 - Completed a broad UI simplification pass focused on flatter visuals, clearer hierarchy, and safer form actions.
@@ -16,13 +16,18 @@ Branch: spike/flat-theme
   - Theme toggle now uses segmented icon control to match other toggles.
 - Simplified input focus borders to remove double-outline effect.
 - Added primary accent color picker (single base color drives theme accents).
+- Replaced the accent color picker with a curated modal swatch selector (mobile-first).
+- Adjusted percent detail modal padding alignment.
+- Tweaked bottom nav translucency/blur to better reveal scroll context.
 - Improved Movement Details UX:
   - Add PR weight defaults to empty (no `100` prefill).
   - Add PR CTA is disabled until required fields are valid.
   - Top bordered form section separated from PR list section.
 - Simplified and improved readability of percent tiles and weight-detail modal.
 
-## Recent commits on `spike/flat-theme`
+## Recent commits on `spike/vibrant-themes`
+- `9fda83d` feat(web): replace accent picker with modal swatches
+- `b4812f8` fix(web): align percent modal padding and tweak bottom nav blur
 - `d7d4e64` fix(web): restore build by importing Check and stabilizing PWA SW generation
 - `567f7d6` feat(web): retone theme and normalize Material-style radii
 - `9093e4c` feat(web): move custom percent controls to compact modal flow
