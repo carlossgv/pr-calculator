@@ -15,6 +15,7 @@ Branch: spike/flat-theme
   - Unit/plate presets renamed to Metric/Imperial (UI-only).
   - Theme toggle now uses segmented icon control to match other toggles.
 - Simplified input focus borders to remove double-outline effect.
+- Added primary accent color picker (single base color drives theme accents).
 - Improved Movement Details UX:
   - Add PR weight defaults to empty (no `100` prefill).
   - Add PR CTA is disabled until required fields are valid.
