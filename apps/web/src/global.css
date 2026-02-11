@@ -15,7 +15,7 @@
   --input-bg: rgba(255, 255, 255, 0.96);
 
   /* Accents */
-  --accent-base: #2563eb;
+  --accent-base: #009cff;
   --accent: var(--accent-base); /* PRIMARY */
   --accent-2: #2f7d6d; /* SECONDARY */
   --accent-3: #6a7f98; /* TERTIARY */

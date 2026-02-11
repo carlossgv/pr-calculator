@@ -1,5 +1,6 @@
 // FILE: apps/web/src/storage/repo.ts
 import {
+  DEFAULT_ACCENT_COLOR,
   convertWeightValue,
   DEFAULT_PREFS,
   type Movement,
@@ -126,7 +127,7 @@ export const repo = {
         typeof value.accentColor === "string" &&
         value.accentColor.trim().length > 0
           ? value.accentColor
-          : "#2563eb";
+          : DEFAULT_ACCENT_COLOR;
 
       const language =
         value.language === "es" || value.language === "en" ? value.language : "en";

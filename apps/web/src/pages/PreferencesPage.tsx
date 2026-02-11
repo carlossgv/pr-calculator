@@ -9,7 +9,12 @@ import type {
   Weight,
   Language,
 } from "@repo/core";
-import { DEFAULT_PREFS, CROSSFIT_LB_WITH_KG_CHANGES } from "@repo/core";
+import {
+  ACCENT_PALETTE,
+  DEFAULT_ACCENT_COLOR,
+  DEFAULT_PREFS,
+  CROSSFIT_LB_WITH_KG_CHANGES,
+} from "@repo/core";
 import { repo } from "../storage/repo";
 import { setLanguage, t } from "../i18n/strings";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
@@ -46,7 +51,7 @@ function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
 
 function resolveAccentColor(value: unknown, fallback?: string): string {
   if (typeof value === "string" && value.trim().length) return value;
-  return fallback ?? "#2563eb";
+  return fallback ?? DEFAULT_ACCENT_COLOR;
 }
 
 function ensurePrefs(
@@ -225,23 +230,11 @@ export function PreferencesPage() {
   }, [prefs]);
 
   const accentColor = useMemo<string>(() => {
-    if (!prefs) return "#2563eb";
+    if (!prefs) return DEFAULT_ACCENT_COLOR;
     return resolveAccentColor(prefs.accentColor);
   }, [prefs]);
 
-  const accentOptions = useMemo(
-    () => [
-      { label: "Cobalt", value: "#2563eb" },
-      { label: "Teal", value: "#0f766e" },
-      { label: "Emerald", value: "#16a34a" },
-      { label: "Amber", value: "#f59e0b" },
-      { label: "Orange", value: "#f97316" },
-      { label: "Rose", value: "#e11d48" },
-      { label: "Violet", value: "#7c3aed" },
-      { label: "Slate", value: "#334155" },
-    ],
-    [],
-  );
+  const accentOptions = ACCENT_PALETTE;
 
   const [isAccentModalOpen, setIsAccentModalOpen] = useState(false);
 

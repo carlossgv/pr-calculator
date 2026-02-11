@@ -1,5 +1,6 @@
 // packages/core/src/defaults.ts
 import type { Plate, UserPreferences } from "./types";
+import { DEFAULT_ACCENT_COLOR } from "./colors";
 
 function plate(value: number, unit: "kg" | "lb", label?: string): Plate {
   return { value, unit, label: label ?? `${value} ${unit}` };
@@ -10,7 +11,7 @@ export const DEFAULT_PREFS: UserPreferences = {
   defaultUnit: "kg",
   contexts: { kg: "olympic", lb: "crossfit" },
   theme: "dark",
-  accentColor: "#2563eb",
+  accentColor: DEFAULT_ACCENT_COLOR,
   bar: plate(20, "kg", "20 kg bar"),
   rounding: { value: 2.5, unit: "kg" },
   plates: [
@@ -32,7 +33,7 @@ export const CROSSFIT_LB_WITH_KG_CHANGES: UserPreferences = {
   defaultUnit: "lb",
   contexts: { kg: "olympic", lb: "crossfit" },
   theme: "dark",
-  accentColor: "#2563eb",
+  accentColor: DEFAULT_ACCENT_COLOR,
   bar: plate(45, "lb", "45 lb bar"),
   rounding: { value: 1, unit: "lb" },
   plates: [
