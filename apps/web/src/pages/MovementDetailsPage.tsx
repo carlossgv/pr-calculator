@@ -8,7 +8,7 @@ import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { UnitPill } from "../components/UnitPill";
 import { NumberInput } from "../components/NumberInput";
-import { Chip, Sticker, Surface, SurfaceHeader } from "../ui/Surface";
+import { Sticker, Surface, SurfaceHeader } from "../ui/Surface";
 import styles from "./MovementDetailsPage.module.css";
 import { Button } from "../ui/Button";
 import { Modal } from "../ui/Modal";
@@ -366,8 +366,6 @@ export function MovementDetailsPage() {
       <Surface variant="panel" aria-label={t.movement.prs}>
         <SurfaceHeader
           leftLabel={<Sticker stamp={<span>MANAGE</span>}>PR CALC</Sticker>}
-          rightChip={<Chip tone="accent3">{unit}</Chip>}
-          showBarcode
         />
 
         <div className={styles.form}>

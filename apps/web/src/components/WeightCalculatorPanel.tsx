@@ -10,7 +10,7 @@ import { UnitSwitch } from "./UnitSwitch";
 import { ArrowUpDown, Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
 import { Button } from "../ui/Button";
-import { Surface } from "../ui/Surface";
+import { Sticker, Surface } from "../ui/Surface";
 import { Modal } from "../ui/Modal";
 
 function round1(n: number) {
@@ -89,24 +89,6 @@ type Props = {
     baseReps: number;
   };
 };
-
-function contextChipWord(ctx: unknown): string {
-  const id =
-    typeof ctx === "string"
-      ? ctx
-      : typeof ctx === "object" && ctx
-        ? ((ctx as any).id ?? (ctx as any).kind ?? (ctx as any).name)
-        : "";
-
-  const s = String(id ?? "").toLowerCase();
-
-  if (s.includes("cross")) return "crossfit";
-  if (s.includes("olym")) return "olympics";
-  if (s === "olympic") return "olympics";
-  if (s === "crossfit") return "crossfit";
-
-  return "context";
-}
 
 function parsePctInput(s: string): number | null {
   const v = Number(String(s).replace("%", "").trim());
@@ -301,8 +283,6 @@ export function WeightCalculatorPanel({
 
   if (!prefs || !effectivePrefs) return <p>{t.home.loading}</p>;
 
-  const contextWord = contextChipWord(prefs.contexts?.[unit]);
-
   const theoreticalHint =
     theoreticalFrom && theoreticalFrom.baseWeight > 0 && theoreticalFrom.baseReps > 0
       ? {
@@ -320,14 +300,9 @@ export function WeightCalculatorPanel({
 
       <Surface variant="panel" className={styles.panel}>
         <div className={styles.header}>
-          <span className={styles.utilLabel}>
-            PR CALC{" "}
-            <span className={styles.stamp}>
-              {theoreticalHint ? "THEORY" : "LIVE"}
-            </span>
-          </span>
-
-          <span className={styles.contextChip}>{contextWord}</span>
+          <Sticker stamp={<span>{theoreticalHint ? "THEORY" : "LIVE"}</span>}>
+            PR CALC
+          </Sticker>
         </div>
 
         {theoreticalHint ? (
@@ -353,8 +328,6 @@ export function WeightCalculatorPanel({
             </div>
           </div>
         ) : null}
-
-        <div className={styles.barcodeRule} />
 
         <div className={styles.topRow}>
           <UnitSwitch value={unit} onChange={switchUnit} />
