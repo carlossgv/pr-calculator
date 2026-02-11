@@ -12,9 +12,8 @@ import type {
 import { DEFAULT_PREFS, CROSSFIT_LB_WITH_KG_CHANGES } from "@repo/core";
 import { repo } from "../storage/repo";
 import { setLanguage, t } from "../i18n/strings";
-import { ThemeToggle } from "../components/ThemeToggle";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
-import { Mars, Venus, ChevronRight, Check } from "lucide-react";
+import { Mars, Venus, ChevronRight, Check, Sun, Moon } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
 import { downloadJson, exportBackup, importBackup } from "../storage/backup";
 import { getOrCreateIdentity } from "../sync/identity";
@@ -91,13 +90,6 @@ function ensurePrefs(
       label: barLabelFor(unit, nextGender),
     },
   };
-}
-
-function onRowKeyDown(e: React.KeyboardEvent, onActivate: () => void) {
-  if (e.key === "Enter" || e.key === " ") {
-    e.preventDefault();
-    onActivate();
-  }
 }
 
 function eqWeight(a: Weight, b: Weight) {
@@ -404,14 +396,7 @@ export function PreferencesPage() {
             </div>
           </div>
 
-          <div
-            className={`${styles.rowPressable} ${styles.rowDivider}`}
-            role="button"
-            tabIndex={0}
-            onClick={toggleTheme}
-            onKeyDown={(e) => onRowKeyDown(e, toggleTheme)}
-            aria-label={t.prefs.theme.toggleRowAria}
-          >
+          <div className={`${styles.row} ${styles.rowDivider}`}>
             <div className={styles.rowLeft}>
               <div className={styles.rowTitle}>{t.prefs.theme.title}</div>
               <span className={styles.srOnly}>
@@ -420,12 +405,47 @@ export function PreferencesPage() {
             </div>
 
             <div className={styles.rowRight}>
-              <span
-                className={styles.iconWrap}
-                onClick={(e) => e.stopPropagation()}
+              <div
+                className={styles.themeSegIcons}
+                role="radiogroup"
+                aria-label={t.prefs.theme.toggleRowAria}
               >
-                <ThemeToggle value={resolvedTheme} onToggle={toggleTheme} />
-              </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  shape="round"
+                  iconOnly
+                  className={styles.themeIconBtn}
+                  data-active={resolvedTheme === "light"}
+                  role="radio"
+                  aria-checked={resolvedTheme === "light"}
+                  aria-label={t.prefs.theme.lightTitle}
+                  onClick={() => {
+                    if (resolvedTheme === "light") return;
+                    toggleTheme();
+                  }}
+                >
+                  <Sun size={18} />
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  shape="round"
+                  iconOnly
+                  className={styles.themeIconBtn}
+                  data-active={resolvedTheme === "dark"}
+                  role="radio"
+                  aria-checked={resolvedTheme === "dark"}
+                  aria-label={t.prefs.theme.darkTitle}
+                  onClick={() => {
+                    if (resolvedTheme === "dark") return;
+                    toggleTheme();
+                  }}
+                >
+                  <Moon size={18} />
+                </Button>
+              </div>
             </div>
           </div>
         </div>

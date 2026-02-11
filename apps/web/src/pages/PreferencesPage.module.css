@@ -189,6 +189,40 @@
   box-shadow: 0 1px 3px rgba(2, 6, 23, 0.14);
 }
 
+/* ===== Theme selector (icons) ===== */
+
+.themeSegIcons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card-bg) 86%, var(--bg));
+
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.themeIconBtn {
+  color: var(--muted);
+
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+
+  padding: 0 !important;
+  flex: 0 0 40px;
+}
+
+.themeIconBtn[data-active="true"] {
+  background: color-mix(in oklab, var(--accent) 14%, transparent) !important;
+  color: var(--fg) !important;
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.14);
+}
+
 /* ===== Value pill ===== */
 
 .valuePill {
