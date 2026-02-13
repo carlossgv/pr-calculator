@@ -7,10 +7,13 @@ export const es = {
     preferences: "Preferencias",
   },
   onboarding: {
-    accentTipTitle: "Tip",
-    accentTipBody: "Puedes cambiar el color de acento en Preferencias cuando quieras.",
-    accentTipCta: "Abrir Preferencias",
-    dismissCta: "Entendido",
+    changelogTitle: "¡Novedades!",
+    changelogIntro: "Gracias por actualizar. Esto cambió:",
+    changelogUiSimplified:
+      "La interfaz se simplificó para una experiencia más fluida.",
+    changelogAccentPrefs:
+      "Ahora puedes cambiar los colores de la app desde la página de Preferencias.",
+    okCta: "Entendido",
   },
   home: {
     loading: "Cargando…",

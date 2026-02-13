@@ -107,6 +107,11 @@ export function AppLayout() {
   }, []);
 
   useEffect(() => {
+    if (isDev) {
+      const timer = window.setTimeout(() => setShowAccentTip(true), 550);
+      return () => window.clearTimeout(timer);
+    }
+
     const seen = localStorage.getItem(ACCENT_TIP_SEEN_KEY) === "1";
     if (seen) return;
 
@@ -119,16 +124,11 @@ export function AppLayout() {
 
     const timer = window.setTimeout(() => setShowAccentTip(true), 550);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [isDev]);
 
   function dismissAccentTip() {
-    localStorage.setItem(ACCENT_TIP_SEEN_KEY, "1");
+    if (!isDev) localStorage.setItem(ACCENT_TIP_SEEN_KEY, "1");
     setShowAccentTip(false);
-  }
-
-  function openPreferencesFromTip() {
-    dismissAccentTip();
-    navigate("/preferences");
   }
 
   // 1) Restore-on-open:
@@ -219,14 +219,20 @@ export function AppLayout() {
       <PwaUpdateBanner />
 
       {showAccentTip ? (
-        <Modal title={t.onboarding.accentTipTitle} onClose={dismissAccentTip}>
-          <p className="onboardingTipText">{t.onboarding.accentTipBody}</p>
+        <Modal
+          title={t.onboarding.changelogTitle}
+          onClose={dismissAccentTip}
+          className="onboardingModal"
+        >
+          <div className="onboardingTipCard">
+            <ul className="onboardingTipList">
+              <li>{t.onboarding.changelogUiSimplified}</li>
+              <li>{t.onboarding.changelogAccentPrefs}</li>
+            </ul>
+          </div>
           <div className="onboardingTipActions">
-            <Button variant="primary" size="md" shape="pill" onClick={openPreferencesFromTip}>
-              {t.onboarding.accentTipCta}
-            </Button>
-            <Button variant="ghost" size="md" shape="pill" onClick={dismissAccentTip}>
-              {t.onboarding.dismissCta}
+            <Button variant="primary" size="md" shape="pill" onClick={dismissAccentTip}>
+              {t.onboarding.okCta}
             </Button>
           </div>
         </Modal>

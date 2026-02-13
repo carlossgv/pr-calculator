@@ -698,10 +698,36 @@ a:active,
   }
 }
 
+.onboardingModal {
+  border: 2px solid color-mix(in oklab, var(--accent) 65%, var(--border));
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
+}
+
+.onboardingTipCard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  padding: 12px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 8px;
+}
+
 .onboardingTipText {
   margin: 0;
   color: var(--muted);
   font-size: 14px;
+  line-height: 1.35;
+}
+
+.onboardingTipList {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 400;
   line-height: 1.35;
 }
 
