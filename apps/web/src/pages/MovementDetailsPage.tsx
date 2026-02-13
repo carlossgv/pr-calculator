@@ -334,19 +334,6 @@ export function MovementDetailsPage() {
 
         <div className={styles.topActions}>
           <Button
-            variant="neutral"
-            size="md"
-            shape="round"
-            iconOnly
-            className={styles.iconBtnMd}
-            ariaLabel={t.movements.openCalculator}
-            title={t.movements.openCalculator}
-            onClick={() => navigate(`/movements/${id}/calc/${unit}/100`)}
-          >
-            <Calculator size={18} />
-          </Button>
-
-          <Button
             variant="danger"
             size="md"
             shape="round"

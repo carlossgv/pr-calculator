@@ -420,8 +420,11 @@ export function MovementsPage() {
 
                 {best ? (
                   <div className={styles.sub}>
-                    {toDateLabel(best.date)} · <b>{best.weight}</b>{" "}
-                    <span className={styles.unitHint}>{unit}</span> × {best.reps}
+                    <span className={styles.bestWeight}>{best.weight}</span>{" "}
+                    <span className={styles.bestUnit}>{unit}</span>{" "}
+                    <span className={styles.bestMult}>×</span>{" "}
+                    <span className={styles.bestReps}>{best.reps}</span>{" "}
+                    · {toDateLabel(best.date)}
                   </div>
                 ) : (
                   <div className={styles.subMuted}>{t.movements.noPrYet}</div>

@@ -446,7 +446,7 @@ export function PercentCards({
             .filter(Boolean)
             .join(" ");
 
-          const targetLabel = `${round1(target)}${unit}`;
+          const targetLabel = `${round1(target)} ${unit}`;
           const targetSize =
             targetLabel.length >= 8 ? "sm" : targetLabel.length >= 7 ? "md" : "lg";
 
