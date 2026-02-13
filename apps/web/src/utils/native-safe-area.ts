@@ -6,6 +6,16 @@ function isAndroid() {
   return /Android/i.test(navigator.userAgent);
 }
 
+function isKeyboardLikelyOpen(): boolean {
+  const vv = window.visualViewport;
+  if (!vv) return false;
+
+  // In Android WebView, when IME opens the visual viewport shrinks a lot.
+  // We treat that as keyboard-open and avoid adding artificial bottom inset.
+  const viewportDelta = window.innerHeight - vv.height;
+  return viewportDelta > 120;
+}
+
 function computeBottomInset(): number {
   const vv = window.visualViewport;
   const viewportHeight = vv?.height ?? window.innerHeight;
@@ -13,11 +23,16 @@ function computeBottomInset(): number {
 
   const diff = Math.max(0, screenHeight - viewportHeight);
 
-  // Guardrails: avoid absurd values from device quirks.
-  return Math.min(diff, 80);
+  // Guardrails: native nav/gesture insets should be relatively small.
+  return Math.min(diff, 40);
 }
 
 function applyInset() {
+  if (isKeyboardLikelyOpen()) {
+    document.documentElement.style.setProperty("--native-bottom-inset", "0px");
+    return;
+  }
+
   const inset = computeBottomInset();
   document.documentElement.style.setProperty(
     "--native-bottom-inset",
@@ -38,6 +53,9 @@ export function initNativeSafeArea() {
 
   window.addEventListener("resize", applyInset, { passive: true });
   window.visualViewport?.addEventListener("resize", applyInset, {
+    passive: true,
+  });
+  window.visualViewport?.addEventListener("scroll", applyInset, {
     passive: true,
   });
 }
