@@ -9,11 +9,20 @@ import { initSync } from "./sync/sync";
 import { repo } from "./storage/repo";
 import { setLanguage } from "./i18n/strings";
 import { initNativeSafeArea } from "./utils/native-safe-area";
+import { maybeApplyDevSeedFromUrl } from "./storage/dev-seed";
 
 async function bootstrap() {
   // SW + callbacks
   initPwa();
   initNativeSafeArea();
+
+  // Dev-only URL seed helper:
+  // http://localhost:5173/?seed=demo
+  try {
+    await maybeApplyDevSeedFromUrl();
+  } catch (err) {
+    console.error("Dev seed import failed:", err);
+  }
 
   // set language ASAP (before first render)
   try {

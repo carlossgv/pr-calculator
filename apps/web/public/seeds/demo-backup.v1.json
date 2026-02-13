@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "exportedAt": "2026-02-13T12:00:00.000Z",
+  "preferences": {
+    "language": "en",
+    "defaultUnit": "kg",
+    "contexts": {
+      "kg": "olympic",
+      "lb": "crossfit"
+    },
+    "theme": "dark",
+    "accentColor": "#009cff",
+    "bar": {
+      "value": 20,
+      "unit": "kg",
+      "label": "20 kg bar"
+    },
+    "rounding": {
+      "value": 2.5,
+      "unit": "kg"
+    },
+    "plates": [
+      { "value": 25, "unit": "kg", "label": "25 kg" },
+      { "value": 20, "unit": "kg", "label": "20 kg" },
+      { "value": 15, "unit": "kg", "label": "15 kg" },
+      { "value": 10, "unit": "kg", "label": "10 kg" },
+      { "value": 5, "unit": "kg", "label": "5 kg" },
+      { "value": 2.5, "unit": "kg", "label": "2.5 kg" },
+      { "value": 2, "unit": "kg", "label": "2 kg" },
+      { "value": 1.5, "unit": "kg", "label": "1.5 kg" },
+      { "value": 1, "unit": "kg", "label": "1 kg" },
+      { "value": 0.5, "unit": "kg", "label": "0.5 kg" }
+    ]
+  },
+  "movements": [
+    {
+      "id": "seed-back-squat",
+      "name": "Back Squat",
+      "createdAt": "2026-01-15T10:00:00.000Z",
+      "updatedAt": "2026-02-10T10:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "seed-bench-press",
+      "name": "Bench Press",
+      "createdAt": "2026-01-16T10:00:00.000Z",
+      "updatedAt": "2026-02-11T10:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "seed-deadlift",
+      "name": "Deadlift",
+      "createdAt": "2026-01-17T10:00:00.000Z",
+      "updatedAt": "2026-02-12T10:00:00.000Z",
+      "deletedAt": null
+    }
+  ],
+  "prEntries": [
+    {
+      "id": "seed-pr-squat-1",
+      "movementId": "seed-back-squat",
+      "weight": 140,
+      "reps": 5,
+      "date": "2026-02-02T12:00:00.000Z",
+      "createdAt": "2026-02-02T12:00:00.000Z",
+      "updatedAt": "2026-02-02T12:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "seed-pr-squat-2",
+      "movementId": "seed-back-squat",
+      "weight": 150,
+      "reps": 3,
+      "date": "2026-02-10T12:00:00.000Z",
+      "createdAt": "2026-02-10T12:00:00.000Z",
+      "updatedAt": "2026-02-10T12:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "seed-pr-bench-1",
+      "movementId": "seed-bench-press",
+      "weight": 92.5,
+      "reps": 5,
+      "date": "2026-02-01T12:00:00.000Z",
+      "createdAt": "2026-02-01T12:00:00.000Z",
+      "updatedAt": "2026-02-01T12:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "seed-pr-bench-2",
+      "movementId": "seed-bench-press",
+      "weight": 100,
+      "reps": 2,
+      "date": "2026-02-11T12:00:00.000Z",
+      "createdAt": "2026-02-11T12:00:00.000Z",
+      "updatedAt": "2026-02-11T12:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "seed-pr-deadlift-1",
+      "movementId": "seed-deadlift",
+      "weight": 180,
+      "reps": 4,
+      "date": "2026-02-05T12:00:00.000Z",
+      "createdAt": "2026-02-05T12:00:00.000Z",
+      "updatedAt": "2026-02-05T12:00:00.000Z",
+      "deletedAt": null
+    },
+    {
+      "id": "seed-pr-deadlift-2",
+      "movementId": "seed-deadlift",
+      "weight": 200,
+      "reps": 1,
+      "date": "2026-02-12T12:00:00.000Z",
+      "createdAt": "2026-02-12T12:00:00.000Z",
+      "updatedAt": "2026-02-12T12:00:00.000Z",
+      "deletedAt": null
+    }
+  ]
+}
