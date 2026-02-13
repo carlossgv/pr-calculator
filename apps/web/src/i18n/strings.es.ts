@@ -6,6 +6,12 @@ export const es = {
     movements: "Movimientos",
     preferences: "Preferencias",
   },
+  onboarding: {
+    accentTipTitle: "Tip",
+    accentTipBody: "Puedes cambiar el color de acento en Preferencias cuando quieras.",
+    accentTipCta: "Abrir Preferencias",
+    dismissCta: "Entendido",
+  },
   home: {
     loading: "Cargando…",
     maxWeight: "Máx (100%)",

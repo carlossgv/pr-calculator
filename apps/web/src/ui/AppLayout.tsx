@@ -7,6 +7,10 @@ import { t, useLanguage } from "../i18n/strings";
 import { applyTheme, toResolvedTheme } from "../theme/theme";
 import { Home, Dumbbell, Settings } from "lucide-react";
 import { PwaUpdateBanner } from "../components/PwaUpdateBanner";
+import { Modal } from "./Modal";
+import { Button } from "./Button";
+
+const ACCENT_TIP_SEEN_KEY = "prcalc.accent-tip-seen.v1";
 
 function topIconClassName({ isActive }: { isActive: boolean }) {
   return isActive ? "navIconLink isActive" : "navIconLink";
@@ -79,6 +83,7 @@ function getNavigationType(): string | null {
 export function AppLayout() {
   useLanguage(); // ✅ fuerza re-render cuando cambia el idioma
   const [, setPrefs] = useState<UserPreferences | null>(null);
+  const [showAccentTip, setShowAccentTip] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -100,6 +105,31 @@ export function AppLayout() {
       applyTheme(toResolvedTheme(p.theme), p.accentColor);
     });
   }, []);
+
+  useEffect(() => {
+    const seen = localStorage.getItem(ACCENT_TIP_SEEN_KEY) === "1";
+    if (seen) return;
+
+    const standalone =
+      window.matchMedia?.("(display-mode: standalone)").matches === true ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone ===
+        true;
+
+    if (!standalone) return;
+
+    const timer = window.setTimeout(() => setShowAccentTip(true), 550);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  function dismissAccentTip() {
+    localStorage.setItem(ACCENT_TIP_SEEN_KEY, "1");
+    setShowAccentTip(false);
+  }
+
+  function openPreferencesFromTip() {
+    dismissAccentTip();
+    navigate("/preferences");
+  }
 
   // 1) Restore-on-open:
   //    Solo corre cuando caes en "/" (PWA start_url) y todavía no restauramos.
@@ -187,6 +217,20 @@ export function AppLayout() {
 
       <BottomNav />
       <PwaUpdateBanner />
+
+      {showAccentTip ? (
+        <Modal title={t.onboarding.accentTipTitle} onClose={dismissAccentTip}>
+          <p className="onboardingTipText">{t.onboarding.accentTipBody}</p>
+          <div className="onboardingTipActions">
+            <Button variant="primary" size="md" shape="pill" onClick={openPreferencesFromTip}>
+              {t.onboarding.accentTipCta}
+            </Button>
+            <Button variant="ghost" size="md" shape="pill" onClick={dismissAccentTip}>
+              {t.onboarding.dismissCta}
+            </Button>
+          </div>
+        </Modal>
+      ) : null}
     </div>
   );
 }

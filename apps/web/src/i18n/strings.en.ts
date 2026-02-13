@@ -6,6 +6,12 @@ export const en = {
     movements: "Movements",
     preferences: "Preferences",
   },
+  onboarding: {
+    accentTipTitle: "Tip",
+    accentTipBody: "You can change the app accent color anytime in Preferences.",
+    accentTipCta: "Open Preferences",
+    dismissCta: "Got it",
+  },
   home: {
     loading: "Loading…",
     maxWeight: "Max (100%)",
