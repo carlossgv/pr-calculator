@@ -212,8 +212,8 @@ jobs:
           set -euo pipefail
           tailscale ssh ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
             cd ${{ vars.DEPLOY_PATH }}
-            docker compose --env-file .env.prod -f docker-compose.prod.yml pull pr-calculator-api pr-calculator-web
-            docker compose --env-file .env.prod -f docker-compose.prod.yml up -d pr-calculator-db pr-calculator-api pr-calculator-web
+            docker compose --env-file .env.prd -f docker-compose.prod.yml pull pr-calculator-api pr-calculator-web
+            docker compose --env-file .env.prd -f docker-compose.prod.yml up -d pr-calculator-db pr-calculator-api pr-calculator-web
           EOF
 
       - name: Notify ntfy
