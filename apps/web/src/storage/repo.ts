@@ -1,5 +1,6 @@
 // FILE: apps/web/src/storage/repo.ts
 import {
+  DEFAULT_ACCENT_COLOR,
   convertWeightValue,
   DEFAULT_PREFS,
   type Movement,
@@ -122,12 +123,28 @@ export const repo = {
     if (isNewPrefsShape(value)) {
       const contexts = value.contexts ?? { kg: "olympic", lb: "crossfit" };
       const theme = value.theme ?? "dark";
+      const accentColor =
+        typeof value.accentColor === "string" &&
+        value.accentColor.trim().length > 0
+          ? value.accentColor
+          : DEFAULT_ACCENT_COLOR;
 
       const language =
         value.language === "es" || value.language === "en" ? value.language : "en";
 
-      if (!value.contexts || !value.theme || !value.language) {
-        const next: UserPreferences = { ...value, contexts, theme, language };
+      if (
+        !value.contexts ||
+        !value.theme ||
+        !value.language ||
+        !value.accentColor
+      ) {
+        const next: UserPreferences = {
+          ...value,
+          contexts,
+          theme,
+          language,
+          accentColor,
+        };
         await db.preferences.put({ id: "prefs", value: next });
         markDirty();
         return next;

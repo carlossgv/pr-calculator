@@ -40,6 +40,7 @@
 .form {
   display: grid;
   gap: 10px;
+  margin-top: 6px;
   min-width: 0;
 }
 
@@ -70,7 +71,7 @@
 
 .dateInput:focus {
   border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
-  box-shadow: 0 0 0 6px var(--ring);
+  box-shadow: none;
 }
 
 :global(:root[data-theme="dark"])
@@ -164,10 +165,14 @@
 }
 
 /* list */
+.prListSection {
+  display: grid;
+  gap: 10px;
+}
+
 .divider {
-  margin-top: 6px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  margin-top: 2px;
+  margin-bottom: 6px;
   display: flex;
   justify-content: space-between;
   align-items: baseline;

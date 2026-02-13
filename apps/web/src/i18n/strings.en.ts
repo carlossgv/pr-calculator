@@ -6,6 +6,14 @@ export const en = {
     movements: "Movements",
     preferences: "Preferences",
   },
+  onboarding: {
+    changelogTitle: "What’s New!",
+    changelogIntro: "Thanks for updating. Here’s what changed:",
+    changelogUiSimplified: "The UI was simplified for a smoother experience.",
+    changelogAccentPrefs:
+      "You can now change accent colors from the Preferences page.",
+    okCta: "Understood",
+  },
   home: {
     loading: "Loading…",
     maxWeight: "Max (100%)",
@@ -50,22 +58,22 @@ export const en = {
     saved: "✅ Saved",
     contexts: {
       title: "Contexts",
-      kg: "KG context",
-      lb: "LB context",
-      olympic: "Olympic",
-      crossfit: "CrossFit",
+      kg: "Metric context",
+      lb: "Imperial context",
+      olympic: "Metric",
+      crossfit: "Imperial",
       custom: "Custom (use my plates)",
     },
     presets: {
       title: "Plate presets",
-      olympicKg: "Olympic (KG)",
-      crossfitLb: "CrossFit (LB + KG change plates)",
+      olympicKg: "Metric (KG)",
+      crossfitLb: "Imperial (LB + KG change plates)",
       applied: "Preset applied",
 
       // NEW (for PreferencesPage UI)
       selectedTitle: "Selected",
       olympicHint: "{bar}{unit} bar, {unit} plates",
-      crossfitHint: "{bar}{unit} bar, {unit} plates + kg change",
+      crossfitHint: "{bar}{unit} bar, lb plates + kg change plates",
     },
     theme: {
       title: "Theme",
@@ -75,6 +83,8 @@ export const en = {
       switchToDarkAria: "Switch to dark theme",
       lightTitle: "Light",
       darkTitle: "Dark",
+      primaryTitle: "Primary",
+      primaryHint: "Choose the primary accent color.",
     },
     bar: {
       title: "Bar",
@@ -218,8 +228,8 @@ theoretical1rmAria: "Open calculator with theoretical 1RM",
   },
   context: {
     label: "Context",
-    olympic: "Olympic",
-    crossfit: "CrossFit",
+    olympic: "Metric",
+    crossfit: "Imperial",
     custom: "Custom",
   },
 } as const;

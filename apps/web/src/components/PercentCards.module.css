@@ -26,7 +26,7 @@
   position: relative;
 
   border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
-  border-radius: 18px;
+  border-radius: var(--radius-md);
 
   /* en vez de padding gigante: min-height + layout consistente */
   padding: 14px 14px 12px;
@@ -42,35 +42,7 @@
     transform 120ms ease,
     border-color 120ms ease,
     background 120ms ease,
-    box-shadow 120ms ease,
-    filter 120ms ease;
-}
-
-/* highlight interno sutil para que no se vea “plain” */
-.tile::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 18px;
-  pointer-events: none;
-
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, white 6%, transparent),
-    transparent 48%,
-    transparent
-  );
-  opacity: 0.7;
-}
-
-:global([data-theme="dark"]) .tile::before {
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, white 8%, transparent),
-    transparent 52%,
-    transparent
-  );
-  opacity: 0.55;
+    box-shadow 120ms ease;
 }
 
 .tile:hover {
@@ -93,14 +65,14 @@
 .tileMax {
   border-color: color-mix(in oklab, var(--accent) 78%, var(--border));
   background: color-mix(in oklab, var(--accent) 16%, var(--card-bg));
-  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.14);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.14);
 }
 
 /* selected = teal */
 .tileSelected {
   border-color: color-mix(in oklab, var(--accent-2) 78%, var(--border));
   background: color-mix(in oklab, var(--accent-2) 16%, var(--card-bg));
-  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.14);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.14);
 }
 
 /* Dark: más pop y profundidad */
@@ -119,19 +91,23 @@
 
 :global([data-theme="dark"]) .tileMax {
   background: color-mix(in oklab, var(--accent) 20%, var(--card-bg));
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 :global([data-theme="dark"]) .tileSelected {
   background: color-mix(in oklab, var(--accent-2) 20%, var(--card-bg));
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+:global([data-theme="dark"]) .pct {
+  color: color-mix(in oklab, var(--accent) 86%, white);
 }
 
 .tileRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
 
   /* asegura que el contenido quede centrado verticalmente */
@@ -141,11 +117,28 @@
   z-index: 1; /* sobre ::before */
 }
 
-.pct,
+.leftTop {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pct {
+  font-size: 19px;
+  font-weight: 950;
+  letter-spacing: -0.015em;
+  color: color-mix(in oklab, var(--accent) 84%, var(--fg));
+  min-width: 58px;
+  text-align: left;
+}
+
 .target {
   font-size: 16px;
-  font-weight: 950;
+  font-weight: 900;
   letter-spacing: -0.01em;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
 }
 
 .target {
@@ -160,7 +153,7 @@
 }
 
 .target[data-size="sm"] {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .pctHint {
@@ -174,8 +167,9 @@
 .rightTop {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
+  margin-left: auto;
 }
 
 .chevronPill {
@@ -215,32 +209,30 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* ✅ línea sutil, tipo “detalle” como tu listado (sin texto) */
-.tileRule {
-  height: 1px;
-  border-radius: 999px;
+@media (max-width: 520px) {
+  .tileRow {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
 
-  background: linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--fg) 16%, transparent),
-    color-mix(in oklab, var(--fg) 8%, transparent) 55%,
-    transparent
-  );
+  .leftTop {
+    display: grid;
+    gap: 2px;
+    width: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
 
-  opacity: 0.95;
+  .pct {
+    font-size: 20px;
+    min-width: 0;
+  }
 
-  position: relative;
-  z-index: 1; /* sobre ::before */
-}
-
-:global([data-theme="dark"]) .tileRule {
-  background: linear-gradient(
-    90deg,
-    color-mix(in oklab, white 14%, transparent),
-    color-mix(in oklab, white 6%, transparent) 55%,
-    transparent
-  );
-  opacity: 0.8;
+  .target {
+    font-size: 15px;
+  }
 }
 
 /* =========================
@@ -255,7 +247,7 @@
   max-width: none;
   margin: 0;
 
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   padding: 14px;
 
   background: var(--card-bg);
@@ -288,13 +280,71 @@
   line-height: 1.35;
 }
 
+.detailPrimary {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--accent) 12%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent) 48%, var(--border));
+}
+
+:global([data-theme="dark"]) .detailPrimary {
+  background: color-mix(in oklab, var(--accent) 16%, var(--card-bg));
+  border-color: color-mix(
+    in oklab,
+    var(--accent) 58%,
+    rgba(255, 255, 255, 0.1)
+  );
+}
+
+.detailFacts {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+}
+
+.detailFactRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  background: color-mix(in oklab, var(--fg) 3%, var(--card-bg));
+}
+
+.detailFactRowEmphasis {
+  border-color: color-mix(in oklab, var(--accent-2) 52%, var(--border));
+  background: color-mix(in oklab, var(--accent-2) 14%, var(--card-bg));
+}
+
+.detailFactLabel {
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.detailFactValue {
+  justify-self: end;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
 /* KPI blocks */
 .detailKpi {
   grid-column: 1 / -1;
   display: grid;
   gap: 8px;
   padding: 12px;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
 
   background: color-mix(in oklab, var(--accent) 16%, var(--card-bg));
   border: 1px solid color-mix(in oklab, var(--accent) 55%, var(--border));
@@ -353,11 +403,7 @@
   width: 58px;
   height: 12px;
   border-radius: 0;
-  background: linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--fg) 18%, transparent),
-    color-mix(in oklab, var(--fg) 35%, transparent)
-  );
+  background: color-mix(in oklab, var(--fg) 28%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--fg) 12%, transparent);
   flex: 0 0 auto;
 }
@@ -402,7 +448,7 @@
   font-size: 14px;
   font-weight: 800;
   color: var(--plate-text, #1a1a1a);
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+  text-shadow: none;
 }
 
 .plateEmpty {
@@ -415,7 +461,7 @@
   grid-column: 1 / -1;
 
   padding: 10px 12px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
 
   background: color-mix(in oklab, var(--accent-2) 16%, var(--card-bg));
   border: 1px solid color-mix(in oklab, var(--accent-2) 55%, var(--border));
@@ -453,34 +499,58 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 120;
+  z-index: 1100;
 
   display: grid;
   place-items: center;
 
-  background: color-mix(in oklab, var(--fg) 16%, transparent);
-
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  background: color-mix(in oklab, var(--fg) 24%, transparent);
 
   padding: 16px;
 }
 
 .modal {
-  width: min(720px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px - var(--safe-bottom) - var(--native-bottom-inset));
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px - var(--safe-bottom) - var(--native-bottom-inset));
   overflow: auto;
 
-  border-radius: 22px;
+  border-radius: var(--radius-lg);
   padding: 14px;
 
   background: var(--card-bg);
   border: 2px solid color-mix(in oklab, var(--accent) 65%, var(--border));
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
 
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modalBody {
+  display: grid;
+  gap: 10px;
+}
+
+.modalClose {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 !important;
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 :global([data-theme="dark"]) .modal {
@@ -489,7 +559,7 @@
     var(--accent) 65%,
     rgba(255, 255, 255, 0.10)
   );
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
 /* On mobile, hide inline detail (we use modal instead) */

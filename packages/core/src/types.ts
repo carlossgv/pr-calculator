@@ -51,6 +51,7 @@ export type UserPreferences = {
   contexts: Record<Unit, UnitContext>;
 
   theme: ThemePreference;
+  accentColor: string;
 
   bar: Plate;
   rounding: Weight;

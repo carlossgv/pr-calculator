@@ -9,9 +9,10 @@ type Props = {
   children: ReactNode;
   onClose: () => void;
   ariaLabel?: string;
+  className?: string;
 };
 
-export function Modal({ title, children, onClose, ariaLabel }: Props) {
+export function Modal({ title, children, onClose, ariaLabel, className }: Props) {
   return (
     <div
       className={styles.overlay}
@@ -22,7 +23,9 @@ export function Modal({ title, children, onClose, ariaLabel }: Props) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <section className={styles.modal}>
+      <section
+        className={[styles.modal, className].filter(Boolean).join(" ")}
+      >
         <div className={styles.header}>
           <div className={styles.title}>{title}</div>
 

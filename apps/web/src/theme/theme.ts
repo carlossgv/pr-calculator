@@ -13,6 +13,9 @@ export function toResolvedTheme(pref: ThemePreference): ResolvedTheme {
   return detectSystemTheme();
 }
 
-export function applyTheme(resolved: ResolvedTheme) {
+export function applyTheme(resolved: ResolvedTheme, accentColor?: string) {
   document.documentElement.dataset.theme = resolved;
+  if (accentColor) {
+    document.documentElement.style.setProperty("--accent-base", accentColor);
+  }
 }

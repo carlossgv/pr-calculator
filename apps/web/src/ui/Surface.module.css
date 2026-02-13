@@ -12,7 +12,7 @@
 
 .card {
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   background: var(--card-bg);
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -20,7 +20,7 @@
 
 .panel {
   border: 2px solid color-mix(in oklab, var(--accent) 34%, var(--border));
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   padding: 12px;
 
   background: var(--card-bg);
@@ -30,19 +30,14 @@
   overflow: hidden;
 }
 
-/* dark: un toque premium sutil */
 :global([data-theme="dark"]) .panel {
   border-color: color-mix(in oklab, var(--accent) 42%, rgba(255, 255, 255, 0.10));
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--fg) 7%, var(--card-bg)) 0%,
-    var(--card-bg) 76%
-  );
+  background: var(--card-bg);
 }
 
 .flat {
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   background: var(--card-bg);
   overflow: hidden;
 }
@@ -111,7 +106,7 @@
   text-transform: uppercase;
 
   padding: 6px 10px;
-  border-radius: 10px;
+  border-radius: var(--radius-xs);
 
   background: color-mix(in oklab, var(--accent-2) 26%, var(--card-bg));
   border: 1px dashed color-mix(in oklab, var(--accent-2) 75%, var(--border));
@@ -201,7 +196,7 @@
    ========================= */
 
 .btn {
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   font-weight: 900;
 
@@ -236,11 +231,10 @@
 }
 
 .btnPrimary {
-  /* 🔥 pop real: sólido */
   background: var(--accent);
   border-color: color-mix(in oklab, var(--accent) 80%, var(--border));
   color: var(--accent-contrast);
-  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.14);
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.2);
 }
 
 .btnPrimary:hover {
@@ -249,7 +243,7 @@
 }
 
 :global([data-theme="dark"]) .btnPrimary {
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.50);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 }
 
 .btnDanger {
@@ -272,7 +266,7 @@
   height: 40px;
   padding: 0;
 
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--card-bg);
 

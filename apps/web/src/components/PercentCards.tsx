@@ -3,7 +3,8 @@ import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react"
 import { calculateLoad, type Unit, type UserPreferences } from "@repo/core";
 import { t } from "../i18n/strings";
 import styles from "./PercentCards.module.css";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
+import { Button } from "../ui/Button";
 
 export type PercentOrder = "asc" | "desc";
 
@@ -304,14 +305,13 @@ export function PercentCards({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [selected]);
 
+  const detailTitle = selected
+    ? `${selected.pct}% · ${round1(selected.target)}${unit}`
+    : "";
+
   const detailContent = selected ? (
     <>
-      <div className={styles.detailTitle}>
-        {selected.pct}% · {round1(selected.target)}
-        {unit}
-      </div>
-
-      <div className={styles.detailKpi}>
+      <div className={styles.detailPrimary}>
         <div className={styles.detailKpiLabel}>{t.home.platesPerSide}</div>
         <div className={styles.plateCombo}>
           <div
@@ -358,28 +358,35 @@ export function PercentCards({
         </div>
       </div>
 
-      <div className={styles.detailKpi}>
-        <div className={styles.detailKpiLabel}>{t.home.perSideTotal}</div>
-        <div className={styles.detailKpiValue}>
-          {round1(selected.load.perSide)}
-          {unit}
+      <div className={styles.detailFacts}>
+        <div className={styles.detailFactRow}>
+          <div className={styles.detailFactLabel}>{t.home.perSideTotal}</div>
+          <div className={styles.detailFactValue}>
+            {round1(selected.load.perSide)}
+            {unit}
+          </div>
         </div>
-      </div>
 
-      <div className={styles.detailRow}>
-        <b>{t.home.bar}:</b>{" "}
-        {formatPickLabel(
-          selected.load.bar.plate.label,
-          selected.load.bar.plate.unit,
-          selected.load.bar.valueInUnit,
-          unit,
-        )}
-      </div>
+        <div className={styles.detailFactRow}>
+          <div className={styles.detailFactLabel}>{t.home.bar}</div>
+          <div className={[styles.detailFactValue, styles.detailClamp].join(" ")}>
+            {formatPickLabel(
+              selected.load.bar.plate.label,
+              selected.load.bar.plate.unit,
+              selected.load.bar.valueInUnit,
+              unit,
+            )}
+          </div>
+        </div>
 
-      <div className={styles.detailAchieved}>
-        {t.home.achieved}: {round1(selected.load.achievedTotal)}
-        {unit} (Δ {round1(selected.load.delta)}
-        {unit})
+        <div className={`${styles.detailFactRow} ${styles.detailFactRowEmphasis}`}>
+          <div className={styles.detailFactLabel}>{t.home.achieved}</div>
+          <div className={styles.detailFactValue}>
+            {round1(selected.load.achievedTotal)}
+            {unit} (Δ {round1(selected.load.delta)}
+            {unit})
+          </div>
+        </div>
       </div>
     </>
   ) : null;
@@ -388,6 +395,7 @@ export function PercentCards({
     <div className={styles.root}>
       {selected ? (
         <section ref={detailRef as any} className={styles.detail}>
+          <div className={styles.detailTitle}>{detailTitle}</div>
           {detailContent}
         </section>
       ) : null}
@@ -402,7 +410,25 @@ export function PercentCards({
             if (e.target === e.currentTarget) close();
           }}
         >
-          <section className={styles.modal}>{detailContent}</section>
+          <section className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <div className={styles.detailTitle}>{detailTitle}</div>
+              <Button
+                variant="ghost"
+                size="md"
+                shape="round"
+                iconOnly
+                className={styles.modalClose}
+                onClick={close}
+                ariaLabel={t.movements.closeAria}
+                title={t.movements.closeAria}
+              >
+                <X size={18} aria-hidden="true" />
+              </Button>
+            </div>
+
+            <div className={styles.modalBody}>{detailContent}</div>
+          </section>
         </div>
       ) : null}
 
@@ -420,7 +446,7 @@ export function PercentCards({
             .filter(Boolean)
             .join(" ");
 
-          const targetLabel = `${round1(target)}${unit}`;
+          const targetLabel = `${round1(target)} ${unit}`;
           const targetSize =
             targetLabel.length >= 8 ? "sm" : targetLabel.length >= 7 ? "md" : "lg";
 
@@ -433,21 +459,17 @@ export function PercentCards({
               aria-pressed={isSelected}
             >
               <div className={styles.tileRow}>
-                <div className={styles.pct}>{pct}%</div>
-
-                <div className={styles.rightTop}>
+                <div className={styles.leftTop}>
+                  <div className={styles.pct}>{pct}%</div>
                   <div className={styles.target} data-size={targetSize}>
                     {targetLabel}
                   </div>
-
-                  <span className={styles.chevronPill} aria-hidden="true">
-                    <ChevronRight size={18} />
-                  </span>
                 </div>
-              </div>
 
-              {/* sin texto: solo “detalle” visual */}
-              <div className={styles.tileRule} aria-hidden="true" />
+                <span className={styles.chevronPill} aria-hidden="true">
+                  <ChevronRight size={18} />
+                </span>
+              </div>
             </button>
           );
         })}

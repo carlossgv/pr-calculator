@@ -4,7 +4,7 @@ import type { Movement, PrEntry, UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Chip, Sticker, Surface, SurfaceHeader } from "../ui/Surface";
+import { Sticker, Surface, SurfaceHeader } from "../ui/Surface";
 import { Modal } from "../ui/Modal";
 import styles from "./MovementsPage.module.css";
 import { ArrowUpDown, Check, Plus, X, Settings2, ChevronRight } from "lucide-react";
@@ -323,8 +323,6 @@ export function MovementsPage() {
       <Surface variant="panel" aria-label="Movements panel">
         <SurfaceHeader
           leftLabel={<Sticker stamp={<span>LIST</span>}>PR CALC</Sticker>}
-          rightChip={<Chip tone="accent3">{unit}</Chip>}
-          showBarcode
         />
 
         <div className={styles.controlsRow}>
@@ -422,8 +420,11 @@ export function MovementsPage() {
 
                 {best ? (
                   <div className={styles.sub}>
-                    {toDateLabel(best.date)} · <b>{best.weight}</b>{" "}
-                    <span className={styles.unitHint}>{unit}</span> × {best.reps}
+                    <span className={styles.bestWeight}>{best.weight}</span>{" "}
+                    <span className={styles.bestUnit}>{unit}</span>{" "}
+                    <span className={styles.bestMult}>×</span>{" "}
+                    <span className={styles.bestReps}>{best.reps}</span>{" "}
+                    · {toDateLabel(best.date)}
                   </div>
                 ) : (
                   <div className={styles.subMuted}>{t.movements.noPrYet}</div>

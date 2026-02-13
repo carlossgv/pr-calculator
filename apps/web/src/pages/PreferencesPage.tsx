@@ -1,6 +1,6 @@
 /* FILE: apps/web/src/pages/PreferencesPage.tsx */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import type {
   Plate,
   Unit,
@@ -9,16 +9,21 @@ import type {
   Weight,
   Language,
 } from "@repo/core";
-import { DEFAULT_PREFS, CROSSFIT_LB_WITH_KG_CHANGES } from "@repo/core";
+import {
+  ACCENT_PALETTE,
+  DEFAULT_ACCENT_COLOR,
+  DEFAULT_PREFS,
+  CROSSFIT_LB_WITH_KG_CHANGES,
+} from "@repo/core";
 import { repo } from "../storage/repo";
 import { setLanguage, t } from "../i18n/strings";
-import { ThemeToggle } from "../components/ThemeToggle";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
-import { Mars, Venus, ChevronRight } from "lucide-react";
+import { Mars, Venus, ChevronRight, Check, Sun, Moon } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
 import { downloadJson, exportBackup, importBackup } from "../storage/backup";
 import { getOrCreateIdentity } from "../sync/identity";
 import { Button } from "../ui/Button";
+import { Modal } from "../ui/Modal";
 
 type BarGender = "male" | "female";
 type PresetKey = "olympicKg" | "crossfitLb" | null;
@@ -42,6 +47,11 @@ function barLabelFor(unit: Unit, gender: BarGender): string {
 
 function resolvePrefsTheme(p: UserPreferences): ResolvedTheme {
   return p.theme === "dark" ? "dark" : "light";
+}
+
+function resolveAccentColor(value: unknown, fallback?: string): string {
+  if (typeof value === "string" && value.trim().length) return value;
+  return fallback ?? DEFAULT_ACCENT_COLOR;
 }
 
 function ensurePrefs(
@@ -81,6 +91,10 @@ function ensurePrefs(
 
     // ✅ NEW
     language: lang,
+    accentColor: resolveAccentColor(
+      (p as UserPreferences).accentColor,
+      fallback.accentColor,
+    ),
 
     defaultUnit: unit,
     bar: {
@@ -91,13 +105,6 @@ function ensurePrefs(
       label: barLabelFor(unit, nextGender),
     },
   };
-}
-
-function onRowKeyDown(e: React.KeyboardEvent, onActivate: () => void) {
-  if (e.key === "Enter" || e.key === " ") {
-    e.preventDefault();
-    onActivate();
-  }
 }
 
 function eqWeight(a: Weight, b: Weight) {
@@ -203,7 +210,7 @@ export function PreferencesPage() {
       // recargar prefs en pantalla (y aplicar theme)
       const nextPrefs = await repo.getPreferences();
       setPrefs(nextPrefs);
-      applyTheme(resolvePrefsTheme(nextPrefs));
+      applyTheme(resolvePrefsTheme(nextPrefs), nextPrefs.accentColor);
     } catch (e) {
       console.error(e);
       setBackupErr(t.prefs.backup.importError);
@@ -221,6 +228,15 @@ export function PreferencesPage() {
     if (!prefs) return "light";
     return resolvePrefsTheme(prefs);
   }, [prefs]);
+
+  const accentColor = useMemo<string>(() => {
+    if (!prefs) return DEFAULT_ACCENT_COLOR;
+    return resolveAccentColor(prefs.accentColor);
+  }, [prefs]);
+
+  const accentOptions = ACCENT_PALETTE;
+
+  const [isAccentModalOpen, setIsAccentModalOpen] = useState(false);
 
   const barUnit = useMemo<Unit>(() => {
     return prefs?.defaultUnit ?? "kg";
@@ -269,7 +285,16 @@ export function PreferencesPage() {
 
     setPrefs(next);
     await repo.setPreferences(next);
-    applyTheme(nextTheme);
+    applyTheme(nextTheme, next.accentColor);
+  }
+
+  async function setAccentColor(nextColor: string) {
+    if (!prefs) return;
+    if (prefs.accentColor === nextColor) return;
+    const next = ensurePrefs({ ...prefs, accentColor: nextColor }, prefs);
+    setPrefs(next);
+    await repo.setPreferences(next);
+    applyTheme(resolvePrefsTheme(next), next.accentColor);
   }
 
   async function applyPreset(preset: UserPreferences) {
@@ -283,6 +308,8 @@ export function PreferencesPage() {
       {
         ...preset,
         theme: prefs.theme,
+        accentColor: prefs.accentColor,
+        language: prefs.language,
         defaultUnit: unit,
         bar: {
           ...preset.bar,
@@ -357,7 +384,7 @@ export function PreferencesPage() {
               <div className={styles.rowTitle}>{t.prefs.language.title}</div>
             </div>
 
-            <div className={styles.rowRight}>
+            <div className={`${styles.rowRight} ${styles.rowRightWrap}`}>
               <div
                 className={styles.seg}
                 role="radiogroup"
@@ -404,14 +431,7 @@ export function PreferencesPage() {
             </div>
           </div>
 
-          <div
-            className={`${styles.rowPressable} ${styles.rowDivider}`}
-            role="button"
-            tabIndex={0}
-            onClick={toggleTheme}
-            onKeyDown={(e) => onRowKeyDown(e, toggleTheme)}
-            aria-label={t.prefs.theme.toggleRowAria}
-          >
+          <div className={`${styles.row} ${styles.rowDivider}`}>
             <div className={styles.rowLeft}>
               <div className={styles.rowTitle}>{t.prefs.theme.title}</div>
               <span className={styles.srOnly}>
@@ -420,16 +440,136 @@ export function PreferencesPage() {
             </div>
 
             <div className={styles.rowRight}>
-              <span
-                className={styles.iconWrap}
-                onClick={(e) => e.stopPropagation()}
+              <div
+                className={styles.themeSegIcons}
+                role="radiogroup"
+                aria-label={t.prefs.theme.toggleRowAria}
               >
-                <ThemeToggle value={resolvedTheme} onToggle={toggleTheme} />
-              </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  shape="round"
+                  iconOnly
+                  className={styles.themeIconBtn}
+                  data-active={resolvedTheme === "light"}
+                  role="radio"
+                  aria-checked={resolvedTheme === "light"}
+                  aria-label={t.prefs.theme.lightTitle}
+                  onClick={() => {
+                    if (resolvedTheme === "light") return;
+                    toggleTheme();
+                  }}
+                >
+                  <Sun size={18} />
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  shape="round"
+                  iconOnly
+                  className={styles.themeIconBtn}
+                  data-active={resolvedTheme === "dark"}
+                  role="radio"
+                  aria-checked={resolvedTheme === "dark"}
+                  aria-label={t.prefs.theme.darkTitle}
+                  onClick={() => {
+                    if (resolvedTheme === "dark") return;
+                    toggleTheme();
+                  }}
+                >
+                  <Moon size={18} />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.row}>
+            <div className={styles.rowLeft}>
+              <div className={styles.rowTitle}>{t.prefs.theme.primaryTitle}</div>
+              <div className={styles.rowHint}>{t.prefs.theme.primaryHint}</div>
+            </div>
+
+            <div className={`${styles.rowRight} ${styles.rowRightWrap}`}>
+              <button
+                type="button"
+                className={styles.accentSwatchTrigger}
+                aria-label={t.prefs.theme.primaryTitle}
+                title={t.prefs.theme.primaryTitle}
+                onClick={() => setIsAccentModalOpen(true)}
+                style={{ "--swatch-color": accentColor } as CSSProperties}
+              >
+                <span className={styles.srOnly}>
+                  {t.prefs.theme.primaryTitle}
+                </span>
+              </button>
+
+              <div
+                className={styles.accentSwatches}
+                role="radiogroup"
+                aria-label={t.prefs.theme.primaryTitle}
+              >
+                {accentOptions.map((option) => {
+                  const isActive =
+                    option.value.toLowerCase() === accentColor.toLowerCase();
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={styles.accentSwatchBtn}
+                      data-active={isActive}
+                      role="radio"
+                      aria-checked={isActive}
+                      aria-label={`${t.prefs.theme.primaryTitle}: ${option.label}`}
+                      title={option.label}
+                      style={{ "--swatch-color": option.value } as CSSProperties}
+                      onClick={() => setAccentColor(option.value)}
+                    />
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
       </section>
+
+      {isAccentModalOpen ? (
+        <Modal
+          title={t.prefs.theme.primaryTitle}
+          onClose={() => setIsAccentModalOpen(false)}
+          ariaLabel={t.prefs.theme.primaryTitle}
+          className={styles.accentModal}
+        >
+          <div className={styles.accentModalCard}>
+            <div
+              className={styles.accentModalSwatches}
+              role="radiogroup"
+              aria-label={t.prefs.theme.primaryTitle}
+            >
+              {accentOptions.map((option) => {
+                const isActive =
+                  option.value.toLowerCase() === accentColor.toLowerCase();
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={styles.accentSwatchBtn}
+                    data-active={isActive}
+                    role="radio"
+                    aria-checked={isActive}
+                    aria-label={`${t.prefs.theme.primaryTitle}: ${option.label}`}
+                    title={option.label}
+                  style={{ "--swatch-color": option.value } as CSSProperties}
+                  onClick={() => {
+                    setAccentColor(option.value);
+                  }}
+                />
+              );
+            })}
+            </div>
+          </div>
+        </Modal>
+      ) : null}
 
       {/* PRESETS */}
       <section className={styles.section} aria-label={t.prefs.presets.title}>

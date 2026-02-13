@@ -5,11 +5,12 @@ export const APP_BRANDING = {
   name: "PR Calculator",
   shortName: "PR Calc",
   description: "PR Calculator",
-  themeColor: "#2563eb",
+  themeColor: "#009cff",
   backgroundColor: "#0b1220",
 };
 
 export function getBrandingForEnv(appEnv) {
+  // TODO: centralize themeColor with shared palette constants.
   const isDev = appEnv === "dev";
   return {
     ...APP_BRANDING,
@@ -18,6 +19,6 @@ export function getBrandingForEnv(appEnv) {
     description: isDev
       ? `${APP_BRANDING.description} (staging/dev)`
       : APP_BRANDING.description,
-    themeColor: isDev ? "#7c3aed" : APP_BRANDING.themeColor,
+    themeColor: isDev ? "#ac11ff" : APP_BRANDING.themeColor,
   };
 }

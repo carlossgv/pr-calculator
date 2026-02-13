@@ -19,6 +19,12 @@ export default defineConfig(() => {
         : [
             VitePWA({
               registerType: "autoUpdate",
+              // Workaround for Workbox terser renderChunk exits on this runtime.
+              // Keep app bundle production-minified; only generate SW without terser.
+              workbox: {
+                mode: "development",
+                disableDevLogs: true,
+              },
               manifest: {
                 name: branding.name,
                 short_name: branding.shortName,

@@ -8,7 +8,7 @@ import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { UnitPill } from "../components/UnitPill";
 import { NumberInput } from "../components/NumberInput";
-import { Chip, Sticker, Surface, SurfaceHeader } from "../ui/Surface";
+import { Sticker, Surface, SurfaceHeader } from "../ui/Surface";
 import styles from "./MovementDetailsPage.module.css";
 import { Button } from "../ui/Button";
 import { Modal } from "../ui/Modal";
@@ -81,7 +81,7 @@ export function MovementDetailsPage() {
   const [loading, setLoading] = useState(true);
 
   // add form
-  const [weightText, setWeightText] = useState("100");
+  const [weightText, setWeightText] = useState("");
   const [weightUnit, setWeightUnit] = useState<Unit>("kg");
   const [repsText, setRepsText] = useState("1");
   const [date, setDate] = useState<string>(
@@ -291,6 +291,12 @@ export function MovementDetailsPage() {
   if (loading) return <p>{t.movement.loading}</p>;
 
   const unit = prefs?.defaultUnit ?? "kg";
+  const canAddEntry =
+    !!prefs &&
+    !!id &&
+    parsePositiveFloat(weightText) != null &&
+    parsePositiveInt(repsText) != null &&
+    !!date.trim();
 
   const confirmTitle =
     confirm?.kind === "deleteMovement"
@@ -328,19 +334,6 @@ export function MovementDetailsPage() {
 
         <div className={styles.topActions}>
           <Button
-            variant="neutral"
-            size="md"
-            shape="round"
-            iconOnly
-            className={styles.iconBtnMd}
-            ariaLabel={t.movements.openCalculator}
-            title={t.movements.openCalculator}
-            onClick={() => navigate(`/movements/${id}/calc/${unit}/100`)}
-          >
-            <Calculator size={18} />
-          </Button>
-
-          <Button
             variant="danger"
             size="md"
             shape="round"
@@ -360,8 +353,6 @@ export function MovementDetailsPage() {
       <Surface variant="panel" aria-label={t.movement.prs}>
         <SurfaceHeader
           leftLabel={<Sticker stamp={<span>MANAGE</span>}>PR CALC</Sticker>}
-          rightChip={<Chip tone="accent3">{unit}</Chip>}
-          showBarcode
         />
 
         <div className={styles.form}>
@@ -419,11 +410,14 @@ export function MovementDetailsPage() {
             shape="pill"
             fullWidth
             onClick={addEntry}
+            disabled={!canAddEntry}
           >
             {t.movement.add}
           </Button>
         </div>
+      </Surface>
 
+      <section className={styles.prListSection} aria-label={t.movement.prsTitle}>
         <div className={styles.divider}>
           <div className={styles.dividerTitle}>{t.movement.prsTitle}</div>
           <div className={styles.count}>{sorted.length}</div>
@@ -574,7 +568,7 @@ export function MovementDetailsPage() {
             })
           )}
         </div>
-      </Surface>
+      </section>
 
       {confirm ? (
         <Modal

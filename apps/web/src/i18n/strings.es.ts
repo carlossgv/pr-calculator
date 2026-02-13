@@ -6,6 +6,15 @@ export const es = {
     movements: "Movimientos",
     preferences: "Preferencias",
   },
+  onboarding: {
+    changelogTitle: "¡Novedades!",
+    changelogIntro: "Gracias por actualizar. Esto cambió:",
+    changelogUiSimplified:
+      "La interfaz se simplificó para una experiencia más fluida.",
+    changelogAccentPrefs:
+      "Ahora puedes cambiar los colores de la app desde la página de Preferencias.",
+    okCta: "Entendido",
+  },
   home: {
     loading: "Cargando…",
     maxWeight: "Máx (100%)",
@@ -54,20 +63,20 @@ export const es = {
     saved: "✅ Guardado",
     contexts: {
       title: "Contextos",
-      kg: "Contexto KG",
-      lb: "Contexto LB",
-      olympic: "Olímpico",
-      crossfit: "CrossFit",
+      kg: "Contexto métrico",
+      lb: "Contexto imperial",
+      olympic: "Métrico",
+      crossfit: "Imperial",
       custom: "Personalizado (usa mis discos)",
     },
     presets: {
       title: "Presets de discos",
-      olympicKg: "Olímpico (KG)",
-      crossfitLb: "CrossFit (LB + discos de cambio en KG)",
+      olympicKg: "Métrico (KG)",
+      crossfitLb: "Imperial (LB + discos de cambio en KG)",
       applied: "Preset aplicado",
       selectedTitle: "Seleccionado",
       olympicHint: "Barra {bar}{unit}, discos {unit}",
-      crossfitHint: "Barra {bar}{unit}, discos {unit} + cambios en kg",
+      crossfitHint: "Barra {bar}{unit}, discos {unit} + discos de cambio en kg",
     },
     theme: {
       title: "Tema",
@@ -77,6 +86,8 @@ export const es = {
       switchToDarkAria: "Cambiar a tema oscuro",
       lightTitle: "Claro",
       darkTitle: "Oscuro",
+      primaryTitle: "Primario",
+      primaryHint: "Elige el color de acento principal.",
     },
     bar: {
       title: "Barra",
@@ -213,8 +224,8 @@ theoreticalModeFrom: "Basado en PR guardado: {weight} × {reps} {unit}",
   },
   context: {
     label: "Contexto",
-    olympic: "Olímpico",
-    crossfit: "CrossFit",
+    olympic: "Métrico",
+    crossfit: "Imperial",
     custom: "Personalizado",
   },
 } as const;

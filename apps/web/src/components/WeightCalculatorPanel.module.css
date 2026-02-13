@@ -11,7 +11,7 @@
 
 .panel {
   border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   padding: 12px;
 
   display: grid;
@@ -25,90 +25,46 @@
 
 :global([data-theme="dark"]) .panel {
   border-color: rgba(255, 255, 255, 0.12);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--fg) 7%, var(--card-bg)) 0%,
-    var(--card-bg) 78%
-  );
+  background: var(--card-bg);
 }
 
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 10px;
   align-items: center;
-}
-
-.utilLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-
-  padding: 6px 10px;
-  border-radius: 999px;
-
-  background: color-mix(in oklab, var(--fg) 4%, var(--card-bg));
-  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
-}
-
-.stamp {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 10px;
-  font-weight: 950;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-
-  padding: 6px 10px;
-  border-radius: 10px;
-
-  background: color-mix(in oklab, var(--accent-2) 24%, var(--card-bg));
-  border: 1px dashed color-mix(in oklab, var(--accent-2) 72%, var(--border));
-}
-
-.contextChip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 10px;
-  font-weight: 950;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-
-  padding: 6px 10px;
-  border-radius: 999px;
-
-  background: color-mix(in oklab, var(--accent-3) 26%, var(--card-bg));
-  border: 1px solid color-mix(in oklab, var(--accent-3) 70%, var(--border));
-}
-
-.barcodeRule {
-  height: 10px;
-  border-radius: 999px;
-  background: var(--barcode);
-  opacity: 0.78;
 }
 
 .topRow {
   display: flex;
   gap: 10px;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .topActions {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.customPctTrigger {
+  gap: 8px;
+}
+
+.customPctCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 2px;
+  border-radius: var(--radius-pill);
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 900;
+  background: color-mix(in oklab, var(--accent) 18%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent) 50%, var(--border));
 }
 
 /* =========================
@@ -119,7 +75,7 @@
   position: relative;
   width: 100%;
   padding: 8px;
-  border-radius: 22px;
+  border-radius: var(--radius-md);
 
   background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
   border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
@@ -127,7 +83,7 @@
 
 .weightInputWrap:focus-within {
   border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
-  box-shadow: 0 0 0 6px var(--ring);
+  box-shadow: none;
 }
 
 .weightInput {
@@ -138,13 +94,13 @@
   letter-spacing: -0.03em;
   text-align: left;
 
-  border-radius: 18px;
-  border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
+  border-radius: var(--radius-md);
+  border: 0;
 
-  background: var(--input-bg);
+  background: transparent;
   color: var(--fg);
 
-  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.1);
+  box-shadow: none;
 
   padding: 16px 56px 16px 18px;
   outline: none;
@@ -187,7 +143,7 @@
 }
 
 .weightInput:focus {
-  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.12);
+  box-shadow: none;
 }
 
 .weightInputUnit {
@@ -195,7 +151,13 @@
   right: 18px;
   top: 50%;
   transform: translateY(-50%);
+}
 
+.weightInputUnitBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 13px;
   font-weight: 900;
   letter-spacing: 0.12em;
@@ -204,12 +166,31 @@
   padding: 6px 10px;
   border-radius: 999px;
 
-  background: color-mix(in oklab, var(--fg) 4%, var(--input-bg));
-  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  background: color-mix(in oklab, var(--accent) 12%, var(--input-bg));
+  border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--border));
   color: var(--muted);
-
-  pointer-events: none;
+  cursor: pointer;
   user-select: none;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.weightInputUnitBtn:hover {
+  background: color-mix(in oklab, var(--accent) 18%, var(--input-bg));
+  border-color: color-mix(in oklab, var(--accent) 58%, var(--border));
+  color: var(--fg);
+}
+
+.weightInputUnitBtn:active {
+  transform: translateY(1px);
+}
+
+.weightInputUnitBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring);
 }
 
 :global([data-theme="dark"]) .weightInputWrap {
@@ -220,7 +201,7 @@
 
 :global([data-theme="dark"]) .weightInputWrap:focus-within {
   border-color: color-mix(in oklab, var(--accent) 62%, rgba(255, 255, 255, 0.12));
-  box-shadow: 0 0 0 6px var(--ring);
+  box-shadow: none;
 }
 
 :global([data-theme="dark"]) .weightInput {
@@ -228,9 +209,13 @@
   background: color-mix(in oklab, var(--fg) 6%, var(--input-bg));
 }
 
-:global([data-theme="dark"]) .weightInputUnit {
-  background: color-mix(in oklab, var(--fg) 10%, var(--card-bg));
-  border-color: rgba(255, 255, 255, 0.14);
+:global([data-theme="dark"]) .weightInputUnitBtn {
+  background: color-mix(in oklab, var(--accent) 22%, var(--card-bg));
+  border-color: color-mix(
+    in oklab,
+    var(--accent) 52%,
+    rgba(255, 255, 255, 0.14)
+  );
   color: color-mix(in oklab, var(--fg) 80%, white);
 }
 
@@ -238,15 +223,15 @@
    Custom % (ephemeral)
    ========================= */
 
-.customPct {
+.customPctModal {
   border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   padding: 12px;
 
   background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
 }
 
-:global([data-theme="dark"]) .customPct {
+:global([data-theme="dark"]) .customPctModal {
   border-color: rgba(255, 255, 255, 0.12);
   background: color-mix(in oklab, var(--fg) 6%, var(--card-bg));
 }
@@ -273,7 +258,7 @@
 
 .customPctInput {
   height: 44px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   padding: 0 12px;
 
   border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
@@ -282,9 +267,19 @@
   outline: none;
 }
 
+.customPctInput::-webkit-outer-spin-button,
+.customPctInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.customPctInput[type="number"] {
+  -moz-appearance: textfield;
+}
+
 .customPctInput:focus {
   border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
-  box-shadow: 0 0 0 6px var(--ring);
+  box-shadow: none;
 }
 
 .customPctChips {
