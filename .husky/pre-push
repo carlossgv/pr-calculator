@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+echo "pre-push: running full build..."
+pnpm build || exit 1
+
+echo "pre-push: running tests..."
+pnpm test || exit 1
