@@ -4,26 +4,19 @@ Date: 2026-02-17
 Branch: staging
 
 ## Summary
-- Standardized modal visuals in web:
-  - Shared modal overlay now applies background blur.
-  - Shared modal container now uses the accent border + stronger shadow by default.
-- Unified weight calculator mobile details with shared modal:
-  - Replaced custom mobile detail dialog in percent cards with `ui/Modal`.
-  - Removed obsolete custom overlay/modal CSS in percent cards.
-- Simplified modal usage call sites:
-  - Removed now-redundant per-modal border overrides from Preferences accent modal and onboarding changelog modal.
-- Preferences UX update:
-  - Moved donation section to the top of the Preferences page for visibility.
-- Android release tooling update:
-  - Extended `scripts/build-android-aab.sh` with semver bump flags:
-    - `--patch`, `--minor`, `--major`, and `--bump patch|minor|major`
-  - Script now bumps `versionName` and increments `versionCode` when a bump flag is passed.
-  - Documented release script usage in `apps/native/README.md`.
-  - Current Android app version in `apps/native/android/app/build.gradle`:
-    - `versionName "1.0.6"`
-    - `versionCode 7`
+- Added automated test infrastructure using Vitest across core, web, and api.
+- Added colocated unit tests for high-risk logic:
+  - `packages/core`: unit conversion and plate math.
+  - `apps/web`: load rounding, equipment resolution, and repo storage/sanitization behavior.
+- Added API controller tests in `apps/api/test` with Prisma mocked at module boundary.
+- Added Husky `pre-push` hook to block pushes unless full `build` and `test` pass.
+- Root scripts now use Turbo again after upgrade:
+  - Upgraded to `turbo 2.8.9`.
+  - Restored `build: turbo build`, `test: turbo test`, and `turbo.json` `test` pipeline task.
 
 ## Commits (latest first)
+- `2651326` build: restore turbo build/test after upgrade to 2.8.9
+- `73b5348` test: add vitest suites and pre-push build+test hook
 - `3bd7d8b` build(android): add semver bump flags to AAB script and docs
 - `9528024` web: move donation section to top of preferences
 - `76a8c60` web: unify modal blur and accent border styles
@@ -31,16 +24,21 @@ Branch: staging
 - `19794a4` fix: env variable docker file prd
 
 ## Key files touched in this iteration
-- `apps/web/src/ui/Modal.module.css`
-- `apps/web/src/components/PercentCards.tsx`
-- `apps/web/src/components/PercentCards.module.css`
-- `apps/web/src/pages/PreferencesPage.tsx`
-- `apps/web/src/pages/PreferencesPage.module.css`
-- `apps/web/src/ui/AppLayout.tsx`
-- `apps/web/src/global.css`
-- `scripts/build-android-aab.sh`
-- `apps/native/README.md`
-- `apps/native/android/app/build.gradle`
+- `package.json`
+- `turbo.json`
+- `pnpm-lock.yaml`
+- `.husky/pre-push`
+- `packages/core/vitest.config.ts`
+- `packages/core/src/units.test.ts`
+- `packages/core/src/bar-maths.test.ts`
+- `apps/web/vitest.config.ts`
+- `apps/web/src/test/setup.ts`
+- `apps/web/src/utils/nearest-loadable.test.ts`
+- `apps/web/src/utils/equipment.test.ts`
+- `apps/web/src/storage/repo.test.ts`
+- `apps/api/vitest.config.ts`
+- `apps/api/test/bootstrap.controller.test.ts`
+- `apps/api/test/sync.controller.test.ts`
 
 ## Notes
-- The old handoff content (2026-02-11, `spike/vibrant-themes`) has been superseded by this branch-level handoff.
+- Earlier Turbo `2.8.7` panicked on this machine; `2.8.9` is stable for `turbo build` and `turbo test`.
