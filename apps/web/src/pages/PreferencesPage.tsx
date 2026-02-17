@@ -374,6 +374,39 @@ export function PreferencesPage() {
 
   return (
     <div className={styles.page}>
+      {/* SUPPORT PR CALC */}
+      <section className={styles.section} aria-label={t.prefs.donate.title}>
+        <div className={styles.sectionTitle}>{t.prefs.donate.title}</div>
+
+        <div className={styles.card}>
+          <div className={styles.row}>
+            <div className={styles.rowLeft}>
+              <div className={styles.rowTitle}>
+                {t.prefs.donate.donateTitle}
+              </div>
+              <div className={styles.rowHint}>{t.prefs.donate.donateHint}</div>
+            </div>
+
+            <div className={styles.rowRight}>
+              <a
+                className={styles.kofiLink}
+                href="https://ko-fi.com/carlossgv"
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={t.prefs.donate.donateAria}
+              >
+                <img
+                  className={styles.kofiImage}
+                  src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
+                  alt={t.prefs.donate.donateAlt}
+                  height={36}
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* UI */}
       <section className={styles.section} aria-label={t.prefs.ui.title}>
         <div className={styles.sectionTitle}>{t.prefs.ui.title}</div>
@@ -538,7 +571,6 @@ export function PreferencesPage() {
           title={t.prefs.theme.primaryTitle}
           onClose={() => setIsAccentModalOpen(false)}
           ariaLabel={t.prefs.theme.primaryTitle}
-          className={styles.accentModal}
         >
           <div className={styles.accentModalCard}>
             <div
@@ -828,38 +860,6 @@ export function PreferencesPage() {
         </div>
       </section>
 
-      {/* SUPPORT PR CALC */}
-      <section className={styles.section} aria-label={t.prefs.donate.title}>
-        <div className={styles.sectionTitle}>{t.prefs.donate.title}</div>
-
-        <div className={styles.card}>
-          <div className={styles.row}>
-            <div className={styles.rowLeft}>
-              <div className={styles.rowTitle}>
-                {t.prefs.donate.donateTitle}
-              </div>
-              <div className={styles.rowHint}>{t.prefs.donate.donateHint}</div>
-            </div>
-
-            <div className={styles.rowRight}>
-              <a
-                className={styles.kofiLink}
-                href="https://ko-fi.com/carlossgv"
-                target="_blank"
-                rel="noreferrer noopener"
-                aria-label={t.prefs.donate.donateAria}
-              >
-                <img
-                  className={styles.kofiImage}
-                  src="https://storage.ko-fi.com/cdn/kofi5.png?v=6"
-                  alt={t.prefs.donate.donateAlt}
-                  height={36}
-                />
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

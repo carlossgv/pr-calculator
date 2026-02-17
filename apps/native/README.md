@@ -17,6 +17,19 @@ This app wraps `apps/web` in a native shell for iOS/Android.
 - `pnpm --filter @repo/web build:native`
 - `pnpm --filter @repo/native sync`
 
+## Android release (AAB)
+- Build release bundle (no version bump): `./scripts/build-android-aab.sh`
+- Build + bump patch: `./scripts/build-android-aab.sh --patch`
+- Build + bump minor: `./scripts/build-android-aab.sh --minor`
+- Build + bump major: `./scripts/build-android-aab.sh --major`
+- Alternative syntax: `./scripts/build-android-aab.sh --bump patch|minor|major`
+- Optional env file path:
+  `./scripts/build-android-aab.sh --patch /path/to/.env.android`
+
+When a bump flag is provided, the script updates:
+- `apps/native/android/app/build.gradle` `versionName` (semver bump)
+- `apps/native/android/app/build.gradle` `versionCode` (+1)
+
 ## Notes
 - Native build uses `apps/web/.env.native` with `VITE_API_BASE`.
 - Service worker is disabled in native builds.

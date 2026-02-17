@@ -222,7 +222,6 @@ export function AppLayout() {
         <Modal
           title={t.onboarding.changelogTitle}
           onClose={dismissAccentTip}
-          className="onboardingModal"
         >
           <div className="onboardingTipCard">
             <ul className="onboardingTipList">

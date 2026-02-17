@@ -298,11 +298,6 @@
   box-shadow: var(--shadow);
 }
 
-.accentModal {
-  border: 2px solid color-mix(in oklab, var(--accent) 65%, var(--border));
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
-}
-
 @media (max-width: 520px) {
   .accentSwatchTrigger {
     display: inline-flex;
