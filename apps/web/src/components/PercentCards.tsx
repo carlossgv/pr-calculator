@@ -3,8 +3,8 @@ import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react"
 import { calculateLoad, type Unit, type UserPreferences } from "@repo/core";
 import { t } from "../i18n/strings";
 import styles from "./PercentCards.module.css";
-import { ChevronRight, X } from "lucide-react";
-import { Button } from "../ui/Button";
+import { ChevronRight } from "lucide-react";
+import { Modal } from "../ui/Modal";
 
 export type PercentOrder = "asc" | "desc";
 
@@ -401,35 +401,13 @@ export function PercentCards({
       ) : null}
 
       {isMobile && selected ? (
-        <div
-          className={styles.overlay}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Percent detail"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) close();
-          }}
+        <Modal
+          title={detailTitle}
+          ariaLabel={detailTitle}
+          onClose={close}
         >
-          <section className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <div className={styles.detailTitle}>{detailTitle}</div>
-              <Button
-                variant="ghost"
-                size="md"
-                shape="round"
-                iconOnly
-                className={styles.modalClose}
-                onClick={close}
-                ariaLabel={t.movements.closeAria}
-                title={t.movements.closeAria}
-              >
-                <X size={18} aria-hidden="true" />
-              </Button>
-            </div>
-
-            <div className={styles.modalBody}>{detailContent}</div>
-          </section>
-        </div>
+          <div className={styles.modalBody}>{detailContent}</div>
+        </Modal>
       ) : null}
 
       <div className={styles.grid}>

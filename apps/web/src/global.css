@@ -698,11 +698,6 @@ a:active,
   }
 }
 
-.onboardingModal {
-  border: 2px solid color-mix(in oklab, var(--accent) 65%, var(--border));
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
-}
-
 .onboardingTipCard {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);

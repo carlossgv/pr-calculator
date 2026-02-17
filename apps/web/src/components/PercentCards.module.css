@@ -492,74 +492,9 @@
   }
 }
 
-/* =========================
-   Mobile modal (blur overlay)
-   ========================= */
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1100;
-
-  display: grid;
-  place-items: center;
-
-  background: color-mix(in oklab, var(--fg) 24%, transparent);
-
-  padding: 16px;
-}
-
-.modal {
-  width: min(720px, calc(100vw - 32px));
-  max-height: calc(100vh - 32px - var(--safe-bottom) - var(--native-bottom-inset));
-  overflow: auto;
-
-  border-radius: var(--radius-lg);
-  padding: 14px;
-
-  background: var(--card-bg);
-  border: 2px solid color-mix(in oklab, var(--accent) 65%, var(--border));
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
-
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-.modalHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
 .modalBody {
   display: grid;
   gap: 10px;
-}
-
-.modalClose {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  padding: 0 !important;
-  flex: 0 0 auto;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-:global([data-theme="dark"]) .modal {
-  border-color: color-mix(
-    in oklab,
-    var(--accent) 65%,
-    rgba(255, 255, 255, 0.10)
-  );
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
 /* On mobile, hide inline detail (we use modal instead) */

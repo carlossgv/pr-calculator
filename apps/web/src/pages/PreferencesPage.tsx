@@ -538,7 +538,6 @@ export function PreferencesPage() {
           title={t.prefs.theme.primaryTitle}
           onClose={() => setIsAccentModalOpen(false)}
           ariaLabel={t.prefs.theme.primaryTitle}
-          className={styles.accentModal}
         >
           <div className={styles.accentModalCard}>
             <div
