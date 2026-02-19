@@ -20,7 +20,12 @@ import { setLanguage, t } from "../i18n/strings";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
 import { Mars, Venus, ChevronRight, Check, Sun, Moon } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
-import { downloadJson, exportBackup, importBackup } from "../storage/backup";
+import {
+  exportBackup,
+  importBackup,
+  isBackupSaveCancelledError,
+  saveJson,
+} from "../storage/backup";
 import { getOrCreateIdentity } from "../sync/identity";
 import { Button } from "../ui/Button";
 import { Modal } from "../ui/Modal";
@@ -189,10 +194,12 @@ export function PreferencesPage() {
       setBackupBusy("export");
       const b = await exportBackup();
       const stamp = b.exportedAt.slice(0, 10);
-      downloadJson(`pr-calc-backup-${stamp}.json`, b);
+      await saveJson(`pr-calc-backup-${stamp}.json`, b);
     } catch (e) {
       console.error(e);
-      setBackupErr(t.prefs.backup.exportError);
+      if (!isBackupSaveCancelledError(e)) {
+        setBackupErr(t.prefs.backup.exportError);
+      }
     } finally {
       setBackupBusy(null);
     }
