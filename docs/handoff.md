@@ -3,7 +3,12 @@
 Date: 2026-02-17
 Branch: staging
 
+## Notes by me:
+
+- We left a WIP for Android native export, is not working currently. Top priority to fix this.
+
 ## Summary
+
 - Added automated test infrastructure using Vitest across core, web, and api.
 - Added colocated unit tests for high-risk logic:
   - `packages/core`: unit conversion and plate math.
@@ -15,6 +20,7 @@ Branch: staging
   - Restored `build: turbo build`, `test: turbo test`, and `turbo.json` `test` pipeline task.
 
 ## Commits (latest first)
+
 - `2651326` build: restore turbo build/test after upgrade to 2.8.9
 - `73b5348` test: add vitest suites and pre-push build+test hook
 - `3bd7d8b` build(android): add semver bump flags to AAB script and docs
@@ -24,6 +30,7 @@ Branch: staging
 - `19794a4` fix: env variable docker file prd
 
 ## Key files touched in this iteration
+
 - `package.json`
 - `turbo.json`
 - `pnpm-lock.yaml`
@@ -41,4 +48,5 @@ Branch: staging
 - `apps/api/test/sync.controller.test.ts`
 
 ## Notes
+
 - Earlier Turbo `2.8.7` panicked on this machine; `2.8.9` is stable for `turbo build` and `turbo test`.
