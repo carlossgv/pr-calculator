@@ -8,7 +8,7 @@ function makePrefs(partial?: Partial<UserPreferences>): UserPreferences {
 }
 
 describe("calculateLoad", () => {
-  it("rounds target and returns exact achievable load when possible", () => {
+  it("returns exact achievable load when possible", () => {
     const prefs = makePrefs({
       bar: { value: 20, unit: "kg", label: "20 kg" },
       rounding: { value: 2.5, unit: "kg" },
@@ -16,9 +16,9 @@ describe("calculateLoad", () => {
     });
 
     const out = calculateLoad(101, "kg", prefs);
-    expect(out.targetTotal).toBe(100);
+    expect(out.targetTotal).toBe(101);
     expect(out.achievedTotal).toBe(100);
-    expect(out.delta).toBe(0);
+    expect(out.delta).toBe(1);
     expect(out.platesPerSide).toHaveLength(2);
   });
 
@@ -32,6 +32,24 @@ describe("calculateLoad", () => {
     expect(out.platesPerSide).toHaveLength(0);
     expect(out.achievedTotal).toBeCloseTo(20, 5);
     expect(out.delta).toBeGreaterThan(0);
+  });
+
+  it("finds the closest achievable load instead of using a greedy overshoot-prone pick", () => {
+    const prefs = makePrefs({
+      bar: { value: 15, unit: "kg", label: "15 kg" },
+      rounding: { value: 2.5, unit: "kg" },
+      plates: [
+        { value: 2.5, unit: "kg" },
+        { value: 2, unit: "kg" },
+      ],
+    });
+
+    const out = calculateLoad(48.8, "kg", prefs);
+    expect(out.achievedTotal).toBe(49);
+    expect(out.delta).toBeCloseTo(0.2, 5);
+    expect(out.perSide).toBe(17);
+    expect(out.platesPerSide.every((plate) => [2, 2.5].includes(plate.plate.value))).toBe(true);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 2)).toBe(true);
   });
 
   it("supports mixed plate units when working in lb", () => {
