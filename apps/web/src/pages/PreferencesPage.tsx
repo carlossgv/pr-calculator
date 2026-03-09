@@ -6,7 +6,6 @@ import type {
   Unit,
   UnitContext,
   UserPreferences,
-  Weight,
   Language,
 } from "@repo/core";
 import {
@@ -112,10 +111,6 @@ function ensurePrefs(
   };
 }
 
-function eqWeight(a: Weight, b: Weight) {
-  return a.unit === b.unit && a.value === b.value;
-}
-
 function eqPlates(a: Plate[], b: Plate[]) {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
@@ -137,7 +132,6 @@ function inferSelectedPreset(p: UserPreferences): PresetKey {
   const isOlympic =
     p.defaultUnit === DEFAULT_PREFS.defaultUnit &&
     eqContexts(p.contexts, DEFAULT_PREFS.contexts) &&
-    eqWeight(p.rounding, DEFAULT_PREFS.rounding) &&
     eqPlates(p.plates, DEFAULT_PREFS.plates);
 
   if (isOlympic) return "olympicKg";
@@ -145,7 +139,6 @@ function inferSelectedPreset(p: UserPreferences): PresetKey {
   const isCrossfit =
     p.defaultUnit === CROSSFIT_LB_WITH_KG_CHANGES.defaultUnit &&
     eqContexts(p.contexts, CROSSFIT_LB_WITH_KG_CHANGES.contexts) &&
-    eqWeight(p.rounding, CROSSFIT_LB_WITH_KG_CHANGES.rounding) &&
     eqPlates(p.plates, CROSSFIT_LB_WITH_KG_CHANGES.plates);
 
   if (isCrossfit) return "crossfitLb";

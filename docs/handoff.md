@@ -1,26 +1,30 @@
 # Handoff
 
-Date: 2026-02-17
+Date: 2026-03-09
 Branch: staging
-
-## Notes by me:
-
-- We left a WIP for Android native export, is not working currently. Top priority to fix this.
 
 ## Summary
 
 - Added automated test infrastructure using Vitest across core, web, and api.
 - Added colocated unit tests for high-risk logic:
   - `packages/core`: unit conversion and plate math.
-  - `apps/web`: load rounding, equipment resolution, and repo storage/sanitization behavior.
+  - `apps/web`: equipment resolution and repo storage/sanitization behavior.
 - Added API controller tests in `apps/api/test` with Prisma mocked at module boundary.
 - Added Husky `pre-push` hook to block pushes unless full `build` and `test` pass.
 - Root scripts now use Turbo again after upgrade:
-  - Upgraded to `turbo 2.8.9`.
+  - Upgraded to `turbo 2.8.10`.
   - Restored `build: turbo build`, `test: turbo test`, and `turbo.json` `test` pipeline task.
+- Added Android native backup export support through a Capacitor plugin.
+- Fixed load calculation to choose the closest achievable plate combination to the entered target instead of greedily filling to a rounded target.
+- Made preference reads tolerant of older/synced blobs missing `rounding` and removed preset detection's dependency on that field.
 
 ## Commits (latest first)
 
+- `b6b8fec` fix: choose closest achievable plate load
+- `05550a1` chore: update turbo
+- `b97bdf2` chore: update handoff
+- `744d00f` wip: export in android native
+- `a7601f3` docs: update handoff for test infra and turbo restoration
 - `2651326` build: restore turbo build/test after upgrade to 2.8.9
 - `73b5348` test: add vitest suites and pre-push build+test hook
 - `3bd7d8b` build(android): add semver bump flags to AAB script and docs
@@ -38,15 +42,22 @@ Branch: staging
 - `packages/core/vitest.config.ts`
 - `packages/core/src/units.test.ts`
 - `packages/core/src/bar-maths.test.ts`
+- `packages/core/src/bar-maths.ts`
 - `apps/web/vitest.config.ts`
 - `apps/web/src/test/setup.ts`
 - `apps/web/src/utils/nearest-loadable.test.ts`
 - `apps/web/src/utils/equipment.test.ts`
 - `apps/web/src/storage/repo.test.ts`
+- `apps/web/src/storage/repo.ts`
+- `apps/web/src/pages/PreferencesPage.tsx`
+- `apps/web/src/storage/backup.ts`
 - `apps/api/vitest.config.ts`
 - `apps/api/test/bootstrap.controller.test.ts`
 - `apps/api/test/sync.controller.test.ts`
+- `apps/native/android/app/src/main/java/dev/carlosgv/prcalculator/BackupExportPlugin.java`
+- `apps/native/android/app/src/main/java/dev/carlosgv/prcalculator/MainActivity.java`
 
 ## Notes
 
-- Earlier Turbo `2.8.7` panicked on this machine; `2.8.9` is stable for `turbo build` and `turbo test`.
+- `rounding` is no longer used by the active load calculation path, but reads now backfill it for compatibility with older stored/synced preferences.
+- Branch currently passes the repo pre-push gate (`pnpm build` and `pnpm test`).

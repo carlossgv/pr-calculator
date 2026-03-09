@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { DEFAULT_PREFS } from "@repo/core";
 import { db } from "./db";
 import { repo } from "./repo";
 
@@ -18,6 +19,21 @@ describe("repo", () => {
 
     const row = await db.preferences.get("prefs");
     expect(row?.id).toBe("prefs");
+  });
+
+  it("backfills missing rounding for older stored preferences", async () => {
+    const legacyPrefs = {
+      ...DEFAULT_PREFS,
+      rounding: undefined,
+    };
+
+    await db.preferences.put({ id: "prefs", value: legacyPrefs as any });
+
+    const prefs = await repo.getPreferences();
+    expect(prefs.rounding).toEqual(DEFAULT_PREFS.rounding);
+
+    const row = await db.preferences.get("prefs");
+    expect((row?.value as any).rounding).toEqual(DEFAULT_PREFS.rounding);
   });
 
   it("sanitizes quick calculator draft and caps custom percentages", async () => {
