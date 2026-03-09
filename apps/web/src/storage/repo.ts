@@ -24,6 +24,16 @@ function isNewPrefsShape(p: unknown): p is UserPreferences {
   );
 }
 
+function isWeightLike(value: unknown): value is { value: number; unit: "kg" | "lb" } {
+  const v = value as any;
+  return Boolean(
+    v &&
+      typeof v === "object" &&
+      typeof v.value === "number" &&
+      (v.unit === "kg" || v.unit === "lb"),
+  );
+}
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -123,6 +133,9 @@ export const repo = {
     if (isNewPrefsShape(value)) {
       const contexts = value.contexts ?? { kg: "olympic", lb: "crossfit" };
       const theme = value.theme ?? "dark";
+      const rounding = isWeightLike((value as any).rounding)
+        ? value.rounding
+        : DEFAULT_PREFS.rounding;
       const accentColor =
         typeof value.accentColor === "string" &&
         value.accentColor.trim().length > 0
@@ -135,6 +148,7 @@ export const repo = {
       if (
         !value.contexts ||
         !value.theme ||
+        !isWeightLike((value as any).rounding) ||
         !value.language ||
         !value.accentColor
       ) {
@@ -142,6 +156,7 @@ export const repo = {
           ...value,
           contexts,
           theme,
+          rounding,
           language,
           accentColor,
         };

@@ -6,7 +6,6 @@ import type {
   Unit,
   UnitContext,
   UserPreferences,
-  Weight,
   Language,
 } from "@repo/core";
 import {
@@ -20,7 +19,12 @@ import { setLanguage, t } from "../i18n/strings";
 import { applyTheme, type ResolvedTheme } from "../theme/theme";
 import { Mars, Venus, ChevronRight, Check, Sun, Moon } from "lucide-react";
 import styles from "./PreferencesPage.module.css";
-import { downloadJson, exportBackup, importBackup } from "../storage/backup";
+import {
+  exportBackup,
+  importBackup,
+  isBackupSaveCancelledError,
+  saveJson,
+} from "../storage/backup";
 import { getOrCreateIdentity } from "../sync/identity";
 import { Button } from "../ui/Button";
 import { Modal } from "../ui/Modal";
@@ -107,10 +111,6 @@ function ensurePrefs(
   };
 }
 
-function eqWeight(a: Weight, b: Weight) {
-  return a.unit === b.unit && a.value === b.value;
-}
-
 function eqPlates(a: Plate[], b: Plate[]) {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
@@ -132,7 +132,6 @@ function inferSelectedPreset(p: UserPreferences): PresetKey {
   const isOlympic =
     p.defaultUnit === DEFAULT_PREFS.defaultUnit &&
     eqContexts(p.contexts, DEFAULT_PREFS.contexts) &&
-    eqWeight(p.rounding, DEFAULT_PREFS.rounding) &&
     eqPlates(p.plates, DEFAULT_PREFS.plates);
 
   if (isOlympic) return "olympicKg";
@@ -140,7 +139,6 @@ function inferSelectedPreset(p: UserPreferences): PresetKey {
   const isCrossfit =
     p.defaultUnit === CROSSFIT_LB_WITH_KG_CHANGES.defaultUnit &&
     eqContexts(p.contexts, CROSSFIT_LB_WITH_KG_CHANGES.contexts) &&
-    eqWeight(p.rounding, CROSSFIT_LB_WITH_KG_CHANGES.rounding) &&
     eqPlates(p.plates, CROSSFIT_LB_WITH_KG_CHANGES.plates);
 
   if (isCrossfit) return "crossfitLb";
@@ -189,10 +187,12 @@ export function PreferencesPage() {
       setBackupBusy("export");
       const b = await exportBackup();
       const stamp = b.exportedAt.slice(0, 10);
-      downloadJson(`pr-calc-backup-${stamp}.json`, b);
+      await saveJson(`pr-calc-backup-${stamp}.json`, b);
     } catch (e) {
       console.error(e);
-      setBackupErr(t.prefs.backup.exportError);
+      if (!isBackupSaveCancelledError(e)) {
+        setBackupErr(t.prefs.backup.exportError);
+      }
     } finally {
       setBackupBusy(null);
     }
