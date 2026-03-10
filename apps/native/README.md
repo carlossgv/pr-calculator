@@ -16,6 +16,16 @@ This app wraps `apps/web` in a native shell for iOS/Android.
 ## Repeat after web changes
 - `pnpm --filter @repo/web build:native`
 - `pnpm --filter @repo/native sync`
+- Or run both with reminder output: `pnpm native:sync`
+
+After sync finishes, open the native project you want to run:
+- Android: `pnpm --filter @repo/native open:android`
+- iOS: `pnpm --filter @repo/native open:ios`
+
+If you also want to bump the Android app version for a release build, use:
+- `./scripts/build-android-aab.sh --patch`
+- `./scripts/build-android-aab.sh --minor`
+- `./scripts/build-android-aab.sh --major`
 
 ## Android release (AAB)
 - Build release bundle (no version bump): `./scripts/build-android-aab.sh`

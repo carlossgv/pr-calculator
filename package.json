@@ -6,6 +6,7 @@
     "prepare": "husky",
     "dev": "turbo dev",
     "build": "turbo build",
+    "native:sync": "./scripts/sync-native.sh",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "prisma:generate": "prisma generate --config ./prisma.config.ts",
