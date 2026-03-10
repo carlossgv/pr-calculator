@@ -6,14 +6,6 @@ export const en = {
     movements: "Movements",
     preferences: "Preferences",
   },
-  onboarding: {
-    changelogTitle: "What’s New!",
-    changelogIntro: "Thanks for updating. Here’s what changed:",
-    changelogUiSimplified: "The UI was simplified for a smoother experience.",
-    changelogAccentPrefs:
-      "You can now change accent colors from the Preferences page.",
-    okCta: "Understood",
-  },
   home: {
     loading: "Loading…",
     maxWeight: "Max (100%)",

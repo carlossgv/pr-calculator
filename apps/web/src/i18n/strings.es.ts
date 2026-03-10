@@ -6,15 +6,6 @@ export const es = {
     movements: "Movimientos",
     preferences: "Preferencias",
   },
-  onboarding: {
-    changelogTitle: "¡Novedades!",
-    changelogIntro: "Gracias por actualizar. Esto cambió:",
-    changelogUiSimplified:
-      "La interfaz se simplificó para una experiencia más fluida.",
-    changelogAccentPrefs:
-      "Ahora puedes cambiar los colores de la app desde la página de Preferencias.",
-    okCta: "Entendido",
-  },
   home: {
     loading: "Cargando…",
     maxWeight: "Máx (100%)",
