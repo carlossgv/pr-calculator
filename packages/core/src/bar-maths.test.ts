@@ -66,4 +66,95 @@ describe("calculateLoad", () => {
     expect(out.achievedTotal).toBeLessThanOrEqual(out.targetTotal + 0.001);
     expect(out.platesPerSide.length).toBeGreaterThan(0);
   });
+
+  it("prefers a practical lb setup over a tiny-plate-heavy exact-ish match", () => {
+    const prefs = makePrefs({
+      bar: { value: 45, unit: "lb", label: "45 lb bar" },
+      plates: [
+        { value: 45, unit: "lb" },
+        { value: 35, unit: "lb" },
+        { value: 25, unit: "lb" },
+        { value: 15, unit: "lb" },
+        { value: 10, unit: "lb" },
+        { value: 2.5, unit: "kg", label: "2.5 kg" },
+        { value: 2, unit: "kg", label: "2 kg" },
+        { value: 1.5, unit: "kg", label: "1.5 kg" },
+        { value: 1, unit: "kg", label: "1 kg" },
+        { value: 0.5, unit: "kg", label: "0.5 kg" },
+      ],
+    });
+
+    const out = calculateLoad(172, "lb", prefs);
+    expect(out.platesPerSide.length).toBeLessThanOrEqual(3);
+    expect(out.platesPerSide.filter((plate) => plate.plate.unit === "kg")).toHaveLength(1);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 45)).toBe(true);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 15)).toBe(true);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 1.5)).toBe(true);
+  });
+
+  it("prefers a practical kg setup when tiny change plates are available", () => {
+    const prefs = makePrefs({
+      bar: { value: 20, unit: "kg", label: "20 kg bar" },
+      plates: [
+        { value: 25, unit: "kg" },
+        { value: 20, unit: "kg" },
+        { value: 15, unit: "kg" },
+        { value: 10, unit: "kg" },
+        { value: 5, unit: "kg" },
+        { value: 2.5, unit: "kg" },
+        { value: 2, unit: "kg" },
+        { value: 1.5, unit: "kg" },
+        { value: 1, unit: "kg" },
+        { value: 0.5, unit: "kg" },
+      ],
+    });
+
+    const out = calculateLoad(83.2, "kg", prefs);
+    expect(out.platesPerSide).toHaveLength(3);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 25)).toBe(true);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 5)).toBe(true);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 1.5)).toBe(true);
+  });
+
+  it("keeps pure lb setups simple when no kg change plates exist", () => {
+    const prefs = makePrefs({
+      bar: { value: 45, unit: "lb", label: "45 lb bar" },
+      plates: [
+        { value: 45, unit: "lb" },
+        { value: 35, unit: "lb" },
+        { value: 25, unit: "lb" },
+        { value: 15, unit: "lb" },
+        { value: 10, unit: "lb" },
+      ],
+    });
+
+    const out = calculateLoad(137, "lb", prefs);
+    expect(out.platesPerSide).toHaveLength(1);
+    expect(out.platesPerSide[0]?.plate.value).toBe(45);
+    expect(out.achievedTotal).toBe(135);
+  });
+
+  it("uses a small kg change plate in lb mode when it avoids a larger practical miss", () => {
+    const prefs = makePrefs({
+      bar: { value: 45, unit: "lb", label: "45 lb bar" },
+      plates: [
+        { value: 45, unit: "lb" },
+        { value: 35, unit: "lb" },
+        { value: 25, unit: "lb" },
+        { value: 15, unit: "lb" },
+        { value: 10, unit: "lb" },
+        { value: 2.5, unit: "kg", label: "2.5 kg" },
+        { value: 2, unit: "kg", label: "2 kg" },
+        { value: 1.5, unit: "kg", label: "1.5 kg" },
+        { value: 1, unit: "kg", label: "1 kg" },
+        { value: 0.5, unit: "kg", label: "0.5 kg" },
+      ],
+    });
+
+    const out = calculateLoad(187, "lb", prefs);
+    expect(out.platesPerSide).toHaveLength(3);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 45)).toBe(true);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 25)).toBe(true);
+    expect(out.platesPerSide.some((plate) => plate.plate.value === 0.5)).toBe(true);
+  });
 });
