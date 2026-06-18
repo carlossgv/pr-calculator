@@ -3,8 +3,7 @@ name: Build & Push (API+WEB) + Deploy
 
 on:
   push:
-    branches: [main, staging]
-    tags: ["v*.*.*"]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -21,7 +20,7 @@ jobs:
   # =========================
   build_and_push:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    environment: production
 
     steps:
       - name: Checkout
@@ -61,16 +60,8 @@ jobs:
 
           if [ "${{ github.ref_name }}" = "main" ]; then
             echo "is_prod=true" >> $GITHUB_OUTPUT
-            echo "is_staging=false" >> $GITHUB_OUTPUT
           else
-            # staging branch OR ANY manual dispatch on non-main behaves as staging
-            if [ "${{ github.ref_name }}" = "staging" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-              echo "is_prod=false" >> $GITHUB_OUTPUT
-              echo "is_staging=true" >> $GITHUB_OUTPUT
-            else
-              echo "is_prod=false" >> $GITHUB_OUTPUT
-              echo "is_staging=false" >> $GITHUB_OUTPUT
-            fi
+            echo "is_prod=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Docker meta (API)
@@ -82,7 +73,6 @@ jobs:
             latest=false
           tags: |
             type=raw,value=latest,enable=${{ steps.flavor.outputs.is_prod == 'true' }}
-            type=raw,value=staging,enable=${{ steps.flavor.outputs.is_staging == 'true' }}
             type=ref,event=branch
             type=sha,format=short
             type=ref,event=tag
@@ -96,7 +86,6 @@ jobs:
             latest=false
           tags: |
             type=raw,value=latest,enable=${{ steps.flavor.outputs.is_prod == 'true' }}
-            type=raw,value=staging,enable=${{ steps.flavor.outputs.is_staging == 'true' }}
             type=ref,event=branch
             type=sha,format=short
             type=ref,event=tag
@@ -133,47 +122,6 @@ jobs:
             VITE_APP_TITLE=${{ steps.flavor.outputs.is_prod == 'true' && 'PR Calculator' || 'PR Calculator Dev' }}
             VITE_API_BASE=${{ vars.API_URL }}
             VITE_APP_VERSION=${{ github.sha }}
-
-  # =========================
-  # DEPLOY STAGING
-  # - staging branch pushes
-  # - OR manual workflow_dispatch on ANY non-main branch
-  # =========================
-  deploy_staging:
-    needs: build_and_push
-    runs-on: ubuntu-latest
-    environment: staging
-    if: github.ref_name == 'staging' || (github.event_name == 'workflow_dispatch' && github.ref_name != 'main')
-
-    steps:
-      - name: Validate Tailscale auth key
-        env:
-          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
-        run: |
-          if [ -z "${TS_AUTHKEY:-}" ]; then
-            echo "TS_AUTHKEY is missing. Add it under repo Settings → Secrets and variables → Actions → Environments → staging." >&2
-            exit 1
-          fi
-
-      - name: Connect to Tailscale (Headscale)
-        uses: tailscale/github-action@v4
-        with:
-          authkey: ${{ secrets.TS_AUTHKEY }}
-          tags: tag:github-actions
-          args: >
-            --login-server=${{ vars.TS_LOGIN_SERVER }}
-            --accept-dns=false
-            --timeout=45s
-          ping: ${{ vars.DEPLOY_HOST_TS }}
-
-      - name: Deploy (staging)
-        run: |
-          set -euo pipefail
-          tailscale ssh ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
-            cd ${{ vars.DEPLOY_PATH }}
-            docker compose --env-file .env.dev -f docker-compose.dev.yml pull pr-calculator-api-dev pr-calculator-web-dev
-            docker compose --env-file .env.dev -f docker-compose.dev.yml up -d pr-calculator-db-dev pr-calculator-api-dev pr-calculator-web-dev
-          EOF
 
   # =========================
   # DEPLOY PRODUCTION
