@@ -41,6 +41,17 @@ export const en = {
     snapDelta: "Δ",
     snapStep: "step",
   },
+  common: {
+    close: "Close",
+  },
+  onboarding: {
+    trends: {
+      title: "New: Trends",
+      body: "Track PR progress over time with charts and lift history for each movement.",
+      cta: "Open latest trends",
+      dismiss: "Not now",
+    },
+  },
   prefs: {
     unit: "Unit",
     barWeight: "Bar weight",

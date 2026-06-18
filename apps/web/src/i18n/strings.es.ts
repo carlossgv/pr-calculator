@@ -39,6 +39,17 @@ export const es = {
     snapDelta: "Δ",
     snapStep: "paso",
   },
+  common: {
+    close: "Cerrar",
+  },
+  onboarding: {
+    trends: {
+      title: "Nuevo: Tendencias",
+      body: "Sigue la evolución de tus PR con gráficos e historial de levantamientos por movimiento.",
+      cta: "Abrir tendencias",
+      dismiss: "Ahora no",
+    },
+  },
   prefs: {
     // ✅ NEW SECTION (la añadiremos en en también)
     language: {

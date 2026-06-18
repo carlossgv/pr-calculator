@@ -586,6 +586,7 @@ export function MovementDetailsPage() {
           title={confirmTitle}
           ariaLabel={confirmTitle}
           onClose={() => (confirmBusy ? null : setConfirm(null))}
+          closeLabel={t.common.close}
         >
           <div className={styles.confirmBody}>{confirmBody}</div>
 

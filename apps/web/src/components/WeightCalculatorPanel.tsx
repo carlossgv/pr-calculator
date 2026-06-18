@@ -434,6 +434,7 @@ export function WeightCalculatorPanel({
           title={t.home.customPercent}
           onClose={() => setCustomPctOpen(false)}
           ariaLabel={t.home.customPercent}
+          closeLabel={t.common.close}
         >
           <section className={styles.customPctModal} aria-label={t.home.customPercent}>
             <div className={styles.customPctTop}>

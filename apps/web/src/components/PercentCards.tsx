@@ -405,6 +405,7 @@ export function PercentCards({
           title={detailTitle}
           ariaLabel={detailTitle}
           onClose={close}
+          closeLabel={t.common.close}
         >
           <div className={styles.modalBody}>{detailContent}</div>
         </Modal>
