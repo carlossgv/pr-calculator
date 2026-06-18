@@ -8,11 +8,19 @@ type Props = {
   title: ReactNode;
   children: ReactNode;
   onClose: () => void;
+  closeLabel: string;
   ariaLabel?: string;
   className?: string;
 };
 
-export function Modal({ title, children, onClose, ariaLabel, className }: Props) {
+export function Modal({
+  title,
+  children,
+  onClose,
+  closeLabel,
+  ariaLabel,
+  className,
+}: Props) {
   return (
     <div
       className={styles.overlay}
@@ -35,8 +43,8 @@ export function Modal({ title, children, onClose, ariaLabel, className }: Props)
             iconOnly
             className={styles.close}
             onClick={onClose}
-            aria-label="Close"
-            title="Close"
+            aria-label={closeLabel}
+            title={closeLabel}
           >
             <X size={18} />
           </Button>

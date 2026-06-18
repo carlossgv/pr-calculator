@@ -6,6 +6,7 @@ import { PreferencesPage } from "./pages/PreferencesPage";
 import { MovementsPage } from "./pages/MovementsPage";
 import { MovementDetailsPage } from "./pages/MovementDetailsPage";
 import { MovementCalculatorPage } from "./pages/MovementCalculatorPage";
+import { MovementTrendsPage } from "./pages/MovementTrendsPage";
 
 export const router = createBrowserRouter(
   [
@@ -21,6 +22,11 @@ export const router = createBrowserRouter(
         {
           path: "movements/:movementId/manage",
           element: <MovementDetailsPage />,
+        },
+
+        {
+          path: "movements/:movementId/trends",
+          element: <MovementTrendsPage />,
         },
 
         // Calc

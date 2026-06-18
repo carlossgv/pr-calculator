@@ -41,7 +41,7 @@ When a bump flag is provided, the script updates:
 - `apps/native/android/app/build.gradle` `versionCode` (+1)
 
 ## Notes
-- Native build uses `apps/web/.env.native` with `VITE_API_BASE`.
+- Native build uses `apps/web/.env.native` as the base and `apps/web/.env.native.local` for local overrides like `VITE_API_BASE`.
 - Service worker is disabled in native builds.
 - Sync runs while the app is open; on resume it triggers a pull.
 - Android builds expect JDK 17. If you see Java home errors, check `~/.gradle/gradle.properties`

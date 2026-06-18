@@ -18,6 +18,7 @@ async function bootstrap() {
 
   // Dev-only URL seed helper:
   // http://localhost:5173/?seed=demo
+  // http://localhost:5173/?seed=graph
   try {
     await maybeApplyDevSeedFromUrl();
   } catch (err) {

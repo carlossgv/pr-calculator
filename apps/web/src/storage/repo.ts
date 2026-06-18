@@ -125,6 +125,20 @@ function sanitizeLastRoute(x: any): LastRouteRow | null {
   };
 }
 
+type FeatureTrendsOnboardingRow = {
+  v: 1;
+  seenAt: string;
+};
+
+function sanitizeFeatureTrendsOnboarding(x: any): FeatureTrendsOnboardingRow | null {
+  if (!x || typeof x !== "object") return null;
+  if (x.v !== 1) return null;
+  return {
+    v: 1,
+    seenAt: typeof x.seenAt === "string" ? x.seenAt : nowIso(),
+  };
+}
+
 export const repo = {
   async getPreferences(): Promise<UserPreferences> {
     const row = await db.preferences.get("prefs");
@@ -290,6 +304,19 @@ export const repo = {
 
     const next: LastRouteRow = { v: 1, path: p, updatedAt: nowIso() };
     await db.meta.put({ id: "lastRoute", value: next });
+  },
+
+  async getFeatureTrendsOnboardingSeen(): Promise<boolean> {
+    const row = await db.meta.get("featureTrendsOnboarding");
+    return sanitizeFeatureTrendsOnboarding((row as any)?.value) != null;
+  },
+
+  async markFeatureTrendsOnboardingSeen(): Promise<void> {
+    const next: FeatureTrendsOnboardingRow = {
+      v: 1,
+      seenAt: nowIso(),
+    };
+    await db.meta.put({ id: "featureTrendsOnboarding", value: next });
   },
 
   async listMovements(): Promise<Movement[]> {
