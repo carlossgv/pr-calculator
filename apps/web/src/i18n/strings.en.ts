@@ -181,8 +181,6 @@ export const en = {
     notFoundTitle: "Movement not found",
     notFoundBody: "This movement no longer exists or was deleted.",
     chartTitle: "Progression",
-    chartHint:
-      "Solid line shows saved weight. Dashed line shows estimated 1RM.",
     chartAria: "PR progression chart",
     legendTitle: "Chart legend",
     legendWeight: "Weight",

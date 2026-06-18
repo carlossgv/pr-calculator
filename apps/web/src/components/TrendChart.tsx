@@ -53,7 +53,7 @@ export function TrendChart({
   weightLabel,
   estimatedLabel,
 }: Props) {
-  const width = Math.max(680, 92 + Math.max(0, points.length - 1) * 92);
+  const width = Math.max(620, 80 + Math.max(0, points.length - 1) * 84);
   const height = 320;
   const margin = { top: 24, right: 24, bottom: 58, left: 58 };
   const plotWidth = width - margin.left - margin.right;

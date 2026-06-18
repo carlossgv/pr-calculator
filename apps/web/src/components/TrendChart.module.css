@@ -11,7 +11,8 @@
 .chart {
   display: block;
   width: 100%;
-  min-width: 680px;
+  min-width: 0;
+  max-width: 100%;
   height: auto;
 }
 
@@ -47,7 +48,7 @@
 
 .estimatedLine {
   fill: none;
-  stroke: var(--accent-2);
+  stroke: var(--trend-theoretical);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -62,8 +63,8 @@
 }
 
 .estimatedPoint {
-  fill: var(--accent-2);
-  stroke: color-mix(in oklab, var(--card-bg) 82%, var(--accent-2));
+  fill: var(--trend-theoretical);
+  stroke: color-mix(in oklab, var(--card-bg) 82%, var(--trend-theoretical));
   stroke-width: 2.5;
 }
 

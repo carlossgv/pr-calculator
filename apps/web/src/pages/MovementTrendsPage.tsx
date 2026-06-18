@@ -231,7 +231,6 @@ export function MovementTrendsPage() {
             <div className={styles.sectionHeading}>
               <div>
                 <div className={styles.sectionTitle}>{t.trends.chartTitle}</div>
-                <div className={styles.sectionHint}>{t.trends.chartHint}</div>
               </div>
 
               <div className={styles.legend} aria-label={t.trends.legendTitle}>

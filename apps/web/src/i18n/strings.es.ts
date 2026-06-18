@@ -175,8 +175,6 @@ export const es = {
     notFoundTitle: "Movimiento no encontrado",
     notFoundBody: "Este movimiento ya no existe o fue eliminado.",
     chartTitle: "Progresión",
-    chartHint:
-      "La línea sólida muestra el peso guardado. La línea punteada muestra el 1RM estimado.",
     chartAria: "Gráfico de progresión de PR",
     legendTitle: "Leyenda del gráfico",
     legendWeight: "Peso",

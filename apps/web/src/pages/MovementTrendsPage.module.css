@@ -147,7 +147,7 @@
 }
 
 .legendSwatchEstimated {
-  background: var(--accent-2);
+  background: var(--trend-theoretical);
 }
 
 .historyList {
