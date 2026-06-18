@@ -39,6 +39,17 @@ export const es = {
     snapDelta: "Δ",
     snapStep: "paso",
   },
+  common: {
+    close: "Cerrar",
+  },
+  onboarding: {
+    trends: {
+      title: "Nuevo: Tendencias",
+      body: "Sigue la evolución de tus PR con gráficos e historial de levantamientos por movimiento.",
+      cta: "Abrir tendencias",
+      dismiss: "Ahora no",
+    },
+  },
   prefs: {
     // ✅ NEW SECTION (la añadiremos en en también)
     language: {
@@ -143,6 +154,7 @@ export const es = {
 
     openCalculator: "Abrir calculadora",
     managePrs: "Gestionar PRs",
+    trends: "Tendencias",
 
     delete: "borrar",
 
@@ -164,6 +176,30 @@ export const es = {
       createCta: "Crear",
       cancelCta: "Cancelar",
       errorEmpty: "Por favor ingresa un nombre",
+    },
+  },
+  trends: {
+    title: "Tendencias",
+    summaryTitle: "Resumen de tendencias",
+    emptyTitle: "Aún no hay historial de PR",
+    emptyBody: "Agrega entradas de PR para ver gráficos de progreso e historial.",
+    notFoundTitle: "Movimiento no encontrado",
+    notFoundBody: "Este movimiento ya no existe o fue eliminado.",
+    chartTitle: "Progresión",
+    chartAria: "Gráfico de progresión de PR",
+    legendTitle: "Leyenda del gráfico",
+    legendWeight: "Peso",
+    legendEstimated: "1RM estimado",
+    historyTitle: "Historial",
+    historyHint: "Primero aparecen las entradas más recientes.",
+    historyDelta: "Cambio",
+    historyEstimated1rm: "1RM est.",
+    summary: {
+      entries: "Entradas",
+      entriesMeta: "Levantamientos guardados",
+      bestWeight: "Mejor PR",
+      latestWeight: "PR más reciente",
+      bestEstimated1rm: "Mejor 1RM est.",
     },
   },
   movement: {

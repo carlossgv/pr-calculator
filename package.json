@@ -5,6 +5,8 @@
   "scripts": {
     "prepare": "husky",
     "dev": "turbo dev",
+    "dev:stack": "docker compose up --build --remove-orphans",
+    "dev:stack:down": "docker compose down",
     "build": "turbo build",
     "native:sync": "./scripts/sync-native.sh",
     "typecheck": "turbo typecheck",
@@ -18,7 +20,7 @@
   },
   "devDependencies": {
     "husky": "^9.1.7",
-    "turbo": "^2.8.10",
+    "turbo": "^2.8.17",
     "typescript": "^5.6.3"
   }
 }

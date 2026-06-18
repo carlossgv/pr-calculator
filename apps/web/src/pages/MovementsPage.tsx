@@ -530,6 +530,7 @@ export function MovementsPage() {
           title={t.movements.create.title}
           ariaLabel={t.movements.create.title}
           onClose={() => setAddOpen(false)}
+          closeLabel={t.common.close}
         >
           <label className={styles.modalLabel}>
             <span className={styles.modalLabelText}>

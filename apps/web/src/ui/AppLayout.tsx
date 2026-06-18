@@ -5,8 +5,10 @@ import type { UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t, useLanguage } from "../i18n/strings";
 import { applyTheme, toResolvedTheme } from "../theme/theme";
-import { Home, Dumbbell, Settings } from "lucide-react";
+import { Home, Dumbbell, Settings, TrendingUp } from "lucide-react";
 import { PwaUpdateBanner } from "../components/PwaUpdateBanner";
+import { Modal } from "./Modal";
+import { Button } from "./Button";
 
 function topIconClassName({ isActive }: { isActive: boolean }) {
   return isActive ? "navIconLink isActive" : "navIconLink";
@@ -76,9 +78,15 @@ function getNavigationType(): string | null {
   return null;
 }
 
+function getMovementIdFromPath(path: string): string | null {
+  const match = path.match(/^\/movements\/([^/]+)\/(?:manage|trends|calc\/[^/]+\/[^/]+)(?:[?#].*)?$/);
+  return match?.[1] ?? null;
+}
+
 export function AppLayout() {
   useLanguage(); // ✅ fuerza re-render cuando cambia el idioma
   const [, setPrefs] = useState<UserPreferences | null>(null);
+  const [showTrendsOnboarding, setShowTrendsOnboarding] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -100,6 +108,40 @@ export function AppLayout() {
       applyTheme(toResolvedTheme(p.theme), p.accentColor);
     });
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    repo
+      .getFeatureTrendsOnboardingSeen()
+      .then((seen) => {
+        if (cancelled) return;
+        if (!seen) setShowTrendsOnboarding(true);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function dismissTrendsOnboarding() {
+    setShowTrendsOnboarding(false);
+    await repo.markFeatureTrendsOnboardingSeen();
+  }
+
+  async function goToLatestTrends() {
+    await dismissTrendsOnboarding();
+
+    const lastRoute = await repo.getLastRoute();
+    const movementId = lastRoute ? getMovementIdFromPath(lastRoute) : null;
+    if (movementId) {
+      navigate(`/movements/${movementId}/trends`);
+      return;
+    }
+
+    navigate("/movements");
+  }
 
   // 1) Restore-on-open:
   //    Solo corre cuando caes en "/" (PWA start_url) y todavía no restauramos.
@@ -184,6 +226,40 @@ export function AppLayout() {
       <main className="mainContent">
         <Outlet />
       </main>
+
+      {showTrendsOnboarding ? (
+        <Modal
+          title={
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <TrendingUp size={18} />
+              {t.onboarding.trends.title}
+            </span>
+          }
+          ariaLabel={t.onboarding.trends.title}
+          onClose={dismissTrendsOnboarding}
+          closeLabel={t.common.close}
+        >
+          <div style={{ display: "grid", gap: 16 }}>
+            <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.5 }}>
+              {t.onboarding.trends.body}
+            </p>
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <Button
+                variant="primary"
+                shape="pill"
+                onClick={goToLatestTrends}
+              >
+                {t.onboarding.trends.cta}
+              </Button>
+
+              <Button variant="ghost" shape="pill" onClick={dismissTrendsOnboarding}>
+                {t.onboarding.trends.dismiss}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
 
       <BottomNav />
       <PwaUpdateBanner />

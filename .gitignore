@@ -42,3 +42,5 @@ yarn-error.log*
 apps/native/android/keystore.properties
 **/.idea/
 **/*/export.json
+.pnpm-store/
+*.tsbuildinfo

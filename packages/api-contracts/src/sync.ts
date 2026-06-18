@@ -1,4 +1,4 @@
-import { UserPreferences } from "../../core/src/types";
+import type { UserPreferences } from "../../core/src/types";
 
 /* FILE: packages/api-contracts/src/sync.ts */
 export type IsoEpochMs = number;

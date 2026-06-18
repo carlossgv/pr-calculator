@@ -1,6 +1,10 @@
 import { importBackup, type BackupV1 } from "./backup";
 
-const DEMO_SEED = "demo";
+const SEEDS: Record<string, string> = {
+  demo: "demo-backup.v1.json",
+  graph: "trends-backup.v1.json",
+  trends: "trends-backup.v1.json",
+};
 
 export async function maybeApplyDevSeedFromUrl(): Promise<boolean> {
   const appEnv = import.meta.env.VITE_APP_ENV ?? "prod";
@@ -8,9 +12,10 @@ export async function maybeApplyDevSeedFromUrl(): Promise<boolean> {
 
   const url = new URL(window.location.href);
   const seed = url.searchParams.get("seed");
-  if (seed !== DEMO_SEED) return false;
+  const file = seed ? SEEDS[seed] : null;
+  if (!file) return false;
 
-  const res = await fetch("/seeds/demo-backup.v1.json", {
+  const res = await fetch(`/seeds/${file}`, {
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Seed file fetch failed: ${res.status}`);

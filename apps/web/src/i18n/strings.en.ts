@@ -41,6 +41,17 @@ export const en = {
     snapDelta: "Δ",
     snapStep: "step",
   },
+  common: {
+    close: "Close",
+  },
+  onboarding: {
+    trends: {
+      title: "New: Trends",
+      body: "Track PR progress over time with charts and lift history for each movement.",
+      cta: "Open latest trends",
+      dismiss: "Not now",
+    },
+  },
   prefs: {
     unit: "Unit",
     barWeight: "Bar weight",
@@ -146,6 +157,7 @@ export const en = {
 
     openCalculator: "Open calculator",
     managePrs: "Manage PRs",
+    trends: "Trends",
 
     delete: "delete",
 
@@ -170,6 +182,30 @@ export const en = {
       createCta: "Create",
       cancelCta: "Cancel",
       errorEmpty: "Please enter a name",
+    },
+  },
+  trends: {
+    title: "Trends",
+    summaryTitle: "Trend summary",
+    emptyTitle: "No PR history yet",
+    emptyBody: "Add PR entries to see progression charts and lift history.",
+    notFoundTitle: "Movement not found",
+    notFoundBody: "This movement no longer exists or was deleted.",
+    chartTitle: "Progression",
+    chartAria: "PR progression chart",
+    legendTitle: "Chart legend",
+    legendWeight: "Weight",
+    legendEstimated: "Estimated 1RM",
+    historyTitle: "History",
+    historyHint: "Most recent entries first.",
+    historyDelta: "Change",
+    historyEstimated1rm: "Est. 1RM",
+    summary: {
+      entries: "Entries",
+      entriesMeta: "Saved lifts",
+      bestWeight: "Best PR",
+      latestWeight: "Latest PR",
+      bestEstimated1rm: "Best est. 1RM",
     },
   },
   movement: {

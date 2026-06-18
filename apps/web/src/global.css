@@ -19,6 +19,7 @@
   --accent: var(--accent-base); /* PRIMARY */
   --accent-2: #2f7d6d; /* SECONDARY */
   --accent-3: #6a7f98; /* TERTIARY */
+  --trend-theoretical: var(--accent-3); /* charts / theoretical series */
   --accent-contrast: #ffffff;
 
   /* Primary button tuning (Light) */
