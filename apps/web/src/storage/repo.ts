@@ -130,6 +130,65 @@ type FeatureTrendsOnboardingRow = {
   seenAt: string;
 };
 
+type WorkoutPlannerDraft = {
+  v: 1;
+  precision: number;
+  order: PercentOrder;
+  customPcts: number[];
+  sequence: number[];
+  updatedAt: string;
+};
+
+function sanitizeWorkoutPlannerDraft(x: any): WorkoutPlannerDraft | null {
+  if (!x || typeof x !== "object") return null;
+  if (x.v !== 1) return null;
+
+  const precision = Number(x.precision);
+  const safePrecision =
+    Number.isFinite(precision) && precision >= 0 && precision <= 100
+      ? Math.round(precision)
+      : 75;
+
+  const cleanPct = (raw: unknown) => {
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return null;
+    const p = Math.round(n * 10) / 10;
+    if (p <= 0 || p > 300) return null;
+    return p;
+  };
+
+  const sequence: number[] = [];
+  for (const raw of Array.isArray(x.sequence) ? x.sequence : []) {
+    const p = cleanPct(raw);
+    if (p == null) continue;
+    sequence.push(p);
+    if (sequence.length >= 16) break;
+  }
+
+  const customPcts: number[] = [];
+  for (const raw of Array.isArray(x.customPcts) ? x.customPcts : []) {
+    const p = cleanPct(raw);
+    if (p == null) continue;
+    if (customPcts.some((v) => Math.abs(v - p) < 0.0001)) continue;
+    customPcts.push(p);
+    if (customPcts.length >= 12) break;
+  }
+
+  return {
+    v: 1,
+    precision: safePrecision,
+    order: x.order === "asc" ? "asc" : "desc",
+    customPcts: customPcts.sort((a, b) => b - a),
+    sequence,
+    updatedAt: typeof x.updatedAt === "string" ? x.updatedAt : nowIso(),
+  };
+}
+
+function workoutPlannerDraftKey(scope: string) {
+  const safe = String(scope ?? "").trim();
+  return safe ? `workoutPlannerDraft:${safe}` : "workoutPlannerDraft";
+}
+
 function sanitizeFeatureTrendsOnboarding(x: any): FeatureTrendsOnboardingRow | null {
   if (!x || typeof x !== "object") return null;
   if (x.v !== 1) return null;
@@ -270,6 +329,67 @@ export const repo = {
     };
 
     await db.meta.put({ id: "quickCalcDraft", value: next });
+  },
+
+  async getWorkoutPlannerDraft(scope = ""): Promise<{
+    precision: number;
+    order: PercentOrder;
+    customPcts: number[];
+    sequence: number[];
+  } | null> {
+    const row = await db.meta.get(workoutPlannerDraftKey(scope));
+    const draft = sanitizeWorkoutPlannerDraft((row as any)?.value);
+    if (!draft) return null;
+
+    return {
+      precision: draft.precision,
+      order: draft.order,
+      customPcts: draft.customPcts,
+      sequence: draft.sequence,
+    };
+  },
+
+  async setWorkoutPlannerDraft(
+    scope: string,
+    draft: {
+      precision: number;
+      order: PercentOrder;
+      customPcts: number[];
+      sequence: number[];
+    } | null,
+  ): Promise<void> {
+    if (!draft) {
+      await db.meta.delete(workoutPlannerDraftKey(scope));
+      return;
+    }
+
+    const next: WorkoutPlannerDraft = {
+      v: 1,
+      precision:
+        Number.isFinite(Number(draft.precision)) &&
+        Number(draft.precision) >= 0 &&
+        Number(draft.precision) <= 100
+          ? Math.round(Number(draft.precision))
+          : 75,
+      order: draft.order === "asc" ? "asc" : "desc",
+      customPcts: Array.isArray(draft.customPcts)
+        ? draft.customPcts
+            .map((x) => Math.round(Number(x) * 10) / 10)
+            .filter((x) => Number.isFinite(x) && x > 0 && x <= 300)
+            .filter((x, i, arr) => arr.findIndex((y) => Math.abs(y - x) < 0.0001) === i)
+            .sort((a, b) => b - a)
+            .slice(0, 12)
+        : [],
+      sequence: Array.isArray(draft.sequence)
+        ? draft.sequence
+            .map((x) => Math.round(Number(x) * 10) / 10)
+            .filter((x) => Number.isFinite(x) && x > 0 && x <= 300)
+            .slice(0, 16)
+        : [],
+      updatedAt: nowIso(),
+    };
+
+    await db.meta.put({ id: workoutPlannerDraftKey(scope), value: next });
   },
 
   // ============================================================

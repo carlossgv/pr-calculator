@@ -1,0 +1,380 @@
+.panel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid color-mix(in oklab, var(--accent-2) 20%, var(--border));
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.resetBtn {
+  flex-shrink: 0;
+}
+
+.baseBlock {
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklab, var(--accent-2) 20%, var(--border));
+  background: color-mix(in oklab, var(--accent-2) 8%, var(--card-bg));
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.baseLabel {
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.baseValue {
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+.baseHint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.wizardNav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.wizardTab {
+  min-width: 110px;
+}
+
+.stepPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.stepHint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.stepActionsBar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hero {
+  display: grid;
+  gap: 14px;
+}
+
+.weightWrap {
+  position: relative;
+  display: grid;
+  gap: 8px;
+}
+
+.weightInput {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklab, var(--fg) 12%, var(--border));
+  background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
+  color: var(--fg);
+  padding: 16px 64px 16px 16px;
+  font-size: 44px;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+  outline: none;
+}
+
+.weightInput:focus {
+  border-color: color-mix(in oklab, var(--accent-2) 60%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-2) 20%, transparent);
+}
+
+.unitButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--accent-2) 40%, var(--border));
+  background: color-mix(in oklab, var(--accent-2) 16%, var(--card-bg));
+  color: var(--fg);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.controls {
+  display: grid;
+  gap: 12px;
+}
+
+.controlBlock {
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.controlLabel {
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.orderRow {
+  display: grid;
+  gap: 8px;
+}
+
+.orderButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slider {
+  width: 100%;
+}
+
+.sliderHint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sequenceSection,
+.resultsSection {
+  display: grid;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.customRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.customInput {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  background: var(--input-bg);
+  color: var(--fg);
+  padding: 12px 14px;
+  font-weight: 800;
+  outline: none;
+}
+
+.sequenceList {
+  display: grid;
+  gap: 10px;
+}
+
+.sequenceItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
+}
+
+.sequenceMain {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.sequencePct {
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.sequenceLoad {
+  font-size: 13px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sequenceActions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.emptyState {
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px dashed color-mix(in oklab, var(--fg) 14%, var(--border));
+  color: var(--muted);
+  background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
+}
+
+.resultsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.resultsColumn {
+  display: grid;
+  gap: 12px;
+}
+
+.resultCard,
+.rackCard {
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.resultHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.resultPct {
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.resultMeta {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.changeBlock {
+  display: grid;
+  gap: 4px;
+}
+
+.changeTitle {
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.changeText {
+  font-size: 13px;
+  color: var(--fg);
+}
+
+.rackCard {
+  position: sticky;
+  top: 12px;
+}
+
+.rackList {
+  display: grid;
+  gap: 8px;
+}
+
+.rackListPreview {
+  display: grid;
+  gap: 8px;
+}
+
+.rackPreviewItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in oklab, var(--fg) 10%, var(--border));
+  background: color-mix(in oklab, var(--fg) 2%, var(--card-bg));
+}
+
+.rackItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--accent-2) 8%, var(--card-bg));
+  border: 1px solid color-mix(in oklab, var(--accent-2) 18%, var(--border));
+}
+
+.rackPlate {
+  font-weight: 900;
+}
+
+.rackCounts {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--muted);
+}
+
+.resetModal {
+  display: grid;
+  gap: 14px;
+}
+
+.resetActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .controls,
+  .resultsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .rackCard {
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .baseValue {
+    font-size: 28px;
+  }
+
+  .sequenceItem {
+    grid-template-columns: 1fr;
+  }
+
+  .sequenceActions {
+    justify-content: flex-start;
+  }
+}

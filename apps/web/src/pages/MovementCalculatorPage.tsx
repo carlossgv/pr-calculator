@@ -1,10 +1,10 @@
 // FILE: apps/web/src/pages/MovementCalculatorPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import type { Movement, Unit, UserPreferences } from "@repo/core";
+import type { Movement, Unit } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
-import { WeightCalculatorPanel } from "../components/WeightCalculatorPanel";
+import { CalculatorWorkspace } from "../components/CalculatorWorkspace";
 import { ArrowLeft, Settings2 } from "lucide-react";
 import { Button } from "../ui/Button";
 import styles from "./MovementCalculatorPage.module.css";
@@ -40,13 +40,16 @@ export function MovementCalculatorPage() {
   }>();
 
   const id = movementId ?? "";
+  const initialUnit = useMemo(() => parseUnit(unitParam), [unitParam]);
+  const initialWeight = useMemo(() => parseWeight(weightParam), [weightParam]);
 
-  const [prefs, setPrefs] = useState<UserPreferences | null>(null);
   const [movement, setMovement] = useState<Movement | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const initialUnit = useMemo(() => parseUnit(unitParam), [unitParam]);
-  const initialWeight = useMemo(() => parseWeight(weightParam), [weightParam]);
+  const activeView = useMemo(() => {
+    const qs = new URLSearchParams(location.search);
+    return qs.get("view") === "workout" ? "workout" : "calculator";
+  }, [location.search]);
 
   const theoretical = useMemo(() => {
     const qs = new URLSearchParams(location.search);
@@ -65,9 +68,9 @@ export function MovementCalculatorPage() {
     if (!id) return;
 
     setLoading(true);
-    Promise.all([repo.getPreferences(), repo.getMovement(id)])
-      .then(([p, m]) => {
-        setPrefs(p);
+    repo
+      .getMovement(id)
+      .then((m) => {
         setMovement(m);
       })
       .finally(() => setLoading(false));
@@ -83,6 +86,27 @@ export function MovementCalculatorPage() {
 
   function goManage() {
     navigate(`/movements/${id}/manage`);
+  }
+
+  function setView(next: "calculator" | "workout") {
+    const qs = new URLSearchParams(location.search);
+    if (next === "workout") qs.set("view", "workout");
+    else qs.delete("view");
+    const search = qs.toString();
+    navigate(
+      `${location.pathname}${search ? `?${search}` : ""}`,
+      { replace: true },
+    );
+  }
+
+  function onCalculatorChange(payload: { unit: Unit; weight: number }) {
+    const u = payload.unit;
+    const w = payload.weight;
+
+    navigate(
+      `/movements/${id}/calc/${u}/${w}${location.search}`,
+      { replace: true },
+    );
   }
 
   if (loading) return <p>{t.home.loading}</p>;
@@ -124,23 +148,14 @@ export function MovementCalculatorPage() {
 
       <h2 className={styles.title}>{title}</h2>
 
-      <WeightCalculatorPanel
-        mode="editable"
-        title={undefined /* el título ya va arriba */}
+      <CalculatorWorkspace
         initialUnit={initialUnit}
         initialWeight={initialWeight}
         theoreticalFrom={theoretical ?? undefined}
-        onChange={(payload) => {
-          const u = payload.unit;
-          const w = payload.weight;
-
-          // Mantiene la URL sincronizada (útil para compartir / refresh)
-          // ✅ preserva querystring (para no perder modo teórico)
-          navigate(
-            `/movements/${id}/calc/${u}/${w}${location.search}`,
-            { replace: true },
-          );
-        }}
+        activeTab={activeView}
+        onActiveTabChange={setView}
+        onChange={onCalculatorChange}
+        plannerScope={id}
       />
     </div>
   );

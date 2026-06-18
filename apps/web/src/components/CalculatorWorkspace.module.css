@@ -1,0 +1,14 @@
+.workspace {
+  display: grid;
+  gap: 12px;
+}
+
+.tabBar {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tabBtn {
+  min-width: 118px;
+}

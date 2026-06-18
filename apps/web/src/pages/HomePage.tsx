@@ -1,7 +1,7 @@
 // FILE: apps/web/src/pages/HomePage.tsx
 import { useEffect, useMemo, useState } from "react";
 import type { Unit } from "@repo/core";
-import { WeightCalculatorPanel } from "../components/WeightCalculatorPanel";
+import { CalculatorWorkspace } from "../components/CalculatorWorkspace";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 
@@ -35,8 +35,7 @@ export function HomePage() {
   if (!loaded) return <p>{t.home.loading}</p>;
 
   return (
-    <WeightCalculatorPanel
-      mode="editable"
+    <CalculatorWorkspace
       initialUnit={initialUnit}
       initialWeight={initialWeight}
       initialCustomPcts={initialCustomPcts}
@@ -54,9 +53,7 @@ export function HomePage() {
           customPcts: pcts,
         }));
       }}
-      fromPct={125}
-      toPct={40}
-      stepPct={5}
+      plannerScope=""
     />
   );
 }

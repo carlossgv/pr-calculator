@@ -49,6 +49,22 @@ describe("repo", () => {
     expect(draft?.customPcts).toEqual([100, 95, 90, 85, 80, 75, 70, 65]);
   });
 
+  it("sanitizes workout planner draft and keeps sequence order", async () => {
+    await repo.setWorkoutPlannerDraft("m-1", {
+      precision: 88.4,
+      order: "asc",
+      customPcts: [75, 75, 101, 62.55, 62.5, -1],
+      sequence: [80, 80, 60, 0, 301],
+    });
+
+    const draft = await repo.getWorkoutPlannerDraft("m-1");
+    expect(draft).not.toBeNull();
+    expect(draft?.precision).toBe(88);
+    expect(draft?.order).toBe("asc");
+    expect(draft?.customPcts).toEqual([101, 75, 62.6, 62.5]);
+    expect(draft?.sequence).toEqual([80, 80, 60]);
+  });
+
   it("converts pr entries unit and updates weight", async () => {
     await db.prEntries.put({
       id: "pr-1",

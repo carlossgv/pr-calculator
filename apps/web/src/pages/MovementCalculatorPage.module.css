@@ -32,3 +32,13 @@
   font-weight: 950;
   letter-spacing: -0.02em;
 }
+
+.tabBar {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tabBtn {
+  min-width: 118px;
+}

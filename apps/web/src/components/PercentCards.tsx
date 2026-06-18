@@ -18,6 +18,8 @@ type Props = {
   order?: PercentOrder;
   /** Extra %s (ephemeral) injected by the parent (not persisted). */
   extraPcts?: number[];
+  onPctClick?: (pct: number) => void;
+  showDetails?: boolean;
 };
 
 function round1(n: number) {
@@ -175,6 +177,8 @@ export function PercentCards({
   stepPct = 5,
   order = "desc",
   extraPcts,
+  onPctClick,
+  showDetails = true,
 }: Props) {
   const [selectedPct, setSelectedPct] = useState<number | null>(null);
 
@@ -234,12 +238,12 @@ export function PercentCards({
   }, [fromPct, toPct, stepPct, maxWeight, unit, prefs, extraPcts, order]);
 
   const selected = useMemo(() => {
-    if (selectedPct == null) return null;
+    if (!showDetails || selectedPct == null) return null;
     return cards.find((c) => Math.abs(c.pct - selectedPct) < 0.0001) ?? null;
-  }, [cards, selectedPct]);
+  }, [cards, selectedPct, showDetails]);
 
   const groupedStylePlates = useMemo(() => {
-    if (!selected?.load.platesPerSide.length) return [];
+    if (!showDetails || !selected?.load.platesPerSide.length) return [];
 
     const maxLbValue = selected.load.platesPerSide.reduce(
       (max, p) =>
@@ -283,7 +287,7 @@ export function PercentCards({
         };
       })
       .sort((a, b) => b.valueInUnit - a.valueInUnit);
-  }, [selected, unit]);
+  }, [selected, unit, showDetails]);
 
   function selectPct(pct: number) {
     setSelectedPct((prev) =>
@@ -296,14 +300,14 @@ export function PercentCards({
   }
 
   useEffect(() => {
-    if (!selected) return;
+    if (!showDetails || !selected) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [selected]);
+  }, [selected, showDetails]);
 
   const detailTitle = selected
     ? `${selected.pct}% · ${round1(selected.target)}${unit}`
@@ -393,14 +397,14 @@ export function PercentCards({
 
   return (
     <div className={styles.root}>
-      {selected ? (
+      {showDetails && selected ? (
         <section ref={detailRef as any} className={styles.detail}>
           <div className={styles.detailTitle}>{detailTitle}</div>
           {detailContent}
         </section>
       ) : null}
 
-      {isMobile && selected ? (
+      {showDetails && isMobile && selected ? (
         <Modal
           title={detailTitle}
           ariaLabel={detailTitle}
@@ -434,8 +438,11 @@ export function PercentCards({
               key={pct}
               type="button"
               className={className}
-              onClick={() => selectPct(pct)}
-              aria-pressed={isSelected}
+              onClick={() => {
+                onPctClick?.(pct);
+                if (showDetails) selectPct(pct);
+              }}
+              aria-pressed={showDetails ? isSelected : undefined}
             >
               <div className={styles.tileRow}>
                 <div className={styles.leftTop}>
