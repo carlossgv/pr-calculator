@@ -4,7 +4,6 @@ import { calculateLoad, type Unit, type UserPreferences } from "@repo/core";
 import { t } from "../i18n/strings";
 import styles from "./PercentCards.module.css";
 import { ChevronRight } from "lucide-react";
-import { Modal } from "../ui/Modal";
 
 export type PercentOrder = "asc" | "desc";
 
@@ -177,27 +176,6 @@ export function PercentCards({
   extraPcts,
 }: Props) {
   const [selectedPct, setSelectedPct] = useState<number | null>(null);
-
-  const detailRef = useRef<HTMLElement | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 520px)");
-
-    const update = (ev?: MediaQueryListEvent) => {
-      setIsMobile(ev ? ev.matches : mq.matches);
-    };
-
-    update();
-
-    if (typeof mq.addEventListener === "function") {
-      mq.addEventListener("change", update);
-      return () => mq.removeEventListener("change", update);
-    }
-
-    (mq as any).addListener(update);
-    return () => (mq as any).removeListener(update);
-  }, []);
 
   const cards = useMemo(() => {
     const out: Array<{
@@ -394,64 +372,55 @@ export function PercentCards({
   return (
     <div className={styles.root}>
       {selected ? (
-        <section ref={detailRef as any} className={styles.detail}>
+        <section className={styles.detail}>
           <div className={styles.detailTitle}>{detailTitle}</div>
           {detailContent}
         </section>
       ) : null}
 
-      {isMobile && selected ? (
-        <Modal
-          title={detailTitle}
-          ariaLabel={detailTitle}
-          onClose={close}
-          closeLabel={t.common.close}
-        >
-          <div className={styles.modalBody}>{detailContent}</div>
-        </Modal>
-      ) : null}
+      <div className={styles.scrollShell}>
+        <div className={styles.grid}>
+          {cards.map(({ pct, target }) => {
+            const isSelected =
+              selectedPct != null && Math.abs(pct - selectedPct) < 0.0001;
+            const is100 = Math.abs(pct - 100) < 0.0001;
 
-      <div className={styles.grid}>
-        {cards.map(({ pct, target }) => {
-          const isSelected =
-            selectedPct != null && Math.abs(pct - selectedPct) < 0.0001;
-          const is100 = Math.abs(pct - 100) < 0.0001;
+            const className = [
+              styles.tile,
+              is100 ? styles.tileMax : "",
+              isSelected ? styles.tileSelected : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
 
-          const className = [
-            styles.tile,
-            is100 ? styles.tileMax : "",
-            isSelected ? styles.tileSelected : "",
-          ]
-            .filter(Boolean)
-            .join(" ");
+            const targetLabel = `${round1(target)} ${unit}`;
+            const targetSize =
+              targetLabel.length >= 8 ? "sm" : targetLabel.length >= 7 ? "md" : "lg";
 
-          const targetLabel = `${round1(target)} ${unit}`;
-          const targetSize =
-            targetLabel.length >= 8 ? "sm" : targetLabel.length >= 7 ? "md" : "lg";
-
-          return (
-            <button
-              key={pct}
-              type="button"
-              className={className}
-              onClick={() => selectPct(pct)}
-              aria-pressed={isSelected}
-            >
-              <div className={styles.tileRow}>
-                <div className={styles.leftTop}>
-                  <div className={styles.pct}>{pct}%</div>
-                  <div className={styles.target} data-size={targetSize}>
-                    {targetLabel}
+            return (
+              <button
+                key={pct}
+                type="button"
+                className={className}
+                onClick={() => selectPct(pct)}
+                aria-pressed={isSelected}
+              >
+                <div className={styles.tileRow}>
+                  <div className={styles.leftTop}>
+                    <div className={styles.pct}>{pct}%</div>
+                    <div className={styles.target} data-size={targetSize}>
+                      {targetLabel}
+                    </div>
                   </div>
-                </div>
 
-                <span className={styles.chevronPill} aria-hidden="true">
-                  <ChevronRight size={18} />
-                </span>
-              </div>
-            </button>
-          );
-        })}
+                  <span className={styles.chevronPill} aria-hidden="true">
+                    <ChevronRight size={18} />
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
