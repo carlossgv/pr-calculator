@@ -171,7 +171,11 @@ export function MovementTrendsPage() {
         <div className={styles.heroMeta}>
           <Sticker stamp={<span>{t.trends.title}</span>}>PR CALC</Sticker>
           <span className={styles.heroSub}>{unit}</span>
+          <span className={styles.heroSub}>
+            {data.summary.entryCount} {t.trends.summary.entries.toLowerCase()}
+          </span>
         </div>
+        <div className={styles.heroNote}>{t.trends.summaryTitle}</div>
       </div>
 
       {entries.length === 0 ? (

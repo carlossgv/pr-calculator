@@ -17,7 +17,8 @@
 
 .title {
   margin: 0;
-  font-size: 18px;
+  font-size: 22px;
+  line-height: 1.1;
 }
 
 .topActions {
@@ -25,6 +26,46 @@
   gap: 8px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.hero {
+  display: grid;
+  gap: 6px;
+}
+
+.heroMeta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.heroSub {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.sectionHint {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.surfaceMeta {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 /* icon-only sizing fixes */
@@ -264,6 +305,11 @@
   gap: 10px;
 }
 
+.dangerZone {
+  display: grid;
+  gap: 12px;
+}
+
 .confirmBody {
   font-size: 13px;
   line-height: 1.35;
@@ -276,4 +322,10 @@
   display: grid;
   gap: 10px;
   margin-top: 12px;
+}
+
+@media (max-width: 640px) {
+  .heroMeta {
+    align-items: flex-start;
+  }
 }

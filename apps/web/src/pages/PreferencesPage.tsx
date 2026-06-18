@@ -374,6 +374,11 @@ export function PreferencesPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.hero}>
+        <h2 className={styles.heroTitle}>{t.nav.preferences}</h2>
+        <div className={styles.heroHint}>{t.prefs.heroHint}</div>
+      </div>
+
       {/* SUPPORT PR CALC */}
       <section className={styles.section} aria-label={t.prefs.donate.title}>
         <div className={styles.sectionTitle}>{t.prefs.donate.title}</div>

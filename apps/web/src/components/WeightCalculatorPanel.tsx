@@ -9,7 +9,7 @@ import { prefsForUnit } from "../utils/equipment";
 import { ArrowUpDown, Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
 import { Button } from "../ui/Button";
-import { Sticker, Surface } from "../ui/Surface";
+import { Chip, Sticker, Surface, SurfaceHeader } from "../ui/Surface";
 import { Modal } from "../ui/Modal";
 
 function round1(n: number) {
@@ -302,33 +302,19 @@ export function WeightCalculatorPanel({
       {title ? <h2 style={{ margin: 0 }}>{title}</h2> : null}
 
       <Surface variant="panel" className={styles.panel}>
-        <div className={styles.header}>
-          <Sticker stamp={<span>{theoreticalHint ? "THEORY" : "LIVE"}</span>}>
-            PR CALC
-          </Sticker>
-        </div>
+        <SurfaceHeader
+          leftLabel={
+            <Sticker stamp={<span>{theoreticalHint ? "THEORY" : "LIVE"}</span>}>
+              PR CALC
+            </Sticker>
+          }
+          rightChip={<Chip tone="accent">{unit.toUpperCase()}</Chip>}
+        />
 
         {theoreticalHint ? (
-          <div
-            style={{
-              marginTop: 10,
-              padding: "10px 12px",
-              borderRadius: 14,
-              border: "1px solid color-mix(in oklab, var(--accent) 35%, var(--border))",
-              background:
-                "color-mix(in oklab, var(--accent) 8%, var(--card-bg))",
-              display: "grid",
-              gap: 4,
-            }}
-            role="note"
-            aria-label={theoreticalHint.label}
-          >
-            <div style={{ fontWeight: 950, letterSpacing: 0.2 }}>
-              {theoreticalHint.label}
-            </div>
-            <div style={{ opacity: 0.85, fontSize: 13 }}>
-              {theoreticalHint.sub}
-            </div>
+          <div className={styles.theoryNote} role="note" aria-label={theoreticalHint.label}>
+            <div className={styles.theoryTitle}>{theoreticalHint.label}</div>
+            <div className={styles.theorySub}>{theoreticalHint.sub}</div>
           </div>
         ) : null}
 
@@ -374,6 +360,10 @@ export function WeightCalculatorPanel({
 
         {mode === "editable" ? (
           <div className={styles.weightInputWrap}>
+            <div className={styles.weightLabelRow}>
+              <span className={styles.weightLabel}>{t.home.maxWeight}</span>
+              <span className={styles.weightUnitMeta}>{unit.toUpperCase()}</span>
+            </div>
             <input
               className={styles.weightInput}
               data-size={weightSize}
@@ -420,10 +410,10 @@ export function WeightCalculatorPanel({
             </span>
           </div>
         ) : (
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-            <div style={{ fontSize: 34, fontWeight: 950 }}>
+          <div className={styles.readOnlyWeight}>
+            <div className={styles.readOnlyWeightValue}>
               {rawWeight}{" "}
-              <span style={{ fontSize: 14, opacity: 0.9 }}>{unit}</span>
+              <span className={styles.readOnlyWeightUnit}>{unit}</span>
             </div>
           </div>
         )}

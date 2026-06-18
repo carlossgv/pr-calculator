@@ -53,6 +53,7 @@ export const en = {
     },
   },
   prefs: {
+    heroHint: "Language, appearance, equipment, backup, and support in one place.",
     unit: "Unit",
     barWeight: "Bar weight",
     rounding: "Rounding",
@@ -146,10 +147,15 @@ export const en = {
     placeholder: "e.g. Back Squat",
     filterPlaceholder: "Filter movements…",
     clearFilterAria: "Clear filter",
+    clearFilter: "Clear search",
     closeAria: "Close",
 
     emptyHint: "No movements yet. Add your first one 👇",
+    emptyCta: "Add movement",
+    emptyBody:
+      "Create a movement to start tracking best lifts and recent activity.",
     noMatches: "No matches for",
+    noMatchesBody: "Try a different search or add a new movement.",
     showing: "Showing",
     of: "of",
     tapHint: "Tap Open calculator to start from your best lift.",
@@ -179,9 +185,15 @@ export const en = {
       aria: "Add movement",
       title: "New movement",
       nameLabel: "Name",
+      quickCta: "Add movement",
       createCta: "Create",
       cancelCta: "Cancel",
       errorEmpty: "Please enter a name",
+    },
+    card: {
+      best: "Best PR",
+      recent: "Recent PR",
+      created: "Created",
     },
   },
   trends: {
@@ -212,6 +224,10 @@ export const en = {
     title: "Movement",
     prs: "PR entries",
     prsTitle: "PRs",
+    quickTitle: "Quick entry",
+    quickHint: "Add a new PR above or edit the history below.",
+    dangerTitle: "Danger zone",
+    dangerHint: "Delete this movement and its PR history.",
 
     weight: "Weight",
     reps: "Reps",

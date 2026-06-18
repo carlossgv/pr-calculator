@@ -126,6 +126,14 @@ export function MovementDetailsPage() {
     return [...entries].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }, [entries]);
 
+  const latestEntry = sorted[0] ?? null;
+  const bestEntry = useMemo(() => {
+    if (entries.length === 0) return null;
+    return entries.reduce((best, entry) =>
+      entry.weight > best.weight ? entry : best,
+    );
+  }, [entries]);
+
   function normalizeToDefaultUnit(input: { value: number; unit: Unit }): number {
     const def = prefs?.defaultUnit ?? "kg";
     if (input.unit === def) return input.value;
@@ -337,34 +345,54 @@ export function MovementDetailsPage() {
             shape="round"
             iconOnly
             className={styles.iconBtnMd}
+            ariaLabel={t.movements.openCalculator}
+            title={t.movements.openCalculator}
+            onClick={() => goCalc(bestEntry?.weight ?? 100)}
+          >
+            <Calculator size={18} />
+          </Button>
+
+          <Button
+            variant="neutral"
+            size="md"
+            shape="round"
+            iconOnly
+            className={styles.iconBtnMd}
             ariaLabel={t.movements.trends}
             title={t.movements.trends}
             onClick={goTrends}
           >
             <TrendingUp size={18} />
           </Button>
-
-          <Button
-            variant="danger"
-            size="md"
-            shape="round"
-            iconOnly
-            className={styles.iconBtnMd}
-            ariaLabel={t.movement.delete}
-            title={t.movement.delete}
-            onClick={requestDeleteMovement}
-          >
-            <Trash2 size={18} />
-          </Button>
         </div>
       </div>
 
-      <h2 className={styles.title}>{movement?.name ?? t.movement.title}</h2>
+      <div className={styles.hero}>
+        <h2 className={styles.title}>{movement?.name ?? t.movement.title}</h2>
+        <div className={styles.heroMeta}>
+          <Sticker stamp={<span>{t.movement.prsTitle}</span>}>PR CALC</Sticker>
+          <span className={styles.heroSub}>
+            {entries.length} {t.trends.summary.entries.toLowerCase()} · {unit}
+          </span>
+          {latestEntry ? (
+            <span className={styles.heroSub}>
+              {t.movements.card.recent}: {toDateInputValue(latestEntry.date)}
+            </span>
+          ) : null}
+        </div>
+      </div>
 
       <Surface variant="panel" aria-label={t.movement.prs}>
         <SurfaceHeader
-          leftLabel={<Sticker stamp={<span>MANAGE</span>}>PR CALC</Sticker>}
+          leftLabel={
+            <Sticker stamp={<span>MANAGE</span>}>PR CALC</Sticker>
+          }
+          rightChip={
+            <span className={styles.surfaceMeta}>{t.movement.quickTitle}</span>
+          }
         />
+
+        <div className={styles.sectionHint}>{t.movement.quickHint}</div>
 
         <div className={styles.form}>
           <label className={styles.label}>
@@ -580,6 +608,30 @@ export function MovementDetailsPage() {
           )}
         </div>
       </section>
+
+      <Surface variant="panel" className={styles.dangerZone}>
+        <SurfaceHeader
+          leftLabel={
+            <div>
+              <div className={styles.sectionTitle}>{t.movement.dangerTitle}</div>
+              <div className={styles.sectionHint}>{t.movement.dangerHint}</div>
+            </div>
+          }
+        />
+
+        <Button
+          variant="danger"
+          size="lg"
+          shape="pill"
+          fullWidth
+          ariaLabel={t.movement.delete}
+          title={t.movement.delete}
+          onClick={requestDeleteMovement}
+        >
+          <Trash2 size={18} />
+          {t.movement.confirm.deleteMovementCta}
+        </Button>
+      </Surface>
 
       {confirm ? (
         <Modal

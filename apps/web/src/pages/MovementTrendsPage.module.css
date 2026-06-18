@@ -56,6 +56,12 @@
   color: var(--muted);
 }
 
+.heroNote {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
 .summaryGrid {
   display: grid;
   gap: 10px;
@@ -63,7 +69,7 @@
 }
 
 .summaryCard {
-  padding: 12px;
+  padding: 14px;
   display: grid;
   gap: 6px;
 }
@@ -227,6 +233,10 @@
   flex-wrap: wrap;
 }
 
+.emptyPanel {
+  padding: 16px;
+}
+
 @media (max-width: 640px) {
   .summaryGrid {
     grid-template-columns: 1fr;
@@ -239,5 +249,13 @@
   .historyMeta {
     justify-items: start;
     text-align: left;
+  }
+
+  .emptyActions {
+    flex-direction: column;
+  }
+
+  .emptyActions > * {
+    width: 100%;
   }
 }

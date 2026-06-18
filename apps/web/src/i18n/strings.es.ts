@@ -51,6 +51,7 @@ export const es = {
     },
   },
   prefs: {
+    heroHint: "Idioma, apariencia, equipo, backup y soporte en un solo lugar.",
     // ✅ NEW SECTION (la añadiremos en en también)
     language: {
       title: "Idioma",
@@ -143,10 +144,15 @@ export const es = {
     placeholder: "ej. Sentadilla trasera",
     filterPlaceholder: "Filtrar movimientos…",
     clearFilterAria: "Limpiar filtro",
+    clearFilter: "Limpiar búsqueda",
     closeAria: "Cerrar",
 
     emptyHint: "Aún no hay movimientos. Agrega el primero 👇",
+    emptyCta: "Agregar movimiento",
+    emptyBody:
+      "Crea un movimiento para empezar a seguir mejores levantamientos y actividad reciente.",
     noMatches: "No hay coincidencias para",
+    noMatchesBody: "Prueba otra búsqueda o agrega un nuevo movimiento.",
     showing: "Mostrando",
     of: "de",
     tapHint: "Toca Abrir calculadora para empezar desde tu mejor lift.",
@@ -173,9 +179,15 @@ export const es = {
       aria: "Agregar movimiento",
       title: "Nuevo movimiento",
       nameLabel: "Nombre",
+      quickCta: "Agregar movimiento",
       createCta: "Crear",
       cancelCta: "Cancelar",
       errorEmpty: "Por favor ingresa un nombre",
+    },
+    card: {
+      best: "Mejor PR",
+      recent: "PR reciente",
+      created: "Creado",
     },
   },
   trends: {
@@ -206,6 +218,10 @@ export const es = {
     title: "Movimiento",
     prs: "Entradas de PR",
     prsTitle: "PRs",
+    quickTitle: "Entrada rápida",
+    quickHint: "Agrega un PR arriba o edita el historial abajo.",
+    dangerTitle: "Zona peligrosa",
+    dangerHint: "Elimina este movimiento y su historial de PR.",
 
     weight: "Peso",
     reps: "Reps",

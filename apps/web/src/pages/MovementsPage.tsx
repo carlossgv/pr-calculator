@@ -233,6 +233,8 @@ export function MovementsPage() {
 
   const total = items.length;
   const shown = cards.length;
+  const isEmpty = total === 0;
+  const isNoMatch = total > 0 && shown === 0;
 
   function computePopover() {
     if (!isDesktop()) {
@@ -320,6 +322,17 @@ export function MovementsPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.hero}>
+        <h2 className={styles.title}>{t.nav.movements}</h2>
+        <div className={styles.heroSub}>
+          {isEmpty
+            ? t.movements.emptyHint
+            : isNoMatch
+              ? t.movements.noMatchesBody
+              : `${shown} ${t.movements.of} ${total}`}
+        </div>
+      </div>
+
       <Surface variant="panel" aria-label="Movements panel">
         <SurfaceHeader
           leftLabel={<Sticker stamp={<span>LIST</span>}>PR CALC</Sticker>}
@@ -381,22 +394,58 @@ export function MovementsPage() {
         </div>
 
         <div className={styles.hint}>
-          {total === 0 ? (
-            <span className={styles.muted}>{t.movements.emptyHint}</span>
-          ) : shown === 0 ? (
+          {isEmpty ? (
+            <span className={styles.muted}>{t.movements.emptyBody}</span>
+          ) : isNoMatch ? (
             <span className={styles.muted}>
-              {t.movements.noMatches} “{q.trim()}”.
+              {t.movements.noMatches} “{q.trim()}”. {t.movements.noMatchesBody}
             </span>
           ) : (
             <span className={styles.muted}>
-              {t.movements.showing} <b>{shown}</b> / <b>{total}</b>
+              {sortIsDefault
+                ? t.movements.tapHint
+                : `${t.movements.showing} ${shown} ${t.movements.of} ${total}`}
             </span>
           )}
         </div>
       </Surface>
 
-      <div className={styles.list}>
-        {cards.map(({ m, best }) => (
+      {isEmpty ? (
+        <Surface variant="panel" className={styles.emptyPanel}>
+          <div className={styles.emptyTitle}>{t.movements.emptyHint}</div>
+          <div className={styles.emptyText}>{t.movements.emptyBody}</div>
+          <Button
+            variant="primary"
+            size="lg"
+            shape="pill"
+            onClick={openAdd}
+          >
+            {t.movements.emptyCta}
+          </Button>
+        </Surface>
+      ) : isNoMatch ? (
+        <Surface variant="panel" className={styles.emptyPanel}>
+          <div className={styles.emptyTitle}>
+            {t.movements.noMatches} “{q.trim()}”
+          </div>
+          <div className={styles.emptyText}>{t.movements.noMatchesBody}</div>
+          <div className={styles.emptyActions}>
+            <Button variant="primary" size="lg" shape="pill" onClick={openAdd}>
+              {t.movements.emptyCta}
+            </Button>
+            <Button
+              variant="ghost"
+              size="lg"
+              shape="pill"
+              onClick={() => setQ("")}
+            >
+              {t.movements.clearFilter}
+            </Button>
+          </div>
+        </Surface>
+      ) : (
+        <div className={styles.list}>
+        {cards.map(({ m, best, latest }) => (
           <Surface
             key={m.id}
             variant="card"
@@ -419,12 +468,29 @@ export function MovementsPage() {
                 </div>
 
                 {best ? (
-                  <div className={styles.sub}>
-                    <span className={styles.bestWeight}>{best.weight}</span>{" "}
-                    <span className={styles.bestUnit}>{unit}</span>{" "}
-                    <span className={styles.bestMult}>×</span>{" "}
-                    <span className={styles.bestReps}>{best.reps}</span>{" "}
-                    · {toDateLabel(best.date)}
+                  <div className={styles.statsStack}>
+                    <div className={styles.statRow}>
+                      <span className={styles.statLabel}>{t.movements.card.best}</span>
+                      <span className={styles.statValue}>
+                        <span className={styles.bestWeight}>{best.weight}</span>{" "}
+                        <span className={styles.bestUnit}>{unit}</span>{" "}
+                        <span className={styles.bestMult}>×</span>{" "}
+                        <span className={styles.bestReps}>{best.reps}</span>
+                      </span>
+                    </div>
+
+                    <div className={styles.statRow}>
+                      <span className={styles.statLabel}>{t.movements.card.recent}</span>
+                      <span className={styles.statValue}>
+                        {latest ? (
+                          <>
+                            {latest.weight} {unit} × {latest.reps} · {toDateLabel(latest.date)}
+                          </>
+                        ) : (
+                          "—"
+                        )}
+                      </span>
+                    </div>
                   </div>
                 ) : (
                   <div className={styles.subMuted}>{t.movements.noPrYet}</div>
@@ -457,7 +523,8 @@ export function MovementsPage() {
             </div>
           </Surface>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* SORT sheet/popover */}
       {sortOpen ? (
