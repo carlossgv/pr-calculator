@@ -1,0 +1,89 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-prcalc}
+      POSTGRES_USER: ${POSTGRES_USER:-prcalc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prcalc}
+    volumes:
+      - prcalc_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  deps:
+    image: node:20-alpine
+    working_dir: /workspace
+    env_file:
+      - .env
+    environment:
+      PNPM_HOME: /pnpm
+      PATH: /pnpm:$PATH
+      HOME: /tmp
+    command: sh -lc "corepack enable && pnpm install --frozen-lockfile"
+    volumes:
+      - ./:/workspace
+      - prcalc_node_modules:/workspace/node_modules
+      - prcalc_pnpm_store:/pnpm/store
+
+  api:
+    image: node:20-alpine
+    working_dir: /workspace
+    env_file:
+      - .env
+    environment:
+      PORT: 3001
+      PNPM_HOME: /pnpm
+      PATH: /pnpm:$PATH
+      HOME: /tmp
+      DATABASE_URL: ${DATABASE_URL:-postgresql://prcalc:prcalc@db:5432/prcalc?schema=public}
+    command: sh -lc "corepack enable && pnpm --filter @repo/api dev"
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./:/workspace
+      - prcalc_node_modules:/workspace/node_modules
+      - prcalc_pnpm_store:/pnpm/store
+    depends_on:
+      db:
+        condition: service_healthy
+      deps:
+        condition: service_completed_successfully
+
+  web:
+    image: node:20-alpine
+    working_dir: /workspace
+    env_file:
+      - .env
+    environment:
+      PNPM_HOME: /pnpm
+      PATH: /pnpm:$PATH
+      HOME: /tmp
+      VITE_API_BASE: ${VITE_API_BASE:-http://localhost:3001}
+      VITE_APP_ENV: ${VITE_APP_ENV:-dev}
+      VITE_APP_TITLE: ${VITE_APP_TITLE:-PR Calculator Dev}
+      VITE_APP_VERSION: ${VITE_APP_VERSION:-local}
+    command: sh -lc "corepack enable && pnpm --filter @repo/web dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/workspace
+      - prcalc_node_modules:/workspace/node_modules
+      - prcalc_pnpm_store:/pnpm/store
+    depends_on:
+      deps:
+        condition: service_completed_successfully
+
+volumes:
+  prcalc_pgdata:
+  prcalc_node_modules:
+  prcalc_pnpm_store:

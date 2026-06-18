@@ -146,6 +146,7 @@ export const en = {
 
     openCalculator: "Open calculator",
     managePrs: "Manage PRs",
+    trends: "Trends",
 
     delete: "delete",
 
@@ -170,6 +171,32 @@ export const en = {
       createCta: "Create",
       cancelCta: "Cancel",
       errorEmpty: "Please enter a name",
+    },
+  },
+  trends: {
+    title: "Trends",
+    summaryTitle: "Trend summary",
+    emptyTitle: "No PR history yet",
+    emptyBody: "Add PR entries to see progression charts and lift history.",
+    notFoundTitle: "Movement not found",
+    notFoundBody: "This movement no longer exists or was deleted.",
+    chartTitle: "Progression",
+    chartHint:
+      "Solid line shows saved weight. Dashed line shows estimated 1RM.",
+    chartAria: "PR progression chart",
+    legendTitle: "Chart legend",
+    legendWeight: "Weight",
+    legendEstimated: "Estimated 1RM",
+    historyTitle: "History",
+    historyHint: "Most recent entries first.",
+    historyDelta: "Change",
+    historyEstimated1rm: "Est. 1RM",
+    summary: {
+      entries: "Entries",
+      entriesMeta: "Saved lifts",
+      bestWeight: "Best PR",
+      latestWeight: "Latest PR",
+      bestEstimated1rm: "Best est. 1RM",
     },
   },
   movement: {

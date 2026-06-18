@@ -2,6 +2,19 @@
 
 This Turborepo starter is maintained by the Turborepo core team.
 
+## Local Development
+
+1. Copy the example env files if you need local overrides:
+   - `/.env.example`
+   - `/apps/api/.env.example`
+   - `/apps/web/.env.development.local.example`
+   - `/apps/web/.env.native.local.example`
+2. Start the Docker dev stack with:
+
+```sh
+pnpm dev:stack
+```
+
 ## Using this example
 
 Run the following command:

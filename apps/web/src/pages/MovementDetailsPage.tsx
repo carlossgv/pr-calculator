@@ -12,6 +12,7 @@ import { Sticker, Surface, SurfaceHeader } from "../ui/Surface";
 import styles from "./MovementDetailsPage.module.css";
 import { Button } from "../ui/Button";
 import { Modal } from "../ui/Modal";
+import { estimate1rmEpley } from "../utils/1rm";
 
 function uid() {
   try {
@@ -56,13 +57,6 @@ function parsePositiveInt(raw: string): number | null {
   const n = Number(trimmed);
   if (!Number.isFinite(n) || !Number.isInteger(n) || n <= 0) return null;
   return n;
-}
-
-// Theoretical 1RM (Epley)
-function estimate1rmEpley(weight: number, reps: number) {
-  if (!Number.isFinite(weight) || weight <= 0) return 0;
-  if (!Number.isFinite(reps) || reps <= 1) return weight;
-  return weight * (1 + reps / 30);
 }
 
 type ConfirmState =
@@ -238,6 +232,10 @@ export function MovementDetailsPage() {
     setConfirm({ kind: "deleteMovement" });
   }
 
+  function goTrends() {
+    navigate(`/movements/${id}/trends`);
+  }
+
   async function confirmDelete() {
     if (!confirm) return;
 
@@ -333,6 +331,19 @@ export function MovementDetailsPage() {
         </Button>
 
         <div className={styles.topActions}>
+          <Button
+            variant="neutral"
+            size="md"
+            shape="round"
+            iconOnly
+            className={styles.iconBtnMd}
+            ariaLabel={t.movements.trends}
+            title={t.movements.trends}
+            onClick={goTrends}
+          >
+            <TrendingUp size={18} />
+          </Button>
+
           <Button
             variant="danger"
             size="md"
