@@ -14,33 +14,30 @@ export default defineConfig(() => {
 
     plugins: [
       react(),
-      ...(isNative
-        ? []
-        : [
-            VitePWA({
-              registerType: "autoUpdate",
-              // Workaround for Workbox terser renderChunk exits on this runtime.
-              // Keep app bundle production-minified; only generate SW without terser.
-              workbox: {
-                mode: "development",
-                disableDevLogs: true,
-              },
-              manifest: {
-                name: branding.name,
-                short_name: branding.shortName,
-                description: branding.description,
-                start_url: "/",
-                scope: "/",
-                display: "standalone",
-                theme_color: branding.themeColor,
-                background_color: branding.backgroundColor,
-                icons: [
-                  { src: "/pwa/icon-192.png", sizes: "192x192", type: "image/png" },
-                  { src: "/pwa/icon-512.png", sizes: "512x512", type: "image/png" },
-                ],
-              },
-            }),
-          ]),
+      VitePWA({
+        disable: isNative,
+        registerType: "autoUpdate",
+        // Workaround for Workbox terser renderChunk exits on this runtime.
+        // Keep app bundle production-minified; only generate SW without terser.
+        workbox: {
+          mode: "development",
+          disableDevLogs: true,
+        },
+        manifest: {
+          name: branding.name,
+          short_name: branding.shortName,
+          description: branding.description,
+          start_url: "/",
+          scope: "/",
+          display: "standalone",
+          theme_color: branding.themeColor,
+          background_color: branding.backgroundColor,
+          icons: [
+            { src: "/pwa/icon-192.png", sizes: "192x192", type: "image/png" },
+            { src: "/pwa/icon-512.png", sizes: "512x512", type: "image/png" },
+          ],
+        },
+      }),
     ],
 
     // 👇 clave
