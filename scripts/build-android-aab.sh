@@ -2,7 +2,6 @@
 set -euo pipefail
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-ANDROID_GRADLE_FILE="$ROOT_DIR/apps/native/android/app/build.gradle"
 ENV_FILE="$ROOT_DIR/.env.android"
 BUMP_TYPE=""
 
@@ -68,43 +67,7 @@ if [[ -n "$BUMP_TYPE" ]] && [[ "$BUMP_TYPE" != "patch" && "$BUMP_TYPE" != "minor
 fi
 
 if [[ -n "$BUMP_TYPE" ]]; then
-  current_version_name=$(
-    sed -nE 's/^[[:space:]]*versionName[[:space:]]+"([0-9]+\.[0-9]+\.[0-9]+)".*$/\1/p' "$ANDROID_GRADLE_FILE" | head -n1
-  )
-  current_version_code=$(
-    sed -nE 's/^[[:space:]]*versionCode[[:space:]]+([0-9]+).*$/\1/p' "$ANDROID_GRADLE_FILE" | head -n1
-  )
-
-  if [[ -z "$current_version_name" || -z "$current_version_code" ]]; then
-    echo "Error: could not parse versionName/versionCode from $ANDROID_GRADLE_FILE" >&2
-    exit 1
-  fi
-
-  IFS='.' read -r major minor patch <<< "$current_version_name"
-  case "$BUMP_TYPE" in
-    major)
-      major=$((major + 1))
-      minor=0
-      patch=0
-      ;;
-    minor)
-      minor=$((minor + 1))
-      patch=0
-      ;;
-    patch)
-      patch=$((patch + 1))
-      ;;
-  esac
-
-  next_version_name="${major}.${minor}.${patch}"
-  next_version_code=$((current_version_code + 1))
-
-  perl -i -pe '
-    s/^(\s*versionCode\s+)\d+(\s*)$/${1}'"$next_version_code"'${2}/;
-    s/^(\s*versionName\s+")\d+\.\d+\.\d+(".*)$/${1}'"$next_version_name"'${2}/;
-  ' "$ANDROID_GRADLE_FILE"
-
-  echo "Bumped Android version: $current_version_name ($current_version_code) -> $next_version_name ($next_version_code)"
+  "$ROOT_DIR/scripts/bump-android-version.sh" "--$BUMP_TYPE"
 fi
 
 if [[ -f "$ENV_FILE" ]]; then
