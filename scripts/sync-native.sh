@@ -19,7 +19,12 @@ Next steps:
 - Open Android project: pnpm --filter @repo/native open:android
 - Open iOS project: pnpm --filter @repo/native open:ios
 
-If you want to bump the Android app version and build a release bundle, run:
+To bump the Android app version without building locally, run:
+- ./scripts/bump-android-version.sh --patch
+- ./scripts/bump-android-version.sh --minor
+- ./scripts/bump-android-version.sh --major
+
+To bump the version and build a release bundle locally, run:
 - ./scripts/build-android-aab.sh --patch
 - ./scripts/build-android-aab.sh --minor
 - ./scripts/build-android-aab.sh --major
