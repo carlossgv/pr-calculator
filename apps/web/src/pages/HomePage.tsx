@@ -1,13 +1,16 @@
 // FILE: apps/web/src/pages/HomePage.tsx
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Unit } from "@repo/core";
 import { WeightCalculatorPanel } from "../components/WeightCalculatorPanel";
 import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
+import { buildPlannerPath } from "../utils/workout-loading-planner";
 
 type Draft = { unit: Unit; weight: number; customPcts: number[] } | null;
 
 export function HomePage() {
+  const navigate = useNavigate();
   const [loaded, setLoaded] = useState(false);
   const [draft, setDraft] = useState<Draft>(null);
 
@@ -40,6 +43,7 @@ export function HomePage() {
       initialUnit={initialUnit}
       initialWeight={initialWeight}
       initialCustomPcts={initialCustomPcts}
+      onOpenPlanner={({ unit, weight }) => navigate(buildPlannerPath(unit, weight))}
       onChange={(p) => {
         setDraft((prev) => ({
           unit: p.unit,

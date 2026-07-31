@@ -8,6 +8,7 @@ import { WeightCalculatorPanel } from "../components/WeightCalculatorPanel";
 import { ArrowLeft, Settings2 } from "lucide-react";
 import { Button } from "../ui/Button";
 import styles from "./MovementCalculatorPage.module.css";
+import { buildPlannerPath } from "../utils/workout-loading-planner";
 
 function parseUnit(raw: string | undefined): Unit {
   return raw === "lb" ? "lb" : "kg";
@@ -130,6 +131,14 @@ export function MovementCalculatorPage() {
         initialUnit={initialUnit}
         initialWeight={initialWeight}
         theoreticalFrom={theoretical ?? undefined}
+        onOpenPlanner={({ unit, weight }) => {
+          navigate(
+            buildPlannerPath(unit, weight, {
+              movementId: id,
+              returnTo: `${location.pathname}${location.search}`,
+            }),
+          );
+        }}
         onChange={(payload) => {
           const u = payload.unit;
           const w = payload.weight;
