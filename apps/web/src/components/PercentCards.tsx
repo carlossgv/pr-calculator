@@ -1,6 +1,11 @@
 // FILE: apps/web/src/components/PercentCards.tsx
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
-import { calculateLoad, type Unit, type UserPreferences } from "@repo/core";
+import {
+  calculateLoad,
+  type LoadResult,
+  type Unit,
+  type UserPreferences,
+} from "@repo/core";
 import { t } from "../i18n/strings";
 import styles from "./PercentCards.module.css";
 import { ChevronRight } from "lucide-react";
@@ -166,6 +171,129 @@ function normalizeExtraPcts(extraPcts: number[] | undefined) {
   return out.slice(0, 8);
 }
 
+export function PlateLoadDetails({ load, unit }: { load: LoadResult; unit: Unit }) {
+  const groupedStylePlates = useMemo(() => {
+    if (!load.platesPerSide.length) return [];
+
+    const maxLbValue = load.platesPerSide.reduce(
+      (max, p) => (p.plate.unit === "lb" ? Math.max(max, p.plate.value) : max),
+      0,
+    );
+
+    return load.platesPerSide
+      .map((p, index) => {
+        const palette =
+          p.plate.unit === "kg"
+            ? getKgPlateColor(p.plate.value)
+            : getLbPlateColor(p.plate.value, maxLbValue);
+        const width = getGroupedPlateWidth(
+          unit,
+          p.plate.unit,
+          p.valueInUnit,
+          p.plate.value,
+        );
+        const height =
+          unit === "lb" && p.plate.unit === "lb"
+            ? 140
+            : getGroupedPlateHeight(
+                p.plate.unit === "kg" ? "kg" : unit,
+                p.plate.unit === "kg" ? p.plate.value : p.valueInUnit,
+              );
+        return {
+          id: `${p.plate.unit}-${p.plate.value}-${index}`,
+          width,
+          height,
+          valueInUnit: p.valueInUnit,
+          text: `${p.plate.value}`,
+          label: formatPickLabel(p.plate.label, p.plate.unit, p.valueInUnit, unit),
+          color: palette.color,
+          textColor: palette.text,
+        };
+      })
+      .sort((a, b) => b.valueInUnit - a.valueInUnit);
+  }, [load, unit]);
+
+  return (
+    <>
+      <div className={styles.detailPrimary}>
+        <div className={styles.detailKpiLabel}>{t.home.platesPerSide}</div>
+        <div className={styles.plateCombo}>
+          <div className={[styles.detailKpiValue, styles.detailClamp].join(" ")}>
+            {platesPerSideLabel(load, unit)}
+          </div>
+          {groupedStylePlates.length ? (
+            <div
+              className={[styles.plateBar, styles.plateBarGrouped].join(" ")}
+              role="img"
+              aria-label={platesPerSideLabel(load, unit)}
+            >
+              <div className={styles.barCore} aria-hidden="true">
+                <span className={styles.barShaft} />
+                <span className={styles.barSleeve} />
+              </div>
+              <div className={[styles.barPlates, styles.barPlatesGrouped].join(" ")}>
+                {groupedStylePlates.map((plate) => (
+                  <span
+                    key={plate.id}
+                    className={styles.plateGroupBlock}
+                    style={
+                      {
+                        "--plate-group-width": `${plate.width}px`,
+                        "--plate-group-height": `${plate.height}px`,
+                        "--plate-color": plate.color,
+                        "--plate-text": plate.textColor,
+                      } as CSSProperties
+                    }
+                    title={plate.label}
+                    aria-label={plate.label}
+                  >
+                    <span className={styles.plateGroupText} aria-hidden="true">
+                      {plate.text}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className={styles.plateEmpty}>—</div>
+          )}
+        </div>
+      </div>
+
+      <div className={styles.detailFacts}>
+        <div className={styles.detailFactRow}>
+          <div className={styles.detailFactLabel}>{t.home.perSideTotal}</div>
+          <div className={styles.detailFactValue}>
+            {round1(load.perSide)}
+            {unit}
+          </div>
+        </div>
+
+        <div className={styles.detailFactRow}>
+          <div className={styles.detailFactLabel}>{t.home.bar}</div>
+          <div className={[styles.detailFactValue, styles.detailClamp].join(" ")}>
+            {formatPickLabel(
+              load.bar.plate.label,
+              load.bar.plate.unit,
+              load.bar.valueInUnit,
+              unit,
+            )}
+          </div>
+        </div>
+
+        <div className={`${styles.detailFactRow} ${styles.detailFactRowEmphasis}`}>
+          <div className={styles.detailFactLabel}>{t.home.achieved}</div>
+          <div className={styles.detailFactValue}>
+            {round1(load.achievedTotal)}
+            {unit} (Δ {round1(load.delta)}
+            {unit})
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function PercentCards({
   maxWeight,
   unit,
@@ -238,53 +366,6 @@ export function PercentCards({
     return cards.find((c) => Math.abs(c.pct - selectedPct) < 0.0001) ?? null;
   }, [cards, selectedPct]);
 
-  const groupedStylePlates = useMemo(() => {
-    if (!selected?.load.platesPerSide.length) return [];
-
-    const maxLbValue = selected.load.platesPerSide.reduce(
-      (max, p) =>
-        p.plate.unit === "lb" ? Math.max(max, p.plate.value) : max,
-      0,
-    );
-
-    return selected.load.platesPerSide
-      .map((p, index) => {
-        const palette =
-          p.plate.unit === "kg"
-            ? getKgPlateColor(p.plate.value)
-            : getLbPlateColor(p.plate.value, maxLbValue);
-        const width = getGroupedPlateWidth(
-          unit,
-          p.plate.unit,
-          p.valueInUnit,
-          p.plate.value,
-        );
-        const height =
-          unit === "lb" && p.plate.unit === "lb"
-            ? 140
-            : getGroupedPlateHeight(
-                p.plate.unit === "kg" ? "kg" : unit,
-                p.plate.unit === "kg" ? p.plate.value : p.valueInUnit,
-              );
-        return {
-          id: `${p.plate.unit}-${p.plate.value}-${index}`,
-          width,
-          height,
-          valueInUnit: p.valueInUnit,
-          text: `${p.plate.value}`,
-          label: formatPickLabel(
-            p.plate.label,
-            p.plate.unit,
-            p.valueInUnit,
-            unit,
-          ),
-          color: palette.color,
-          textColor: palette.text,
-        };
-      })
-      .sort((a, b) => b.valueInUnit - a.valueInUnit);
-  }, [selected, unit]);
-
   function selectPct(pct: number) {
     setSelectedPct((prev) =>
       prev != null && Math.abs(prev - pct) < 0.0001 ? null : pct,
@@ -310,85 +391,7 @@ export function PercentCards({
     : "";
 
   const detailContent = selected ? (
-    <>
-      <div className={styles.detailPrimary}>
-        <div className={styles.detailKpiLabel}>{t.home.platesPerSide}</div>
-        <div className={styles.plateCombo}>
-          <div
-            className={[styles.detailKpiValue, styles.detailClamp].join(" ")}
-          >
-            {platesPerSideLabel(selected.load, unit)}
-          </div>
-          {groupedStylePlates.length ? (
-            <div
-              className={[styles.plateBar, styles.plateBarGrouped].join(" ")}
-              role="img"
-              aria-label={platesPerSideLabel(selected.load, unit)}
-            >
-              <div className={styles.barCore} aria-hidden="true">
-                <span className={styles.barShaft} />
-                <span className={styles.barSleeve} />
-              </div>
-              <div className={[styles.barPlates, styles.barPlatesGrouped].join(" ")}>
-                {groupedStylePlates.map((plate) => (
-                  <span
-                    key={plate.id}
-                    className={styles.plateGroupBlock}
-                    style={
-                      {
-                        "--plate-group-width": `${plate.width}px`,
-                        "--plate-group-height": `${plate.height}px`,
-                        "--plate-color": plate.color,
-                        "--plate-text": plate.textColor,
-                      } as CSSProperties
-                    }
-                    title={plate.label}
-                    aria-label={plate.label}
-                  >
-                    <span className={styles.plateGroupText} aria-hidden="true">
-                      {plate.text}
-                    </span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className={styles.plateEmpty}>—</div>
-          )}
-        </div>
-      </div>
-
-      <div className={styles.detailFacts}>
-        <div className={styles.detailFactRow}>
-          <div className={styles.detailFactLabel}>{t.home.perSideTotal}</div>
-          <div className={styles.detailFactValue}>
-            {round1(selected.load.perSide)}
-            {unit}
-          </div>
-        </div>
-
-        <div className={styles.detailFactRow}>
-          <div className={styles.detailFactLabel}>{t.home.bar}</div>
-          <div className={[styles.detailFactValue, styles.detailClamp].join(" ")}>
-            {formatPickLabel(
-              selected.load.bar.plate.label,
-              selected.load.bar.plate.unit,
-              selected.load.bar.valueInUnit,
-              unit,
-            )}
-          </div>
-        </div>
-
-        <div className={`${styles.detailFactRow} ${styles.detailFactRowEmphasis}`}>
-          <div className={styles.detailFactLabel}>{t.home.achieved}</div>
-          <div className={styles.detailFactValue}>
-            {round1(selected.load.achievedTotal)}
-            {unit} (Δ {round1(selected.load.delta)}
-            {unit})
-          </div>
-        </div>
-      </div>
-    </>
+    <PlateLoadDetails load={selected.load} unit={unit} />
   ) : null;
 
   return (

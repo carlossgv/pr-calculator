@@ -6,7 +6,7 @@ import { repo } from "../storage/repo";
 import { t } from "../i18n/strings";
 import { PercentCards, type PercentOrder } from "../components/PercentCards";
 import { prefsForUnit } from "../utils/equipment";
-import { ArrowUpDown, Plus } from "lucide-react";
+import { ArrowUpDown, ClipboardList, Plus } from "lucide-react";
 import styles from "./WeightCalculatorPanel.module.css";
 import { Button } from "../ui/Button";
 import { Sticker, Surface } from "../ui/Surface";
@@ -81,6 +81,7 @@ type Props = {
   stepPct?: number;
 
   onChange?: (payload: ChangePayload) => void;
+  onOpenPlanner?: (payload: ChangePayload) => void;
 
   /** NEW: if present, we're in "theoretical PR" mode and we show a hint/banner */
   theoreticalFrom?: {
@@ -128,6 +129,7 @@ export function WeightCalculatorPanel({
   toPct = 40,
   stepPct = 5,
   onChange,
+  onOpenPlanner,
   theoreticalFrom,
 }: Props) {
   const weightInputRef = useRef<HTMLInputElement | null>(null);
@@ -334,6 +336,21 @@ export function WeightCalculatorPanel({
 
         <div className={styles.topRow}>
           <div className={styles.topActions}>
+            {onOpenPlanner ? (
+              <Button
+                variant="primary"
+                size="sm"
+                shape="pill"
+                className={styles.plannerTrigger}
+                onClick={() => onOpenPlanner({ unit, weight: rawWeight })}
+                ariaLabel={t.planner.open}
+                title={t.planner.open}
+              >
+                <ClipboardList size={14} aria-hidden="true" />
+                <span>{t.planner.open}</span>
+              </Button>
+            ) : null}
+
             <Button
               variant="outline"
               size="sm"

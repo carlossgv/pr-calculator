@@ -7,6 +7,7 @@ import { MovementsPage } from "./pages/MovementsPage";
 import { MovementDetailsPage } from "./pages/MovementDetailsPage";
 import { MovementCalculatorPage } from "./pages/MovementCalculatorPage";
 import { MovementTrendsPage } from "./pages/MovementTrendsPage";
+import { WorkoutLoadingPlannerPage } from "./pages/WorkoutLoadingPlannerPage";
 
 export const router = createBrowserRouter(
   [
@@ -17,6 +18,7 @@ export const router = createBrowserRouter(
         { index: true, element: <HomePage /> },
         { path: "preferences", element: <PreferencesPage /> },
         { path: "movements", element: <MovementsPage /> },
+        { path: "planner/:unit/:weight", element: <WorkoutLoadingPlannerPage /> },
 
         // ✅ new explicit manage route (preferred)
         {
