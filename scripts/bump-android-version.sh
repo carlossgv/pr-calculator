@@ -82,3 +82,25 @@ perl -i -pe '
 ' "$ANDROID_GRADLE_FILE"
 
 echo "Bumped Android version: $current_version_name ($current_version_code) -> $next_version_name ($next_version_code)"
+
+cat <<EOF
+
+Next steps:
+  1. Review and commit the version bump:
+     git diff -- apps/native/android/app/build.gradle
+     git add apps/native/android/app/build.gradle
+     git commit -m "chore: bump android version to $next_version_name"
+
+  2. Push this branch, open a pull request, and merge it into main:
+     git push -u origin <your-branch>
+
+  3. After the pull request is merged, update main:
+     git checkout main
+     git pull --ff-only origin main
+
+  4. Tag the merged commit to start the Android Release workflow:
+     git tag -a v$next_version_name -m "Android v$next_version_name"
+     git push origin v$next_version_name
+
+The tag must match versionName exactly: $next_version_name -> v$next_version_name
+EOF
