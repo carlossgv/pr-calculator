@@ -28,6 +28,7 @@ import {
 import { getOrCreateIdentity } from "../sync/identity";
 import { Button } from "../ui/Button";
 import { Modal } from "../ui/Modal";
+import { RecoverySettings } from "../components/RecoverySettings";
 
 type BarGender = "male" | "female";
 type PresetKey = "olympicKg" | "crossfitLb" | null;
@@ -164,6 +165,7 @@ export function PreferencesPage() {
     null,
   );
   const [supportId, setSupportId] = useState<string>("…");
+  const [recoveryId, setRecoveryId] = useState<string>("");
 
   useEffect(() => {
     repo.getPreferences().then((p) => {
@@ -177,7 +179,10 @@ export function PreferencesPage() {
 
   useEffect(() => {
     getOrCreateIdentity()
-      .then((id) => setSupportId(id.deviceId || t.prefs.support.unknownId))
+      .then((id) => {
+        setSupportId(id.deviceId || t.prefs.support.unknownId);
+        setRecoveryId(id.recoveryId ?? "");
+      })
       .catch(() => setSupportId(t.prefs.support.unknownId));
   }, []);
 
@@ -259,6 +264,7 @@ export function PreferencesPage() {
 
     const body = t.prefs.contact.body
       .replace("{name}", contactName)
+      .replace("{recoveryId}", recoveryId || t.prefs.support.unknownId)
       .replace("{supportId}", sid);
 
     return buildMailto({
@@ -266,7 +272,7 @@ export function PreferencesPage() {
       subject: t.prefs.contact.subject,
       body,
     });
-  }, [supportId, contactName, contactEmail]);
+  }, [supportId, recoveryId, contactName, contactEmail]);
 
   if (!prefs) return <p>{t.home.loading}</p>;
 
@@ -374,6 +380,7 @@ export function PreferencesPage() {
 
   return (
     <div className={styles.page}>
+      <RecoverySettings />
       {/* SUPPORT PR CALC */}
       <section className={styles.section} aria-label={t.prefs.donate.title}>
         <div className={styles.sectionTitle}>{t.prefs.donate.title}</div>

@@ -18,6 +18,7 @@ import {
 import { repo } from "../storage/repo";
 import { setLanguage } from "../i18n/strings";
 import { IS_NATIVE_APP } from "../utils/app-envs";
+import { finishRecoveryRestore } from "./recovery";
 
 const DEBUG_SYNC = (import.meta as any).env?.VITE_DEBUG_SYNC === "1";
 
@@ -309,6 +310,7 @@ async function doPush(auth: { deviceId: string; deviceToken: string }) {
   pushing = true;
 
   try {
+    if ((await getOrCreateIdentity()).restorePhase) return;
     const sinceMs = await getLastSyncMs();
     const payload = await buildPushPayload(sinceMs);
 
@@ -341,6 +343,14 @@ async function doPush(auth: { deviceId: string; deviceToken: string }) {
   } finally {
     pushing = false;
   }
+}
+
+export async function forceSyncPush() {
+  const identity = await getOrCreateIdentity();
+  await ensureBootstrapped(identity);
+  const sinceMs = await getLastSyncMs();
+  const payload = await buildPushPayload(sinceMs);
+  await withSelfHeal(identity, "forced push", () => syncPush(identity, payload));
 }
 
 function schedulePush(auth: { deviceId: string; deviceToken: string }) {
@@ -380,6 +390,8 @@ export async function initSync() {
 
   const id = await getOrCreateIdentity();
   const auth = { deviceId: id.deviceId, deviceToken: id.deviceToken };
+
+  if (id.restorePhase === "restoring") await finishRecoveryRestore();
 
   dbg("initSync", {
     deviceId: auth.deviceId,
