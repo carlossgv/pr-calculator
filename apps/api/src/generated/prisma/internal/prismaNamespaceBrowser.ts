@@ -76,7 +76,11 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const AccountScalarFieldEnum = {
   id: 'id',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  recoveryId: 'recoveryId',
+  recoveryPasswordSalt: 'recoveryPasswordSalt',
+  recoveryPasswordDerived: 'recoveryPasswordDerived',
+  recoveryPasswordVersion: 'recoveryPasswordVersion'
 } as const
 
 export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeof AccountScalarFieldEnum]

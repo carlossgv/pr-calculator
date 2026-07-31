@@ -45,15 +45,19 @@ export type Identity = {
   deviceToken: string;
   accountId?: string;
   lastSyncMs?: number;
+  recoveryId?: string;
+  restorePhase?: "attaching" | "restoring";
 };
 
 export async function getOrCreateIdentity(): Promise<Identity> {
-  const [deviceIdRow, deviceTokenRow, accountIdRow, lastSyncRow] =
+  const [deviceIdRow, deviceTokenRow, accountIdRow, lastSyncRow, recoveryIdRow, restorePhaseRow] =
     await Promise.all([
       db.meta.get("deviceId"),
       db.meta.get("deviceToken"),
       db.meta.get("accountId"),
       db.meta.get("lastSyncMs"),
+      db.meta.get("recoveryId"),
+      db.meta.get("restorePhase"),
     ]);
 
   let deviceId = (deviceIdRow as any)?.value as string | undefined;
@@ -89,6 +93,8 @@ export async function getOrCreateIdentity(): Promise<Identity> {
     deviceToken,
     accountId: (accountIdRow as any)?.value as string | undefined,
     lastSyncMs: (lastSyncRow as any)?.value as number | undefined,
+    recoveryId: (recoveryIdRow as any)?.value as string | undefined,
+    restorePhase: (restorePhaseRow as any)?.value as Identity["restorePhase"],
   };
 }
 
@@ -108,4 +114,14 @@ export async function getLastSyncMs(): Promise<number> {
 
 export async function setLastSyncMs(ms: number) {
   await db.meta.put({ id: "lastSyncMs", value: ms });
+}
+
+export async function setRecoveryId(recoveryId: string | null) {
+  if (recoveryId) await db.meta.put({ id: "recoveryId", value: recoveryId });
+  else await db.meta.delete("recoveryId");
+}
+
+export async function setRestorePhase(phase: Identity["restorePhase"] | null) {
+  if (phase) await db.meta.put({ id: "restorePhase", value: phase });
+  else await db.meta.delete("restorePhase");
 }

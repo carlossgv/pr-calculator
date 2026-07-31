@@ -1,5 +1,5 @@
 generator client {
-  provider     = "prisma-client-js"
+  provider     = "prisma-client"
   output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
@@ -9,12 +9,16 @@ datasource db {
 }
 
 model Account {
-  id          String       @id @default(uuid())
-  createdAt   DateTime     @default(now())
-  devices     Device[]
-  preferences Preferences?
-  movements   Movement[]
-  prEntries   PrEntry[]
+  id                      String       @id @default(uuid())
+  createdAt               DateTime     @default(now())
+  recoveryId              String?      @unique
+  recoveryPasswordSalt    String?
+  recoveryPasswordDerived String?
+  recoveryPasswordVersion Int?
+  devices                 Device[]
+  preferences             Preferences?
+  movements               Movement[]
+  prEntries               PrEntry[]
 }
 
 model Device {
