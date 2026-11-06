@@ -12,6 +12,7 @@
 - [x] 2.5 Add the verifier to primary navigation and fit four destinations on narrow mobile screens.
 - [x] 2.6 Soften content moving behind the sticky total with a blurred edge treatment.
 - [x] 2.7 Remove the redundant verifier entry from the home calculator.
+- [x] 2.8 Let unit and bar choices fill equal-width columns, stacking the equipment controls only on very narrow screens.
 
 ## 3. Polish and verification
 

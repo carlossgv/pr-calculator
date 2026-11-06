@@ -132,12 +132,14 @@
 }
 
 .choiceRow {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
 .choiceRow > button {
+  min-width: 0;
+  width: 100%;
   padding-inline: 10px;
 }
 
@@ -208,6 +210,12 @@
 .stepper > button:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+@media (max-width: 340px) {
+  .equipmentRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 315px) {
