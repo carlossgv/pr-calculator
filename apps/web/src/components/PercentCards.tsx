@@ -10,6 +10,7 @@ import { t } from "../i18n/strings";
 import styles from "./PercentCards.module.css";
 import { ChevronRight } from "lucide-react";
 import { Modal } from "../ui/Modal";
+import { plateColors } from "../utils/plate-colors";
 
 export type PercentOrder = "asc" | "desc";
 
@@ -53,51 +54,6 @@ function platesPerSideLabel(load: ReturnType<typeof calculateLoad>, unit: Unit) 
       formatPickLabel(p.plate.label, p.plate.unit, p.valueInUnit, unit),
     )
     .join(" + ");
-}
-
-const KG_PLATE_COLORS: Array<{
-  value: number;
-  color: string;
-  text: string;
-}> = [
-  { value: 25, color: "#e53935", text: "#fefefe" },
-  { value: 20, color: "#1e88e5", text: "#fefefe" },
-  { value: 15, color: "#fdd835", text: "#1a1a1a" },
-  { value: 10, color: "#43a047", text: "#fefefe" },
-  { value: 5, color: "#f5f5f5", text: "#1a1a1a" },
-  { value: 2.5, color: "#e53935", text: "#fefefe" },
-  { value: 2, color: "#1e88e5", text: "#fefefe" },
-  { value: 1.5, color: "#fdd835", text: "#1a1a1a" },
-  { value: 1, color: "#43a047", text: "#fefefe" },
-  { value: 0.5, color: "#f5f5f5", text: "#1a1a1a" },
-];
-
-function getKgPlateColor(valueKg: number) {
-  let best = KG_PLATE_COLORS[0];
-  for (const c of KG_PLATE_COLORS) {
-    if (Math.abs(valueKg - c.value) < Math.abs(valueKg - best.value)) best = c;
-  }
-  return { color: best.color, text: best.text };
-}
-
-const LB_PLATE_COLORS: Array<{
-  value: number;
-  color: string;
-  text: string;
-}> = [
-  { value: 45, color: "#1e88e5", text: "#fefefe" },
-  { value: 35, color: "#fdd835", text: "#1a1a1a" },
-  { value: 25, color: "#43a047", text: "#fefefe" },
-  { value: 10, color: "#f5f5f5", text: "#1a1a1a" },
-];
-
-function getLbPlateColor(valueLb: number, maxLb: number) {
-  const mapped = LB_PLATE_COLORS.find((plate) => plate.value === valueLb);
-  if (mapped) return { color: mapped.color, text: mapped.text };
-  const t = maxLb > 0 ? Math.min(1, valueLb / maxLb) : 0;
-  const lightness = Math.round(78 - t * 38);
-  const text = lightness > 60 ? "#1a1a1a" : "#f7f7f7";
-  return { color: `hsl(0 0% ${lightness}%)`, text };
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -182,10 +138,7 @@ export function PlateLoadDetails({ load, unit }: { load: LoadResult; unit: Unit 
 
     return load.platesPerSide
       .map((p, index) => {
-        const palette =
-          p.plate.unit === "kg"
-            ? getKgPlateColor(p.plate.value)
-            : getLbPlateColor(p.plate.value, maxLbValue);
+        const palette = plateColors(p.plate, maxLbValue);
         const width = getGroupedPlateWidth(
           unit,
           p.plate.unit,

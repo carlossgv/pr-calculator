@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Plate, Unit, UserPreferences } from "@repo/core";
+import { convertWeightValue, type Plate, type Unit, type UserPreferences } from "@repo/core";
 import { ArrowLeft, Minus, Plus, RotateCcw } from "lucide-react";
 import { t, useLanguage } from "../i18n/strings";
 import { repo } from "../storage/repo";
@@ -13,6 +13,7 @@ import {
   type CountedPlate,
 } from "../utils/loaded-bar";
 import styles from "./LoadedBarVerificationPage.module.css";
+import { plateColors } from "../utils/plate-colors";
 
 function plateLabel(plate: Plate) {
   return `${plate.value} ${plate.unit}`;
@@ -27,6 +28,41 @@ type VerifierSession = {
 let activeSession: VerifierSession | null = null;
 const emptyCount: CountedPlate[] = [];
 const initialBar: Plate = { value: 20, unit: "kg" };
+
+function MiniPlateDiagram({ counted }: { counted: CountedPlate[] }) {
+  const plates = counted
+    .flatMap(({ plate, count }) => Array.from({ length: count }, () => plate))
+    .sort((a, b) =>
+      convertWeightValue(b.value, b.unit, "kg") - convertWeightValue(a.value, a.unit, "kg"),
+    );
+  const maxLb = Math.max(0, ...plates.filter((plate) => plate.unit === "lb").map((plate) => plate.value));
+  const step = Math.min(9, 76 / Math.max(plates.length, 1));
+
+  return (
+    <div className={styles.miniDiagram} aria-hidden="true">
+      <svg viewBox="0 0 120 70" focusable="false">
+        <rect className={styles.miniShaft} x="2" y="32" width="116" height="6" rx="3" />
+        <rect className={styles.miniSleeve} x="26" y="27" width="92" height="16" rx="3" />
+        {plates.map((plate, index) => {
+          const weightKg = convertWeightValue(plate.value, plate.unit, "kg");
+          const height = 20 + Math.min(34, Math.sqrt(weightKg / 25) * 34);
+          return (
+            <rect
+              key={`${plateKey(plate)}-${index}`}
+              x={37 + index * step}
+              y={(70 - height) / 2}
+              width={Math.max(1, step - 1)}
+              height={height}
+              rx="1.5"
+              fill={plateColors(plate, maxLb).color}
+              className={styles.miniPlate}
+            />
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
 
 export function LoadedBarVerificationPage() {
   useLanguage();
@@ -148,43 +184,46 @@ export function LoadedBarVerificationPage() {
         </Surface>
       </div>
 
-      <section className={styles.controls} aria-label={t.verifier.equipment}>
-        <div className={styles.controlGroup}>
-          <div className={styles.controlLabel}>{t.verifier.unit}</div>
-          <div className={styles.choiceRow}>
-            {(["kg", "lb"] as const).map((choice) => (
-              <Button
-                key={choice}
-                variant={unit === choice ? "primary" : "outline"}
-                size="md"
-                shape="pill"
-                aria-pressed={unit === choice}
-                onClick={() => switchUnit(choice)}
-              >
-                {choice}
-              </Button>
-            ))}
+      <div className={styles.equipmentRow}>
+        <section className={styles.controls} aria-label={t.verifier.equipment}>
+          <div className={styles.controlGroup}>
+            <div className={styles.controlLabel}>{t.verifier.unit}</div>
+            <div className={styles.choiceRow}>
+              {(["kg", "lb"] as const).map((choice) => (
+                <Button
+                  key={choice}
+                  variant={unit === choice ? "primary" : "outline"}
+                  size="md"
+                  shape="pill"
+                  aria-pressed={unit === choice}
+                  onClick={() => switchUnit(choice)}
+                >
+                  {choice}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className={styles.controlGroup}>
-          <div className={styles.controlLabel}>{t.verifier.bar}</div>
-          <div className={styles.choiceRow}>
-            {bars.map((choice) => (
-              <Button
-                key={plateKey(choice)}
-                variant={plateKey(bar) === plateKey(choice) ? "primary" : "outline"}
-                size="md"
-                shape="pill"
-                aria-pressed={plateKey(bar) === plateKey(choice)}
-                onClick={() => updateSession((current) => ({ ...current, bar: choice }))}
-              >
-                {plateLabel(choice)}
-              </Button>
-            ))}
+          <div className={styles.controlGroup}>
+            <div className={styles.controlLabel}>{t.verifier.bar}</div>
+            <div className={styles.choiceRow}>
+              {bars.map((choice) => (
+                <Button
+                  key={plateKey(choice)}
+                  variant={plateKey(bar) === plateKey(choice) ? "primary" : "outline"}
+                  size="md"
+                  shape="pill"
+                  aria-pressed={plateKey(bar) === plateKey(choice)}
+                  onClick={() => updateSession((current) => ({ ...current, bar: choice }))}
+                >
+                  {plateLabel(choice)}
+                </Button>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+        <MiniPlateDiagram counted={counted} />
+      </div>
 
       <section className={styles.platesSection} aria-labelledby="verifier-plates-title">
         <div className={styles.sectionHeading}>
