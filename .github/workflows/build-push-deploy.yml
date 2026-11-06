@@ -1,5 +1,5 @@
 # FILE: .github/workflows/build-push-deploy.yml
-name: Build & Push (API+WEB) + Deploy
+name: Build & Push (API+WEB)
 
 on:
   push:
@@ -19,6 +19,7 @@ jobs:
   # BUILD & PUSH
   # =========================
   build_and_push:
+    if: github.ref_name == 'main'
     runs-on: ubuntu-latest
     environment: production
 
@@ -53,17 +54,6 @@ jobs:
           # fi
           echo "value=linux/amd64" >> $GITHUB_OUTPUT
 
-      - name: Compute deploy flavor
-        id: flavor
-        run: |
-          set -euo pipefail
-
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "is_prod=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_prod=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Docker meta (API)
         id: meta_api
         uses: docker/metadata-action@v5
@@ -72,7 +62,7 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=raw,value=latest,enable=${{ steps.flavor.outputs.is_prod == 'true' }}
+            type=raw,value=latest
             type=ref,event=branch
             type=sha,format=short
             type=ref,event=tag
@@ -85,7 +75,7 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=raw,value=latest,enable=${{ steps.flavor.outputs.is_prod == 'true' }}
+            type=raw,value=latest
             type=ref,event=branch
             type=sha,format=short
             type=ref,event=tag
@@ -118,59 +108,7 @@ jobs:
           cache-to: type=gha,mode=max
           provenance: false
           build-args: |
-            VITE_APP_ENV=${{ steps.flavor.outputs.is_prod == 'true' && 'prod' || 'dev' }}
-            VITE_APP_TITLE=${{ steps.flavor.outputs.is_prod == 'true' && 'PR Calculator' || 'PR Calculator Dev' }}
+            VITE_APP_ENV=prod
+            VITE_APP_TITLE=PR Calculator
             VITE_API_BASE=${{ vars.API_URL }}
             VITE_APP_VERSION=${{ github.sha }}
-
-  # =========================
-  # DEPLOY PRODUCTION
-  # - main branch pushes
-  # - OR manual workflow_dispatch on main
-  # =========================
-  deploy_production:
-    needs: build_and_push
-    runs-on: ubuntu-latest
-    environment: production
-    if: github.ref_name == 'main'
-
-    steps:
-      - name: Validate Tailscale auth key
-        env:
-          TS_AUTHKEY: ${{ secrets.TS_AUTHKEY }}
-        run: |
-          if [ -z "${TS_AUTHKEY:-}" ]; then
-            echo "TS_AUTHKEY is missing. Add it under repo Settings → Secrets and variables → Actions → Environments → production." >&2
-            exit 1
-          fi
-
-      - name: Connect to Tailscale (Headscale)
-        uses: tailscale/github-action@v4
-        with:
-          authkey: ${{ secrets.TS_AUTHKEY }}
-          tags: tag:github-actions
-          args: >
-            --login-server=${{ vars.TS_LOGIN_SERVER }}
-            --accept-dns=false
-            --timeout=45s
-          ping: ${{ vars.DEPLOY_HOST_TS }}
-
-      - name: Deploy (production)
-        run: |
-          set -euo pipefail
-          tailscale ssh ${{ vars.SERVER_USER }}@${{ vars.DEPLOY_HOST_TS }} << 'EOF'
-            cd ${{ vars.DEPLOY_PATH }}
-            docker compose --env-file .env.prd -f docker-compose.prd.yml pull pr-calculator-api pr-calculator-web
-            docker compose --env-file .env.prd -f docker-compose.prd.yml up -d pr-calculator-db pr-calculator-api pr-calculator-web
-          EOF
-
-      - name: Notify ntfy
-        env:
-          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
-        run: |
-          curl -sS -X POST \
-            -u :"$NTFY_TOKEN" \
-            -H "Title: PR Calculator deployed (production)" \
-            -H "Tags: rocket,production" \
-            -d "Ref: ${{ github.ref_name }} | Sha: ${{ github.sha }}" \
-            ${{ vars.NTFY_URL }} || true
