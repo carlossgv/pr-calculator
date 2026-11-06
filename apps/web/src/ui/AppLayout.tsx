@@ -5,7 +5,7 @@ import type { UserPreferences } from "@repo/core";
 import { repo } from "../storage/repo";
 import { t, useLanguage } from "../i18n/strings";
 import { applyTheme, toResolvedTheme } from "../theme/theme";
-import { Home, Dumbbell, Settings, TrendingUp } from "lucide-react";
+import { Home, Dumbbell, Scale, Settings, TrendingUp } from "lucide-react";
 import { PwaUpdateBanner } from "../components/PwaUpdateBanner";
 import { Modal } from "./Modal";
 import { Button } from "./Button";
@@ -36,6 +36,16 @@ function BottomNav() {
       >
         <Dumbbell size={20} />
         <span className="bottomNavLabel">{t.nav.movements}</span>
+      </NavLink>
+
+      <NavLink
+        to="/verify-bar"
+        className="bottomNavLink"
+        aria-label={t.nav.verifier}
+        title={t.nav.verifier}
+      >
+        <Scale size={20} />
+        <span className="bottomNavLabel">{t.nav.verifier}</span>
       </NavLink>
 
       <NavLink
@@ -209,6 +219,15 @@ export function AppLayout() {
               title={t.nav.movements}
             >
               <Dumbbell size={18} />
+            </NavLink>
+
+            <NavLink
+              to="/verify-bar"
+              className={topIconClassName}
+              aria-label={t.nav.verifier}
+              title={t.nav.verifier}
+            >
+              <Scale size={18} />
             </NavLink>
 
             <NavLink

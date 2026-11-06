@@ -1,0 +1,176 @@
+.page {
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 25px;
+  letter-spacing: -0.025em;
+}
+
+.resultFrame {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
+  isolation: isolate;
+}
+
+.resultFrame::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: calc(var(--radius-md) + 12px);
+  background: color-mix(in oklab, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.result {
+  display: grid;
+  gap: 6px;
+  text-align: center;
+  padding: 24px 14px;
+  border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+  background: color-mix(in oklab, var(--accent) 7%, var(--card-bg));
+}
+
+.resultLabel {
+  color: var(--muted);
+  font-weight: 850;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.total {
+  color: var(--fg);
+  font-size: clamp(48px, 12vw, 72px);
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.total span {
+  font-size: 0.3em;
+  letter-spacing: 0;
+}
+
+.breakdown {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.barOnly,
+.sectionHeading span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.controls {
+  display: grid;
+  gap: 14px;
+}
+
+.controlGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.controlLabel {
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.choiceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.platesSection {
+  display: grid;
+  gap: 10px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.symmetryHint {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.plateGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.plateCard {
+  min-width: 0;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+}
+
+.plateLabel {
+  font-size: 16px;
+  text-align: center;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+}
+
+.stepper > button {
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+
+.plateCount {
+  min-width: 24px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.stepper > button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (max-width: 315px) {
+  .plateGrid {
+    grid-template-columns: 1fr;
+  }
+}

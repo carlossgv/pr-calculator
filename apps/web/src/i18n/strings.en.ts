@@ -4,6 +4,7 @@ export const en = {
   nav: {
     home: "Home",
     movements: "Movements",
+    verifier: "Bar",
     preferences: "Preferences",
   },
   home: {
@@ -69,6 +70,21 @@ export const en = {
     inventoryTitle: "Required plate inventory",
     inventoryHint:
       "Minimum total plates needed near one bar for this sequence. Availability is not verified.",
+  },
+  verifier: {
+    title: "Verify bar",
+    back: "Back to home",
+    total: "Total weight",
+    equipment: "Equipment",
+    unit: "Result unit",
+    bar: "Bar",
+    barOnly: "Bar only",
+    platesPerSide: "Plates on one side",
+    symmetryHint: "Doubled in the total",
+    addPlate: "Add {plate} per side",
+    count: "{count} per side",
+    removePlate: "Remove one {plate} plate per side",
+    clear: "Clear",
   },
   common: {
     close: "Close",

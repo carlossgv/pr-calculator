@@ -4,6 +4,7 @@ export const es = {
   nav: {
     home: "Inicio",
     movements: "Movimientos",
+    verifier: "Barra",
     preferences: "Preferencias",
   },
   home: {
@@ -68,6 +69,21 @@ export const es = {
     inventoryTitle: "Inventario de discos requerido",
     inventoryHint:
       "Mínimo total de discos necesarios junto a una barra para esta secuencia. No se verifica la disponibilidad.",
+  },
+  verifier: {
+    title: "Verificar barra",
+    back: "Volver al inicio",
+    total: "Peso total",
+    equipment: "Equipo",
+    unit: "Unidad del resultado",
+    bar: "Barra",
+    barOnly: "Solo barra",
+    platesPerSide: "Discos de un lado",
+    symmetryHint: "Se duplican en el total",
+    addPlate: "Agregar {plate} por lado",
+    count: "{count} por lado",
+    removePlate: "Quitar un disco de {plate} por lado",
+    clear: "Limpiar",
   },
   common: {
     close: "Cerrar",

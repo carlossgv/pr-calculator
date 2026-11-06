@@ -8,6 +8,7 @@ import { MovementDetailsPage } from "./pages/MovementDetailsPage";
 import { MovementCalculatorPage } from "./pages/MovementCalculatorPage";
 import { MovementTrendsPage } from "./pages/MovementTrendsPage";
 import { WorkoutLoadingPlannerPage } from "./pages/WorkoutLoadingPlannerPage";
+import { LoadedBarVerificationPage } from "./pages/LoadedBarVerificationPage";
 
 export const router = createBrowserRouter(
   [
@@ -19,6 +20,7 @@ export const router = createBrowserRouter(
         { path: "preferences", element: <PreferencesPage /> },
         { path: "movements", element: <MovementsPage /> },
         { path: "planner/:unit/:weight", element: <WorkoutLoadingPlannerPage /> },
+        { path: "verify-bar", element: <LoadedBarVerificationPage /> },
 
         // ✅ new explicit manage route (preferred)
         {
